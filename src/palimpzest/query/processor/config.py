@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from palimpzest.constants import Model
@@ -53,6 +55,11 @@ class QueryProcessorConfig(BaseModel):
     exp_name: str | None = Field(default=None)
     priors: dict | None = Field(default=None)
     dont_use_priors: bool = Field(default=False)
+    document_sampling_method: Literal["random", "stratified"] = Field(
+        default="random",
+        description="Baseline shuffle vs stratified; stratified requires implementing stratified_source_keys in document_sampling.py (or use document_sampler on the strategy).",
+    )
+    stratified_num_strata: int = Field(default=8, ge=1)
 
     def to_dict(self) -> dict:
         """Convert the config to a dict representation."""

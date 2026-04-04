@@ -8,6 +8,7 @@ from palimpzest.core.data.dataset import Dataset
 from palimpzest.core.elements.records import DataRecord, DataRecordSet
 from palimpzest.core.models import OperatorCostEstimates, OperatorStats, RecordOpStats, SentinelPlanStats
 from palimpzest.policy import Policy
+from palimpzest.query.execution.document_sampling import sample_documents
 from palimpzest.query.execution.execution_strategy import SentinelExecutionStrategy
 from palimpzest.query.operators.aggregate import AggregateOp
 from palimpzest.query.operators.convert import LLMConvert
@@ -795,13 +796,18 @@ class MABExecutionStrategy(SentinelExecutionStrategy):
         plan_stats = SentinelPlanStats.from_plan(plan)
         plan_stats.start()
 
-        # shuffle the indices of records to sample
+        # order root-dataset rows for sentinel evaluation (random, stratified, or custom sampler)
         dataset_id_to_shuffled_source_indices = {}
         for dataset_id, dataset in train_dataset.items():
             total_num_samples = len(dataset)
-            shuffled_source_indices = [f"{dataset_id}---{int(idx)}" for idx in np.arange(total_num_samples)]
-            self.rng.shuffle(shuffled_source_indices)
-            dataset_id_to_shuffled_source_indices[dataset_id] = shuffled_source_indices
+            dataset_id_to_shuffled_source_indices[dataset_id] = sample_documents(
+                dataset_id,
+                total_num_samples,
+                self.rng,
+                method=self.document_sampling_method,
+                stratified_num_strata=self.stratified_num_strata,
+                sampler=self.document_sampler,
+            )
 
         # initialize frontier for each logical operator
         op_frontiers = {}

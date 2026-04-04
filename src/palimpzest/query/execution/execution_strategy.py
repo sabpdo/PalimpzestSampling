@@ -1,6 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Literal
 
 import numpy as np
 from chromadb.api.models.Collection import Collection
@@ -16,6 +17,7 @@ from palimpzest.query.operators.join import JoinOp
 from palimpzest.query.operators.physical import PhysicalOperator
 from palimpzest.query.operators.scan import ContextScanOp, ScanPhysicalOp
 from palimpzest.query.operators.topk import TopKOp
+from palimpzest.query.execution.document_sampling import DocumentSourceSampler
 from palimpzest.query.optimizer.plan import PhysicalPlan, SentinelPlan
 from palimpzest.utils.progress import PZSentinelProgressManager
 from palimpzest.validator.validator import Validator
@@ -92,6 +94,9 @@ class SentinelExecutionStrategy(BaseExecutionStrategy, ABC):
         seed: int = 42,
         exp_name: str | None = None,
         dont_use_priors: bool = False,
+        document_sampling_method: Literal["random", "stratified"] = "random",
+        stratified_num_strata: int = 8,
+        document_sampler: DocumentSourceSampler | None = None,
         *args,
         **kwargs,
     ):
@@ -107,6 +112,9 @@ class SentinelExecutionStrategy(BaseExecutionStrategy, ABC):
         self.rng = np.random.default_rng(seed=seed)
         self.exp_name = exp_name
         self.dont_use_priors = dont_use_priors
+        self.document_sampling_method = document_sampling_method
+        self.stratified_num_strata = stratified_num_strata
+        self.document_sampler = document_sampler
 
         # general cache which maps hash(logical_op_id, phys_op_id, hash(input)) --> record_set
         self.cache: dict[int, DataRecordSet] = {}
