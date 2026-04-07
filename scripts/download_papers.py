@@ -3,7 +3,7 @@ Download a stratified sample of research papers (PDFs) via Semantic Scholar.
 
 Filters for papers with ≥5 citations (2021-2026) that have open-access PDFs,
 then randomly samples from that pool.
-Strata: 4 domains (CS, Bio/Medical, Physics, Math) x 2 lengths (short, long)
+Strata: 4 domains (CS, Bio/Medical, Physics, Math)
 Target: ~200 papers total
 
 Usage:
@@ -28,7 +28,7 @@ DOMAIN_CONFIG = {
         "fraction": 0.30,
         "s2_field": "Computer Science",
     },
-    "bio": {
+    "bio_medical": {
         "fraction": 0.30,
         "s2_field": "Biology",
     },
@@ -42,8 +42,6 @@ DOMAIN_CONFIG = {
     },
 }
 
-SHORT_MAX_PAGES = 10
-LONG_MIN_PAGES = 11
 MIN_CITATIONS = 1
 YEAR_RANGE = "2021-2026"
 
@@ -59,31 +57,33 @@ def get_pdf_page_count(pdf_bytes: bytes) -> Optional[int]:
         return None
 
 
-def download_pdf(url: str, timeout: int = 60) -> Optional[bytes]:
+def download_pdf(url: str, timeout: int = 60) -> tuple[Optional[bytes], Optional[str]]:
+    """Download PDF bytes. Returns (bytes, None) on success or (None, reason) on failure."""
     try:
-        resp = requests.get(url, timeout=timeout, allow_redirects=True)
+        resp = requests.get(url, timeout=timeout, allow_redirects=True, headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        })
         resp.raise_for_status()
         if len(resp.content) < 1000:
-            return None
+            return None, "too_small"
         if not resp.content[:5] == b'%PDF-':
-            return None
-        return resp.content
+            return None, "not_pdf"
+        return resp.content, None
+    except requests.exceptions.HTTPError as e:
+        reason = f"http_{e.response.status_code}" if e.response else "http_error"
+        print(f"  ✗ {reason}")
+        return None, reason
+    except requests.exceptions.Timeout:
+        print(f"  ✗ timeout")
+        return None, "timeout"
     except Exception as e:
-        print(f"  ✗ Download failed: {e}")
-        return None
+        print(f"  ✗ {e}")
+        return None, "other"
 
 
 def save_pdf(pdf_bytes: bytes, path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(pdf_bytes)
-
-
-def classify_length(page_count: int) -> Optional[str]:
-    if page_count <= SHORT_MAX_PAGES:
-        return "short"
-    elif page_count >= LONG_MIN_PAGES:
-        return "long"
-    return None
 
 
 # ── Semantic Scholar fetching ──────────────────────────────────────────────────
@@ -158,11 +158,10 @@ def sample_domain(
     target_count: int,
     output_dir: Path,
     min_citations: int,
-) -> list[dict]:
+) -> tuple[list[dict], dict]:
     """
-    Sample papers for one domain, stratified 50/50 by short/long.
-    Iterates through the shuffled candidate pool, downloads PDFs,
-    classifies by page count, and saves until buckets are full.
+    Sample papers for one domain. Downloads until target_count is reached.
+    Returns (metadata, failure_report).
     """
     print(f"\n{'='*60}")
     print(f"Domain: {domain} (target: {target_count} papers)")
@@ -170,44 +169,37 @@ def sample_domain(
 
     candidates = fetch_s2_candidates(config["s2_field"], min_citations)
 
-    target_per_length = target_count // 2
-    collected = {"short": [], "long": []}
+    collected = []
     metadata = []
+    failures = {}
+    attempts = 0
 
     for paper in candidates:
-        if (len(collected["short"]) >= target_per_length and
-                len(collected["long"]) >= target_per_length):
+        if len(collected) >= target_count:
             break
 
+        attempts += 1
         print(f"  Trying: {paper['title'][:60]}...", end=" ")
 
-        pdf_bytes = download_pdf(paper["pdf_url"])
+        pdf_bytes, fail_reason = download_pdf(paper["pdf_url"])
         if pdf_bytes is None:
+            failures[fail_reason] = failures.get(fail_reason, 0) + 1
             continue
 
         page_count = get_pdf_page_count(pdf_bytes)
         if page_count is None:
             print("✗ couldn't read PDF")
-            continue
-
-        length_class = classify_length(page_count)
-        if length_class is None:
-            print(f"✗ {page_count}pp (in gap)")
-            continue
-
-        if len(collected[length_class]) >= target_per_length:
-            print(f"✗ {length_class} bucket full")
+            failures["unreadable_pdf"] = failures.get("unreadable_pdf", 0) + 1
             continue
 
         # Save
-        filename = f"{domain}_{length_class}_{len(collected[length_class]):03d}.pdf"
-        save_path = output_dir / domain / length_class / filename
+        filename = f"{domain}_{len(collected):03d}.pdf"
+        save_path = output_dir / domain / filename
         save_pdf(pdf_bytes, save_path)
-        collected[length_class].append(paper)
+        collected.append(paper)
 
         record = {
             "domain": domain,
-            "length_class": length_class,
             "page_count": page_count,
             "citations": paper["citations"],
             "year": paper["year"],
@@ -217,18 +209,21 @@ def sample_domain(
         }
         metadata.append(record)
 
-        print(f"✓ {page_count}pp, {paper['citations']} cites → {length_class}")
+        print(f"✓ {page_count}pp, {paper['citations']} cites")
         time.sleep(0.5)
 
-    print(f"  Collected: {len(collected['short'])} short, {len(collected['long'])} long")
-    return metadata
+    total_failures = sum(failures.values())
+    print(f"  Collected: {len(collected)}")
+    print(f"  Attempts: {attempts}  Successes: {len(collected)}  Failures: {total_failures} ({100*total_failures/max(attempts,1):.0f}%)")
+
+    return metadata, {"domain": domain, "attempts": attempts, "successes": len(collected), "failures": failures}
 
 
 def main():
     parser = argparse.ArgumentParser(description="Download stratified paper sample")
     parser.add_argument("--output-dir", type=str, default="./papers",
                         help="Directory to save PDFs (default: ./papers)")
-    parser.add_argument("--total", type=int, default=200,
+    parser.add_argument("--total", type=int, default=300,
                         help="Total number of papers to download (default: 200)")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed (default: 42)")
@@ -241,11 +236,13 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     all_metadata = []
+    all_failures = []
 
     for domain, config in DOMAIN_CONFIG.items():
         target = int(args.total * config["fraction"])
-        meta = sample_domain(domain, config, target, output_dir, args.min_citations)
+        meta, fail_report = sample_domain(domain, config, target, output_dir, args.min_citations)
         all_metadata.extend(meta)
+        all_failures.append(fail_report)
 
     # Save metadata
     meta_path = output_dir / "metadata.json"
@@ -254,14 +251,29 @@ def main():
 
     # Print summary
     print(f"\n{'='*60}")
-    print("SUMMARY")
+    print("DOWNLOAD SUMMARY")
     print(f"{'='*60}")
     for domain in DOMAIN_CONFIG:
-        short = sum(1 for m in all_metadata if m["domain"] == domain and m["length_class"] == "short")
-        long_ = sum(1 for m in all_metadata if m["domain"] == domain and m["length_class"] == "long")
-        print(f"  {domain:15s}  short={short:3d}  long={long_:3d}  total={short+long_:3d}")
+        count = sum(1 for m in all_metadata if m["domain"] == domain)
+        print(f"  {domain:15s}  total={count:3d}")
     total = len(all_metadata)
     print(f"  {'TOTAL':15s}  {' '*16}  total={total:3d}")
+
+    # Print failure report
+    print(f"\n{'='*60}")
+    print("FAILURE REPORT")
+    print(f"{'='*60}")
+    for report in all_failures:
+        domain = report["domain"]
+        attempts = report["attempts"]
+        successes = report["successes"]
+        total_fail = sum(report["failures"].values())
+        fail_rate = 100 * total_fail / max(attempts, 1)
+        flag = " ← HIGH FAILURE RATE" if fail_rate > 40 else ""
+        print(f"  {domain:15s}  {successes}/{attempts} succeeded ({fail_rate:.0f}% failed){flag}")
+        for reason, count in sorted(report["failures"].items(), key=lambda x: -x[1]):
+            print(f"    {reason:20s}  {count}")
+
     print(f"\nPDFs saved to: {output_dir.resolve()}")
     print(f"Metadata saved to: {meta_path.resolve()}")
 
