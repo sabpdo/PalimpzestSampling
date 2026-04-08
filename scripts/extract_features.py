@@ -8,12 +8,46 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 from pypdf import PdfReader
+
+# Path to the word frequency list (line number = rank, 1-indexed)
+_FREQ_LIST_PATH = Path(__file__).parent / "google-10000-english-no-swears.txt"
+_RARE_RANK_THRESHOLD = 10_000
+_MAX_RANK = _RARE_RANK_THRESHOLD + 1  # assigned to words not in the list
+
+# Cached rank lookup: word -> 1-based rank
+_word_rank: dict[str, int] | None = None
+
+
+def _load_word_ranks() -> dict[str, int]:
+    global _word_rank
+    if _word_rank is None:
+        _word_rank = {}
+        with open(_FREQ_LIST_PATH) as f:
+            for rank, line in enumerate(f, start=1):
+                word = line.strip().lower()
+                if word:
+                    _word_rank[word] = rank
+    return _word_rank
+
+
+def _rank(word: str, ranks: dict[str, int]) -> int:
+    return ranks.get(word.lower(), _MAX_RANK)
+
+
+def _count_syllables(word: str) -> int:
+    """Approximate syllable count by counting vowel clusters."""
+    return len(re.findall(r"[aeiouAEIOU]+", word)) or 1
+
+
+# Split on sentence-ending punctuation regardless of what follows
+_PUNCT_SPLIT_RE = re.compile(r"[.!?]+")
 
 
 # Numbered heading: "1. Title", "1.1 Title", "2.3.1 Title" — word after number must be title-case
@@ -34,11 +68,12 @@ _TABLE_RE = re.compile(r"\btab(?:le|\.?)?\s*(\d+)", re.IGNORECASE)
 @dataclass
 class DocumentFeatures:
     path: str
-    token_count: int
+    word_count: int
     section_count: int
     avg_sentence_length: float
     figure_count: int
     table_count: int
+    complexity_score: float
 
 
 def extract_text(pdf_path: str | Path) -> str:
@@ -48,8 +83,8 @@ def extract_text(pdf_path: str | Path) -> str:
     return "\n".join(pages)
 
 
-def count_tokens(text: str) -> int:
-    """Approximate token count using whitespace splitting (1 word ≈ 1 token)."""
+def count_words(text: str) -> int:
+    """Approximate word count using whitespace splitting (1 word ≈ 1 word)."""
     return len(text.split())
 
 
@@ -85,16 +120,62 @@ def avg_sentence_length(text: str) -> float:
     return round(sum(len(s.split()) for s in sentences) / len(sentences), 2)
 
 
+def complexity_score(text: str) -> float:
+    """Compute a weighted document complexity score in [0, 1].
+
+    Score = 0.35 * word_rarity
+          + 0.20 * avg_sentence_length  (normalised)
+          + 0.20 * rare_word_density
+          + 0.15 * lexical_diversity
+          + 0.10 * syllable_load        (normalised)
+    """
+    ranks = _load_word_ranks()
+    words = [t for t in re.findall(r"[a-zA-Z]+", text)]
+    if not words:
+        return 0.0
+
+    # --- word rarity: mean log-normalised rank ---
+    log_max = math.log(_MAX_RANK)
+    word_rarity = sum(math.log(_rank(t, ranks)) / log_max for t in words) / len(words)
+
+    # --- average sentence length (split on punctuation), normalised to [0,1] ---
+    segments = [s.strip() for s in _PUNCT_SPLIT_RE.split(text) if s.strip()]
+    raw_avg_sent_len = (
+        sum(len(s.split()) for s in segments) / len(segments) if segments else 0.0
+    )
+    avg_sent_len_norm = min(raw_avg_sent_len / 40.0, 1.0)
+
+    # --- rare word density: fraction of words with rank > threshold ---
+    rare_word_density = sum(1 for t in words if _rank(t, ranks) >= _MAX_RANK) / len(words)
+
+    # --- lexical diversity: type-word ratio ---
+    lexical_diversity = len({t.lower() for t in words}) / len(words)
+
+    # --- syllable load: mean syllables per word, normalised to [0,1] ---
+    raw_syllable_load = sum(_count_syllables(t) for t in words) / len(words)
+    syllable_load_norm = min(raw_syllable_load / 4.0, 1.0)
+
+    score = (
+        0.35 * word_rarity
+        + 0.20 * avg_sent_len_norm
+        + 0.20 * rare_word_density
+        + 0.15 * lexical_diversity
+        + 0.10 * syllable_load_norm
+    )
+    return round(score, 4)
+
+
 def extract_features(pdf_path: str | Path) -> DocumentFeatures:
     """Extract features from a PDF and return a DocumentFeatures instance."""
     text = extract_text(pdf_path)
     return DocumentFeatures(
         path=str(pdf_path),
-        token_count=count_tokens(text),
+        word_count=count_words(text),
         section_count=count_sections(text),
         avg_sentence_length=avg_sentence_length(text),
         figure_count=count_figures(text),
         table_count=count_tables(text),
+        complexity_score=complexity_score(text),
     )
 
 
@@ -110,11 +191,12 @@ def main() -> None:
 
     features = extract_features(path)
     print(f"File            : {features.path}")
-    print(f"Token count     : {features.token_count}")
-    print(f"Section count   : {features.section_count}")
+    print(f"Word count     : {features.word_count}")
+    # print(f"Section count   : {features.section_count}")
     print(f"Avg sent length : {features.avg_sentence_length} words")
     print(f"Figure count    : {features.figure_count}")
     print(f"Table count     : {features.table_count}")
+    print(f"Complexity score: {features.complexity_score}")
 
 
 if __name__ == "__main__":
