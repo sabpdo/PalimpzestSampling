@@ -57,7 +57,7 @@ class QueryProcessorConfig(BaseModel):
     dont_use_priors: bool = Field(default=False)
     document_sampling_method: Literal["random", "stratified"] = Field(
         default="random",
-        description="Baseline shuffle vs stratified; stratified requires implementing stratified_source_keys in document_sampling.py (or use document_sampler on the strategy).",
+        description="Baseline shuffle vs feature stratified (paper_features.csv / PALIMPZEST_STRATIFIED_FEATURES_PATH), or override with document_sampler on the strategy.",
     )
     stratified_num_strata: int = Field(default=8, ge=1)
 
