@@ -3,6 +3,7 @@ Extract document features from a PDF.
 
 Usage:
     python scripts/extract_features.py path/to/doc.pdf
+    python scripts/extract_features.py --scan ./papers -o papers/paper_features.csv
 """
 
 from __future__ import annotations
@@ -11,10 +12,12 @@ import argparse
 import math
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
 
+import pandas as pd
 from pypdf import PdfReader
+from tqdm import tqdm
 
 # Path to the word frequency list (line number = rank, 1-indexed)
 _FREQ_LIST_PATH = Path(__file__).parent / "google-10000-english-no-swears.txt"
@@ -63,6 +66,17 @@ _SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
 _FIGURE_RE = re.compile(r"\bfig(?:ure|\.?)?\s*(\d+)", re.IGNORECASE)
 # Tables: "Table 1", "Tab. 1", "Tab 1" — capture the number for deduplication
 _TABLE_RE = re.compile(r"\btab(?:le|\.?)?\s*(\d+)", re.IGNORECASE)
+
+
+# Columns used by ``feature_stratified_sampling`` (must match ``FEATURE_COLUMNS`` there).
+STRATIFICATION_FEATURE_FIELDS = (
+    "word_count",
+    "section_count",
+    "avg_sentence_length",
+    "figure_count",
+    "table_count",
+    "complexity_score",
+)
 
 
 @dataclass
@@ -179,11 +193,88 @@ def extract_features(pdf_path: str | Path) -> DocumentFeatures:
     )
 
 
+def paper_domain_from_path(pdf_path: str | Path) -> str:
+    """
+    Infer paper domain from the folder immediately under ``papers/``.
+
+    Example: ``papers/cs/cs_001.pdf`` -> ``cs``.
+    """
+    p = Path(pdf_path)
+    parts = p.parts
+    for i, part in enumerate(parts):
+        if part == "papers" and i + 1 < len(parts):
+            return parts[i + 1]
+    return "unknown"
+
+
+def iter_pdf_paths(papers_root: Path) -> list[Path]:
+    """All ``*.pdf`` under ``papers_root``, sorted for stable row indices."""
+    if not papers_root.is_dir():
+        return []
+    return sorted(papers_root.rglob("*.pdf"))
+
+
+def build_feature_table(papers_root: Path) -> pd.DataFrame:
+    """Extract features for every PDF under ``papers_root``; ``row_index`` matches sort order."""
+    paths = iter_pdf_paths(papers_root)
+    rows: list[dict] = []
+    for row_index, pdf in enumerate(tqdm(paths, desc="PDFs", unit="file")):
+        feat = extract_features(pdf)
+        d = asdict(feat)
+        d["row_index"] = row_index
+        d["domain"] = paper_domain_from_path(pdf)
+        rows.append(d)
+    cols = ["row_index", "path", "domain", *STRATIFICATION_FEATURE_FIELDS]
+    if not rows:
+        return pd.DataFrame(columns=cols)
+    df = pd.DataFrame(rows)
+    return df[cols]
+
+
+def write_feature_table_csv(papers_root: Path, out_csv: Path) -> pd.DataFrame:
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    df = build_feature_table(papers_root)
+    df.to_csv(out_csv, index=False)
+    return df
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract features from a PDF.")
-    parser.add_argument("pdf", help="Path to the PDF file.")
+    parser = argparse.ArgumentParser(
+        description="Extract features from PDF(s); use --scan to build a stratification table CSV."
+    )
+    parser.add_argument(
+        "pdf",
+        nargs="?",
+        default=None,
+        help="Path to a single PDF (omit if using --scan).",
+    )
+    parser.add_argument(
+        "--scan",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help="Directory of PDFs (e.g. ./papers); writes --output CSV with row_index and features.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("papers/paper_features.csv"),
+        help="Output CSV for --scan (default: papers/paper_features.csv).",
+    )
     args = parser.parse_args()
 
+    if args.scan is not None:
+        root = args.scan
+        if not root.is_dir():
+            print(f"Error: not a directory: {root}", file=sys.stderr)
+            sys.exit(1)
+        df = write_feature_table_csv(root, args.output)
+        print(f"Wrote {len(df)} rows to {args.output.resolve()}")
+        return
+
+    if args.pdf is None:
+        parser.error("Provide a PDF path or --scan DIR")
     path = Path(args.pdf)
     if not path.exists():
         print(f"Error: file not found: {path}", file=sys.stderr)
@@ -191,7 +282,7 @@ def main() -> None:
 
     features = extract_features(path)
     print(f"File            : {features.path}")
-    print(f"Word count     : {features.word_count}")
+    print(f"Word count      : {features.word_count}")
     # print(f"Section count   : {features.section_count}")
     print(f"Avg sent length : {features.avg_sentence_length} words")
     print(f"Figure count    : {features.figure_count}")

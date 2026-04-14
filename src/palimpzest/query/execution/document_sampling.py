@@ -8,6 +8,7 @@ centralizes how those keys are ordered before ``OpFrontier`` consumes them.
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import Literal
 
 import numpy as np
@@ -24,28 +25,24 @@ def stratified_source_keys(
     rng: np.random.Generator,
     *,
     num_strata: int = 8,
+    features_csv: Path | None = None,
 ) -> list[str]:
     """
-    Stratified sentinel document order — **implement here** (or use ``sample_documents(..., sampler=…)``).
+    Feature-stratified sentinel order: shuffle within strata, then round-robin across strata.
 
-    Called when ``sample_documents(..., method="stratified")``. Must return a permutation of
+    Strata come from ``scripts/extract_features.py`` feature columns (see
+    :mod:`palimpzest.query.execution.feature_stratified_sampling`). Default CSV is
+    ``<cwd>/papers/paper_features.csv`` or ``PALIMPZEST_STRATIFIED_FEATURES_PATH``.
+
+    Called when ``sample_documents(..., method="stratified")``. Returns a permutation of
     ``f"{dataset_id}---{i}"`` for ``i`` in ``0 .. num_records - 1``.
-
-    Parameters
-    ----------
-    dataset_id
-        Root dataset id (same as for baseline shuffle).
-    num_records
-        Number of rows in that dataset.
-    rng
-        Seeded generator (use for any within-stratum randomness).
-    num_strata
-        Value from ``QueryProcessorConfig.stratified_num_strata`` / ``sample_documents(..., stratified_num_strata=…)``.
     """
-    raise NotImplementedError(
-        "Implement stratified_source_keys() in palimpzest/query/execution/document_sampling.py, "
-        "or pass sample_documents(..., sampler=your_callable)."
+    from . import feature_stratified_sampling as fss
+
+    row_order = fss.feature_stratified_row_order(
+        num_records, rng, num_strata, features_csv=features_csv
     )
+    return [f"{dataset_id}---{int(i)}" for i in row_order]
 
 
 class StratifiedDocumentSampler:
@@ -68,6 +65,29 @@ class StratifiedDocumentSampler:
         num_strata: int = 8,
     ) -> list[str]:
         raise NotImplementedError("Subclass StratifiedDocumentSampler and implement order().")
+
+
+class FeatureStratifiedDocumentSampler(StratifiedDocumentSampler):
+    """Stratified ordering from a feature table (same policy as :func:`stratified_source_keys`)."""
+
+    def __init__(self, features_csv: Path | None = None) -> None:
+        self._features_csv = features_csv
+
+    def order(
+        self,
+        dataset_id: str,
+        num_records: int,
+        rng: np.random.Generator,
+        *,
+        num_strata: int = 8,
+    ) -> list[str]:
+        return stratified_source_keys(
+            dataset_id,
+            num_records,
+            rng,
+            num_strata=num_strata,
+            features_csv=self._features_csv,
+        )
 
 
 def sample_documents(
