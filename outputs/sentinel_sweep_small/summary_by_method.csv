@@ -1,0 +1,3 @@
+mode,n_runs,total_cost_mean,total_cost_std,total_cost_var,total_time_s_mean,total_time_s_std,total_time_s_var,mean_sentinel_quality_mean,mean_sentinel_quality_std,mean_sentinel_quality_var,num_outputs_mean,num_outputs_std,consistency_jaccard_mean
+random,2,1.158407125,0.8240924716096982,0.6791284017637812,111.06536912918091,39.812381439171155,1585.0257158580598,1.0,0.0,0.0,0.0,0.0,1.0
+stratified,2,1.2794827500000001,0.06365057046189752,0.004051395120124982,111.37838351726532,20.464590269408955,418.7994548947877,1.0,0.0,0.0,0.0,0.0,1.0
