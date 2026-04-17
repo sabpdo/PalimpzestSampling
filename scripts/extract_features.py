@@ -135,48 +135,12 @@ def avg_sentence_length(text: str) -> float:
 
 
 def complexity_score(text: str) -> float:
-    """Compute a weighted document complexity score in [0, 1].
-
-    Score = 0.35 * word_rarity
-          + 0.20 * avg_sentence_length  (normalised)
-          + 0.20 * rare_word_density
-          + 0.15 * lexical_diversity
-          + 0.10 * syllable_load        (normalised)
-    """
-    ranks = _load_word_ranks()
-    words = [t for t in re.findall(r"[a-zA-Z]+", text)]
+    """Flesch-Kincaid Grade Level: 0.39*(words/sentences) + 11.8*(syllables/words) - 15.59."""
+    words = re.findall(r"[a-zA-Z]+", text)
     if not words:
         return 0.0
-
-    # --- word rarity: mean log-normalised rank ---
-    log_max = math.log(_MAX_RANK)
-    word_rarity = sum(math.log(_rank(t, ranks)) / log_max for t in words) / len(words)
-
-    # --- average sentence length (split on punctuation), normalised to [0,1] ---
-    segments = [s.strip() for s in _PUNCT_SPLIT_RE.split(text) if s.strip()]
-    raw_avg_sent_len = (
-        sum(len(s.split()) for s in segments) / len(segments) if segments else 0.0
-    )
-    avg_sent_len_norm = min(raw_avg_sent_len / 40.0, 1.0)
-
-    # --- rare word density: fraction of words with rank > threshold ---
-    rare_word_density = sum(1 for t in words if _rank(t, ranks) >= _MAX_RANK) / len(words)
-
-    # --- lexical diversity: type-word ratio ---
-    lexical_diversity = len({t.lower() for t in words}) / len(words)
-
-    # --- syllable load: mean syllables per word, normalised to [0,1] ---
-    raw_syllable_load = sum(_count_syllables(t) for t in words) / len(words)
-    syllable_load_norm = min(raw_syllable_load / 4.0, 1.0)
-
-    score = (
-        0.35 * word_rarity
-        + 0.20 * avg_sent_len_norm
-        + 0.20 * rare_word_density
-        + 0.15 * lexical_diversity
-        + 0.10 * syllable_load_norm
-    )
-    return round(score, 4)
+    avg_syllables_per_word = sum(_count_syllables(w) for w in words) / len(words)
+    return round(0.39 * avg_sentence_length(text) + 11.8 * avg_syllables_per_word - 15.59, 4)
 
 
 def extract_features(pdf_path: str | Path) -> DocumentFeatures:
