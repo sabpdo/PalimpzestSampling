@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """
-Run the same Palimpzest optimize-and-execute workload twice: sentinel **document order**
-is either baseline shuffle (``random``) or **feature stratified** (``stratified``).
+Run Palimpzest sentinel optimization at increasing sample budgets and compare
+random vs. feature-stratified document ordering.
 
-This measures **real** post-sample behavior: optimization cost/time, final plan cost/time,
-totals, and mean record-level **quality** from sentinel ``RecordOpStats`` (when the
-validator assigns scores).
+For each budget in --budgets, both methods are run and the quality of the plan
+chosen by MAB is recorded. Results are plotted as quality (and error) vs. sample budget.
 
-**Alignment with ``paper_features.csv``:** Row indices in the CSV must match
-``sorted(root.rglob('*.pdf'))`` — the same rule as ``scripts/extract_features.py --scan``.
-Use the same ``--papers`` root you used to build the feature table. Stratified ordering
-only affects the **training** corpus (first ``--train-n`` PDFs in that sort order).
-
-Requires API keys and dependencies as for other Palimpzest demos (see README).
+Ground truth is the quality at the largest budget.
 
 ::
 
     python scripts/run_sentinel_sampling_ab.py --papers ./papers --train-n 40
+    python scripts/run_sentinel_sampling_ab.py --papers ./papers --train-n 20 --budgets 5 10 15 20
 """
 
 from __future__ import annotations
@@ -27,6 +22,7 @@ import os
 import sys
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 from prettytable import PrettyTable
 
@@ -45,15 +41,12 @@ from palimpzest.tools.pdfparser import get_text_from_pdf
 
 
 def iter_pdf_paths(papers_root: Path) -> list[Path]:
-    """Same ordering as ``scripts/extract_features.iter_pdf_paths``."""
     if not papers_root.is_dir():
         return []
     return sorted(papers_root.rglob("*.pdf"))
 
 
 class PDFPathsDataset(IterDataset):
-    """Root dataset over an explicit list of PDF paths (recursive scan, stable order)."""
-
     def __init__(self, dataset_id: str, paths: list[Path]) -> None:
         super().__init__(id=dataset_id, schema=PDFFile)
         self.paths = [str(p) for p in paths]
@@ -79,41 +72,26 @@ class PDFPathsDataset(IterDataset):
 
 _TITLE_MAP_FIELDS = [
     {
-        "name": "title",
+        "name": "primary_contribution",
         "type": str,
-        "desc": "A short descriptive title for the paper from its first page or heading.",
+        "desc": "The single most important technical contribution of the paper in one sentence.",
+    },
+    {
+        "name": "methodology",
+        "type": str,
+        "desc": "The core method or approach used (e.g. algorithm name, experimental design, proof technique).",
+    },
+    {
+        "name": "domain",
+        "type": str,
+        "desc": "The research domain: one of 'cs', 'biomedical', 'math', or 'physics'.",
+    },
+    {
+        "name": "uses_experiments",
+        "type": bool,
+        "desc": "True if the paper includes empirical experiments or evaluations, False if purely theoretical.",
     },
 ]
-
-
-def mean_sentinel_record_quality(stats: ExecutionStats) -> float | None:
-    """Average ``RecordOpStats.quality`` across all sentinel operator stats (if any)."""
-    qualities: list[float] = []
-    for plan_stats in stats.sentinel_plan_stats.values():
-        for phys_map in plan_stats.operator_stats.values():
-            if not isinstance(phys_map, dict):
-                continue
-            for op_stats in phys_map.values():
-                for r in op_stats.record_op_stats_lst:
-                    if r.quality is not None:
-                        qualities.append(float(r.quality))
-    if not qualities:
-        return None
-    return sum(qualities) / len(qualities)
-
-
-def summarize_run(label: str, stats: ExecutionStats) -> dict:
-    mq = mean_sentinel_record_quality(stats)
-    return {
-        "mode": label,
-        "optimization_cost": stats.optimization_cost,
-        "optimization_time_s": stats.optimization_time,
-        "plan_execution_cost": stats.plan_execution_cost,
-        "plan_execution_time_s": stats.plan_execution_time,
-        "total_cost": stats.total_execution_cost,
-        "total_time_s": stats.total_execution_time,
-        "mean_sentinel_quality": mq,
-    }
 
 
 def run_once(
@@ -132,12 +110,19 @@ def run_once(
     progress: bool,
     max_workers: int | None,
     available_models: list[str] | None,
-) -> ExecutionStats:
+) -> tuple[ExecutionStats, float | None]:
+    """Run once and return (stats, final_best_op_quality).
+
+    final_best_op_quality is the quality of the operator MAB selects at the
+    end of sampling — i.e. the quality of the chosen plan.
+    """
     os.environ["PALIMPZEST_STRATIFIED_FEATURES_PATH"] = str(features_csv.resolve())
     train_ds = PDFPathsDataset(dataset_id, train_paths)
     eval_ds = PDFPathsDataset(dataset_id, eval_paths)
     train_dataset = {dataset_id: train_ds}
     plan = eval_ds.sem_map(_TITLE_MAP_FIELDS)
+
+    last_quality: list[float] = []
 
     config = pz.QueryProcessorConfig(
         policy=pz.MaxQuality(),
@@ -151,71 +136,65 @@ def run_once(
         j=j,
         progress=progress,
         max_workers=max_workers,
+        on_sample=lambda n, q: last_quality.append(q),
     )
     if available_models:
         config.available_models = available_models
+
     result = plan.optimize_and_run(config=config, train_dataset=train_dataset, validator=validator)
     if result.execution_stats is None:
         raise RuntimeError("optimize_and_run returned no execution_stats")
-    return result.execution_stats
+
+    final_quality = last_quality[-1] if last_quality else None
+    chosen_plans = list(result.execution_stats.plan_strs.values())
+    chosen_plan = chosen_plans[0] if chosen_plans else "unknown"
+    return result.execution_stats, final_quality, chosen_plan
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="A/B: MAB sentinel run with random vs feature-stratified document order."
+        description="Sample-efficiency sweep: random vs. stratified sentinel ordering across budgets."
     )
     parser.add_argument(
         "--papers",
         type=Path,
         default=Path("papers"),
-        help="Root directory scanned for PDFs (same as extract_features --scan)",
+        help="Root directory scanned for PDFs",
     )
     parser.add_argument(
         "--features-csv",
         type=Path,
         default=Path("papers/paper_features.csv"),
-        help="Feature table for stratified_source_keys (row_index matches sorted PDF order)",
+        help="Feature table CSV for stratified ordering",
     )
     parser.add_argument(
         "--train-n",
         type=int,
         default=40,
-        help="Number of PDFs (prefix of sorted list) used as sentinel training corpus",
+        help="Number of PDFs used as sentinel training corpus",
     )
     parser.add_argument(
         "--eval-n",
         type=int,
         default=None,
-        help="Cap evaluation corpus to first N PDFs (default: all under --papers)",
+        help="Cap evaluation corpus to first N PDFs (default: all)",
     )
-    parser.add_argument("--sample-budget", type=int, default=80, help="MAB sentinel sample budget")
-    parser.add_argument("--seed", type=int, default=42, help="RNG seed for MAB / shuffle")
-    parser.add_argument("--strata", type=int, default=8, help="stratified_num_strata")
-    parser.add_argument("--k", type=int, default=6, help="MAB k")
-    parser.add_argument("--j", type=int, default=4, help="MAB j")
-    parser.add_argument("--max-workers", type=int, default=None, help="Parallel execution workers")
     parser.add_argument(
-        "--available-models",
-        type=str,
+        "--budgets",
+        type=int,
         nargs="+",
-        default=None,
-        help="Model(s) to use, e.g. gpt-4o-mini gpt-4o (overrides auto-detection)",
+        default=[5, 10, 15, 20, 25, 30],
+        help="Sample budgets to sweep over (default: 5 10 15 20 25 30)",
     )
-    parser.add_argument(
-        "--no-progress",
-        action="store_true",
-        help="Disable progress bars",
-    )
-    parser.add_argument(
-        "--random-only",
-        action="store_true",
-        help="Only run baseline shuffle (skip stratified pass)",
-    )
-    parser.add_argument(
-        "--stratified-only",
-        action="store_true",
-        help="Only run stratified pass (skip random)",
-    )
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--strata", type=int, default=8)
+    parser.add_argument("--k", type=int, default=6)
+    parser.add_argument("--j", type=int, default=4)
+    parser.add_argument("--max-workers", type=int, default=None)
+    parser.add_argument("--available-models", type=str, nargs="+", default=None)
+    parser.add_argument("--no-progress", action="store_true")
+    parser.add_argument("--random-only", action="store_true")
+    parser.add_argument("--stratified-only", action="store_true")
     args = parser.parse_args()
 
     if args.random_only and args.stratified_only:
@@ -233,9 +212,8 @@ def main() -> None:
     eval_paths = all_paths if args.eval_n is None else all_paths[: args.eval_n]
     train_n = min(args.train_n, len(eval_paths))
     if train_n < 1:
-        print("train-n must be >= 1 after clamping to corpus size", file=sys.stderr)
+        print("train-n must be >= 1", file=sys.stderr)
         sys.exit(1)
-
     train_paths = eval_paths[:train_n]
     dataset_id = "papers"
 
@@ -253,14 +231,14 @@ def main() -> None:
         feat_rows = sum(1 for _ in reader)
     if feat_rows < train_n:
         print(
-            f"Feature CSV has {feat_rows} rows but --train-n={train_n}; rebuild CSV for this corpus.",
+            f"Feature CSV has {feat_rows} rows but --train-n={train_n}; rebuild CSV.",
             file=sys.stderr,
         )
         sys.exit(1)
 
     validator = pz.Validator()
     progress = not args.no_progress
-    rows: list[dict] = []
+    budgets = sorted(args.budgets)
 
     run_kwargs = dict(
         eval_paths=eval_paths,
@@ -268,7 +246,6 @@ def main() -> None:
         dataset_id=dataset_id,
         validator=validator,
         features_csv=args.features_csv.resolve(),
-        sample_budget=args.sample_budget,
         seed=args.seed,
         strata=args.strata,
         k=args.k,
@@ -278,56 +255,121 @@ def main() -> None:
         available_models=args.available_models,
     )
 
-    if not args.stratified_only:
-        print("=== Run A: document_sampling_method=random (baseline shuffle) ===", flush=True)
-        stats_r = run_once(document_sampling_method="random", **run_kwargs)
-        rows.append(summarize_run("random", stats_r))
+    # results[mode] = list of row dicts in budget order
+    results: dict[str, list[dict]] = {"random": [], "stratified": []}
 
-    if not args.random_only:
-        print("=== Run B: document_sampling_method=stratified (feature table) ===", flush=True)
-        stats_s = run_once(document_sampling_method="stratified", **run_kwargs)
-        rows.append(summarize_run("stratified", stats_s))
+    for budget in budgets:
+        print(f"\n=== sample_budget={budget} ===", flush=True)
 
+        if not args.stratified_only:
+            print(f"  [random]     budget={budget}", flush=True)
+            stats, q, plan = run_once(document_sampling_method="random", sample_budget=budget, **run_kwargs)
+            if q is not None:
+                results["random"].append({
+                    "budget": budget,
+                    "plan_quality": q,
+                    "chosen_plan": plan,
+                    "opt_cost": stats.optimization_cost,
+                    "opt_s": stats.optimization_time,
+                    "plan_cost": stats.plan_execution_cost,
+                    "plan_s": stats.plan_execution_time,
+                    "total_cost": stats.total_execution_cost,
+                    "total_s": stats.total_execution_time,
+                })
+                print(f"  -> plan quality: {q:.4f}  plan: {plan}")
+
+        if not args.random_only:
+            print(f"  [stratified] budget={budget}", flush=True)
+            stats, q, plan = run_once(document_sampling_method="stratified", sample_budget=budget, **run_kwargs)
+            if q is not None:
+                results["stratified"].append({
+                    "budget": budget,
+                    "plan_quality": q,
+                    "chosen_plan": plan,
+                    "opt_cost": stats.optimization_cost,
+                    "opt_s": stats.optimization_time,
+                    "plan_cost": stats.plan_execution_cost,
+                    "plan_s": stats.plan_execution_time,
+                    "total_cost": stats.total_execution_cost,
+                    "total_s": stats.total_execution_time,
+                })
+                print(f"  -> plan quality: {q:.4f}  plan: {plan}")
+
+    # ground truth = quality at the largest budget
+    ground_truth: dict[str, float] = {}
+    for mode, rows in results.items():
+        if rows:
+            ground_truth[mode] = rows[-1]["plan_quality"]
+
+    shared_gt = sum(ground_truth.values()) / len(ground_truth) if ground_truth else None
+
+    # summary table
     table = PrettyTable()
-    table.field_names = [
-        "Mode",
-        "opt_cost",
-        "opt_s",
-        "plan_cost",
-        "plan_s",
-        "total_cost",
-        "total_s",
-        "mean_Q_sentinel",
-    ]
+    table.field_names = ["Mode", "budget", "chosen_plan", "plan_quality", "error_vs_gt", "opt_cost", "opt_s", "plan_cost", "plan_s", "total_cost", "total_s"]
     table.align = "r"
     table.align["Mode"] = "l"
-
-    for r in rows:
-        mq = r["mean_sentinel_quality"]
-        table.add_row(
-            [
-                r["mode"],
-                f"{r['optimization_cost']:.4f}",
-                f"{r['optimization_time_s']:.2f}",
-                f"{r['plan_execution_cost']:.4f}",
-                f"{r['plan_execution_time_s']:.2f}",
-                f"{r['total_cost']:.4f}",
-                f"{r['total_time_s']:.2f}",
-                "—" if mq is None else f"{mq:.4f}",
-            ],
-        )
+    table.align["chosen_plan"] = "l"
+    for mode, rows in results.items():
+        for row in rows:
+            q = row["plan_quality"]
+            err = f"{abs(q - shared_gt):.4f}" if shared_gt is not None else "—"
+            table.add_row([
+                mode,
+                row["budget"],
+                row["chosen_plan"],
+                f"{q:.4f}",
+                err,
+                f"{row['opt_cost']:.4f}",
+                f"{row['opt_s']:.2f}",
+                f"{row['plan_cost']:.4f}",
+                f"{row['plan_s']:.2f}",
+                f"{row['total_cost']:.4f}",
+                f"{row['total_s']:.2f}",
+            ])
 
     print()
     print(f"Papers root: {papers_root}  |  eval PDFs: {len(eval_paths)}  |  train PDFs: {train_n}")
-    print(f"Features CSV: {args.features_csv.resolve()}")
-    print(f"sample_budget={args.sample_budget} seed={args.seed} strata={args.strata} k={args.k} j={args.j}")
+    print(f"Budgets: {budgets}  |  seed={args.seed}  strata={args.strata}  k={args.k}  j={args.j}")
     print()
     print(table)
-    print()
-    print(
-        "mean_Q_sentinel = mean of non-null RecordOpStats.quality over sentinel ops "
-        "(default Validator uses an LLM judge when map_score_fn is not overridden)."
-    )
+
+    # plot
+    colors = {"random": "steelblue", "stratified": "darkorange"}
+    labels = {"random": "Random (baseline)", "stratified": "Feature-stratified"}
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    for mode, rows in results.items():
+        if not rows:
+            continue
+        xs = [r["budget"] for r in rows]
+        qs = [r["plan_quality"] for r in rows]
+        color = colors[mode]
+        label = labels[mode]
+
+        ax1.plot(xs, qs, marker="o", label=label, color=color, linewidth=2)
+
+        if shared_gt is not None:
+            errs = [abs(q - shared_gt) for q in qs]
+            ax2.plot(xs, errs, marker="o", label=label, color=color, linewidth=2)
+
+    ax1.set_xlabel("Sample budget")
+    ax1.set_ylabel("Plan quality (best operator mean quality)")
+    ax1.set_title("Plan quality vs. sample budget")
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+
+    ax2.set_xlabel("Sample budget")
+    ax2.set_ylabel("Absolute error vs. shared ground truth")
+    ax2.set_title("Sample efficiency: convergence to ground truth")
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+
+    fig.tight_layout()
+    plot_path = Path("sample_efficiency.png")
+    fig.savefig(plot_path, dpi=150)
+    print(f"\nPlot saved to {plot_path.resolve()}")
+    plt.show()
 
 
 if __name__ == "__main__":

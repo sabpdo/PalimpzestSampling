@@ -778,6 +778,18 @@ class MABExecutionStrategy(SentinelExecutionStrategy):
                         full_op_id_to_source_indices_processed[op.get_full_op_id()].add(source_indices)
                 op_frontiers[unique_logical_op_id].update_frontier(unique_logical_op_id, plan_stats, full_op_id_to_source_indices_processed)
 
+                # fire per-sample callback with (samples_drawn, best_op_mean_quality)
+                # reports quality of the operator MAB would currently select, not overall mean
+                if self.on_sample is not None:
+                    best_op = self._get_max_quality_op(unique_logical_op_id, op_frontiers, plan_stats)
+                    if best_op is not None:
+                        phys_map = plan_stats.operator_stats.get(unique_logical_op_id, {})
+                        op_stats = phys_map.get(best_op.get_full_op_id())
+                        if op_stats is not None:
+                            qualities = [r.quality for r in op_stats.record_op_stats_lst if r.quality is not None]
+                            if qualities:
+                                self.on_sample(samples_drawn, sum(qualities) / len(qualities))
+
                 # if the operator is a non-llm filter which has filtered out records, remove those records from
                 # all downstream operators' full_op_id_to_sources_not_processed
                 if isinstance(op_set[0], NonLLMFilter) and next_unique_logical_op_id is not None:

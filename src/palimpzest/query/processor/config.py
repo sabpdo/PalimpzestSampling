@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -60,6 +60,7 @@ class QueryProcessorConfig(BaseModel):
         description="Baseline shuffle vs feature stratified (paper_features.csv / PALIMPZEST_STRATIFIED_FEATURES_PATH), or override with document_sampler on the strategy.",
     )
     stratified_num_strata: int = Field(default=8, ge=1)
+    on_sample: Callable | None = Field(default=None)
 
     def to_dict(self) -> dict:
         """Convert the config to a dict representation."""

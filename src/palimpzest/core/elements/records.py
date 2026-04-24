@@ -324,9 +324,9 @@ class DataRecord:
         if bytes_to_str:
             for k, v in dct.items():
                 if isinstance(v, bytes):
-                    dct[k] = v.decode("utf-8")
+                    dct[k] = v.decode("utf-8", errors="replace")
                 elif isinstance(v, list) and len(v) > 0 and any([isinstance(elt, bytes) for elt in v]):
-                    dct[k] = [elt.decode("utf-8") if isinstance(elt, bytes) else elt for elt in v]
+                    dct[k] = [elt.decode("utf-8", errors="replace") if isinstance(elt, bytes) else elt for elt in v]
 
         if _sorted:
             dct = dict(sorted(dct.items()))
