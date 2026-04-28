@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import base64
 from collections.abc import Generator
 from copy import deepcopy
 from typing import Any
@@ -324,9 +325,14 @@ class DataRecord:
         if bytes_to_str:
             for k, v in dct.items():
                 if isinstance(v, bytes):
-                    dct[k] = v.decode("utf-8")
+                    # Binary payloads (e.g. PDFs/images) are not valid UTF-8 in general.
+                    # Base64 keeps serialization deterministic and hash-safe.
+                    dct[k] = base64.b64encode(v).decode("ascii")
                 elif isinstance(v, list) and len(v) > 0 and any([isinstance(elt, bytes) for elt in v]):
-                    dct[k] = [elt.decode("utf-8") if isinstance(elt, bytes) else elt for elt in v]
+                    dct[k] = [
+                        base64.b64encode(elt).decode("ascii") if isinstance(elt, bytes) else elt
+                        for elt in v
+                    ]
 
         if _sorted:
             dct = dict(sorted(dct.items()))

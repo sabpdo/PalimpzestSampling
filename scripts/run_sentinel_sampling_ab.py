@@ -27,8 +27,16 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-from prettytable import PrettyTable
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):  # type: ignore[no-redef]
+        return False
+
+try:
+    from prettytable import PrettyTable
+except ImportError:
+    PrettyTable = None  # type: ignore[assignment]
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _SRC = _REPO_ROOT / "src"
@@ -37,11 +45,79 @@ if _SRC.is_dir() and str(_SRC) not in sys.path:
 if _REPO_ROOT.is_dir():
     os.chdir(_REPO_ROOT)
 
-import palimpzest as pz
-from palimpzest.core.data.iter_dataset import IterDataset
-from palimpzest.core.lib.schemas import PDFFile
-from palimpzest.core.models import ExecutionStats
-from palimpzest.tools.pdfparser import get_text_from_pdf
+try:
+    import palimpzest as pz
+    from palimpzest.core.data.iter_dataset import IterDataset
+    from palimpzest.core.lib.schemas import PDFFile
+    from palimpzest.core.models import ExecutionStats
+    from palimpzest.tools.pdfparser import get_text_from_pdf
+except ModuleNotFoundError as exc:
+    missing = getattr(exc, "name", "unknown")
+    print(
+        "Missing Python dependency while importing Palimpzest components: "
+        f"{missing}\n"
+        "Install project dependencies in your active environment, then rerun.\n"
+        "Suggested commands:\n"
+        "  python -m pip install -e .\n"
+        "or (minimal for this error):\n"
+        f"  python -m pip install {missing}",
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from exc
+
+STRAT_FEATURE_COLUMNS = (
+    "word_count",
+    "section_count",
+    "avg_sentence_length",
+    "figure_count",
+    "table_count",
+    "complexity_score",
+)
+
+
+def _print_results_table(rows: list[dict]) -> None:
+    columns = [
+        ("budget", lambda r: str(r["sample_budget"])),
+        ("Mode", lambda r: str(r["mode"])),
+        ("opt_cost", lambda r: f"{r['optimization_cost']:.4f}"),
+        ("opt_s", lambda r: f"{r['optimization_time_s']:.2f}"),
+        ("eval_cost", lambda r: f"{r['plan_execution_cost']:.4f}"),
+        ("eval_s", lambda r: f"{r['plan_execution_time_s']:.2f}"),
+        ("total_cost", lambda r: f"{r['total_cost']:.4f}"),
+        ("total_s", lambda r: f"{r['total_time_s']:.2f}"),
+        ("mean_Q_sentinel", lambda r: "—" if r["mean_sentinel_quality"] is None else f"{r['mean_sentinel_quality']:.4f}"),
+        ("mean_Q_plan", lambda r: "—" if r["mean_plan_quality"] is None else f"{r['mean_plan_quality']:.4f}"),
+    ]
+
+    if PrettyTable is not None:
+        table = PrettyTable()
+        table.field_names = [name for name, _ in columns]
+        table.align = "r"
+        table.align["Mode"] = "l"
+        for r in rows:
+            table.add_row([fn(r) for _, fn in columns])
+        print(table)
+        return
+
+    # Plain-text fallback if prettytable is unavailable.
+    headers = [name for name, _ in columns]
+    rendered_rows = [[fn(r) for _, fn in columns] for r in rows]
+    widths = [len(h) for h in headers]
+    for row in rendered_rows:
+        for i, val in enumerate(row):
+            widths[i] = max(widths[i], len(val))
+
+    def fmt(row_vals: list[str]) -> str:
+        parts: list[str] = []
+        for i, val in enumerate(row_vals):
+            align_left = headers[i] == "Mode"
+            parts.append(val.ljust(widths[i]) if align_left else val.rjust(widths[i]))
+        return " | ".join(parts)
+
+    print(fmt(headers))
+    print("-+-".join("-" * w for w in widths))
+    for row in rendered_rows:
+        print(fmt(row))
 
 
 def iter_pdf_paths(papers_root: Path) -> list[Path]:
@@ -102,8 +178,22 @@ def mean_sentinel_record_quality(stats: ExecutionStats) -> float | None:
     return sum(qualities) / len(qualities)
 
 
+def mean_plan_record_quality(stats: ExecutionStats) -> float | None:
+    """Average ``RecordOpStats.quality`` across final plan operator stats (if any)."""
+    qualities: list[float] = []
+    for plan_stats in stats.plan_stats.values():
+        for op_stats in plan_stats.operator_stats.values():
+            for r in op_stats.record_op_stats_lst:
+                if r.quality is not None:
+                    qualities.append(float(r.quality))
+    if not qualities:
+        return None
+    return sum(qualities) / len(qualities)
+
+
 def summarize_run(label: str, stats: ExecutionStats) -> dict:
     mq = mean_sentinel_record_quality(stats)
+    plan_q = mean_plan_record_quality(stats)
     return {
         "mode": label,
         "optimization_cost": stats.optimization_cost,
@@ -113,6 +203,9 @@ def summarize_run(label: str, stats: ExecutionStats) -> dict:
         "total_cost": stats.total_execution_cost,
         "total_time_s": stats.total_execution_time,
         "mean_sentinel_quality": mq,
+        "mean_plan_quality": plan_q,
+        "sentinel_plan_count": len(stats.sentinel_plan_stats),
+        "final_plan_count": len(stats.plan_stats),
     }
 
 
@@ -132,8 +225,20 @@ def run_once(
     progress: bool,
     max_workers: int | None,
     available_models: list[str] | None,
+    strat_feature_columns: list[str] | None = None,
+    strat_mode: str = "composite",
+    strat_single_feature: str | None = None,
 ) -> ExecutionStats:
     os.environ["PALIMPZEST_STRATIFIED_FEATURES_PATH"] = str(features_csv.resolve())
+    if strat_feature_columns:
+        os.environ["PALIMPZEST_STRATIFIED_FEATURE_COLUMNS"] = ",".join(strat_feature_columns)
+    else:
+        os.environ.pop("PALIMPZEST_STRATIFIED_FEATURE_COLUMNS", None)
+    os.environ["PALIMPZEST_STRATIFIED_MODE"] = strat_mode
+    if strat_single_feature:
+        os.environ["PALIMPZEST_STRATIFIED_SINGLE_FEATURE"] = strat_single_feature
+    else:
+        os.environ.pop("PALIMPZEST_STRATIFIED_SINGLE_FEATURE", None)
     train_ds = PDFPathsDataset(dataset_id, train_paths)
     eval_ds = PDFPathsDataset(dataset_id, eval_paths)
     train_dataset = {dataset_id: train_ds}
@@ -188,12 +293,43 @@ def main() -> None:
         default=None,
         help="Cap evaluation corpus to first N PDFs (default: all under --papers)",
     )
-    parser.add_argument("--sample-budget", type=int, default=80, help="MAB sentinel sample budget")
+    parser.add_argument(
+        "--sample-budget",
+        type=int,
+        default=None,
+        help="Single MAB sentinel sample budget (deprecated; use --budgets).",
+    )
+    parser.add_argument(
+        "--budgets",
+        type=int,
+        nargs="+",
+        default=None,
+        help="One or more sample budgets to sweep (e.g. --budgets 5 10 15 20).",
+    )
     parser.add_argument("--seed", type=int, default=42, help="RNG seed for MAB / shuffle")
     parser.add_argument("--strata", type=int, default=8, help="stratified_num_strata")
     parser.add_argument("--k", type=int, default=6, help="MAB k")
     parser.add_argument("--j", type=int, default=4, help="MAB j")
     parser.add_argument("--max-workers", type=int, default=None, help="Parallel execution workers")
+    parser.add_argument(
+        "--stratify-features",
+        type=str,
+        nargs="+",
+        default=None,
+        help=(
+            "Feature columns to use for stratification. "
+            f"Default: {', '.join(STRAT_FEATURE_COLUMNS)}"
+        ),
+    )
+    parser.add_argument(
+        "--strata-composition",
+        choices=["composite", "exclusive"],
+        default="composite",
+        help=(
+            "composite: one stratified run using all selected features. "
+            "exclusive: one stratified run per selected feature (mutually exclusive)."
+        ),
+    )
     parser.add_argument(
         "--available-models",
         type=str,
@@ -215,6 +351,12 @@ def main() -> None:
         "--stratified-only",
         action="store_true",
         help="Only run stratified pass (skip random)",
+    )
+    parser.add_argument(
+        "--output-csv",
+        type=Path,
+        default=None,
+        help="Optional path to save detailed run results CSV.",
     )
     args = parser.parse_args()
 
@@ -261,73 +403,124 @@ def main() -> None:
     validator = pz.Validator()
     progress = not args.no_progress
     rows: list[dict] = []
+    features_csv_path = args.features_csv.resolve()
 
-    run_kwargs = dict(
-        eval_paths=eval_paths,
-        train_paths=train_paths,
-        dataset_id=dataset_id,
-        validator=validator,
-        features_csv=args.features_csv.resolve(),
-        sample_budget=args.sample_budget,
-        seed=args.seed,
-        strata=args.strata,
-        k=args.k,
-        j=args.j,
-        progress=progress,
-        max_workers=args.max_workers,
-        available_models=args.available_models,
-    )
-
-    if not args.stratified_only:
-        print("=== Run A: document_sampling_method=random (baseline shuffle) ===", flush=True)
-        stats_r = run_once(document_sampling_method="random", **run_kwargs)
-        rows.append(summarize_run("random", stats_r))
-
-    if not args.random_only:
-        print("=== Run B: document_sampling_method=stratified (feature table) ===", flush=True)
-        stats_s = run_once(document_sampling_method="stratified", **run_kwargs)
-        rows.append(summarize_run("stratified", stats_s))
-
-    table = PrettyTable()
-    table.field_names = [
-        "Mode",
-        "opt_cost",
-        "opt_s",
-        "plan_cost",
-        "plan_s",
-        "total_cost",
-        "total_s",
-        "mean_Q_sentinel",
-    ]
-    table.align = "r"
-    table.align["Mode"] = "l"
-
-    for r in rows:
-        mq = r["mean_sentinel_quality"]
-        table.add_row(
-            [
-                r["mode"],
-                f"{r['optimization_cost']:.4f}",
-                f"{r['optimization_time_s']:.2f}",
-                f"{r['plan_execution_cost']:.4f}",
-                f"{r['plan_execution_time_s']:.2f}",
-                f"{r['total_cost']:.4f}",
-                f"{r['total_time_s']:.2f}",
-                "—" if mq is None else f"{mq:.4f}",
-            ],
+    if args.budgets is not None and len(args.budgets) == 0:
+        print("--budgets cannot be empty", file=sys.stderr)
+        sys.exit(2)
+    if args.budgets is not None and args.sample_budget is not None:
+        print("Pass either --sample-budget or --budgets (not both).", file=sys.stderr)
+        sys.exit(2)
+    budgets = args.budgets if args.budgets is not None else [args.sample_budget or 80]
+    selected_features = list(args.stratify_features or STRAT_FEATURE_COLUMNS)
+    unknown_features = sorted(set(selected_features) - set(STRAT_FEATURE_COLUMNS))
+    if unknown_features:
+        print(
+            f"Unknown --stratify-features columns: {unknown_features}. "
+            f"Allowed: {list(STRAT_FEATURE_COLUMNS)}",
+            file=sys.stderr,
         )
+        sys.exit(2)
+    if len(selected_features) == 0:
+        print("At least one stratification feature is required.", file=sys.stderr)
+        sys.exit(2)
+
+    def stratified_runs() -> list[tuple[str, str, str | None]]:
+        if args.strata_composition == "exclusive":
+            return [(f"stratified:{feat}", "single", feat) for feat in selected_features]
+        return [("stratified", "composite", None)]
+
+    for budget in budgets:
+        run_kwargs = dict(
+            eval_paths=eval_paths,
+            train_paths=train_paths,
+            dataset_id=dataset_id,
+            validator=validator,
+            features_csv=features_csv_path,
+            sample_budget=budget,
+            seed=args.seed,
+            strata=args.strata,
+            k=args.k,
+            j=args.j,
+            progress=progress,
+            max_workers=args.max_workers,
+            available_models=args.available_models,
+            strat_feature_columns=selected_features,
+        )
+
+        if not args.stratified_only:
+            print(
+                f"=== Run A: document_sampling_method=random (baseline shuffle), budget={budget} ===",
+                flush=True,
+            )
+            stats_r = run_once(document_sampling_method="random", **run_kwargs)
+            row_r = summarize_run("random", stats_r)
+            row_r["sample_budget"] = budget
+            row_r["stratify_features"] = ",".join(selected_features)
+            row_r["strata_composition"] = args.strata_composition
+            row_r["strata_feature"] = ""
+            rows.append(row_r)
+
+        if not args.random_only:
+            for mode_label, strat_mode, strat_single in stratified_runs():
+                print(
+                    "=== Run B: document_sampling_method=stratified "
+                    f"({mode_label}), budget={budget} ===",
+                    flush=True,
+                )
+                stats_s = run_once(
+                    document_sampling_method="stratified",
+                    strat_mode=strat_mode,
+                    strat_single_feature=strat_single,
+                    **run_kwargs,
+                )
+                row_s = summarize_run(mode_label, stats_s)
+                row_s["sample_budget"] = budget
+                row_s["stratify_features"] = ",".join(selected_features)
+                row_s["strata_composition"] = args.strata_composition
+                row_s["strata_feature"] = strat_single or ""
+                rows.append(row_s)
 
     print()
     print(f"Papers root: {papers_root}  |  eval PDFs: {len(eval_paths)}  |  train PDFs: {train_n}")
-    print(f"Features CSV: {args.features_csv.resolve()}")
-    print(f"sample_budget={args.sample_budget} seed={args.seed} strata={args.strata} k={args.k} j={args.j}")
+    print(f"Features CSV: {features_csv_path}")
+    print(f"stratify_features={selected_features} strata_composition={args.strata_composition}")
+    print(f"budgets={budgets} seed={args.seed} strata={args.strata} k={args.k} j={args.j}")
     print()
-    print(table)
+    _print_results_table(rows)
     print()
     print(
         "mean_Q_sentinel = mean of non-null RecordOpStats.quality over sentinel ops "
         "(default Validator uses an LLM judge when map_score_fn is not overridden)."
     )
+    print("mean_Q_plan = mean of non-null RecordOpStats.quality over final executed plan operators.")
+
+    if args.output_csv is not None:
+        out_csv = args.output_csv.resolve()
+        out_csv.parent.mkdir(parents=True, exist_ok=True)
+        fieldnames = [
+            "sample_budget",
+            "mode",
+            "optimization_cost",
+            "optimization_time_s",
+            "plan_execution_cost",
+            "plan_execution_time_s",
+            "total_cost",
+            "total_time_s",
+            "mean_sentinel_quality",
+            "mean_plan_quality",
+            "sentinel_plan_count",
+            "final_plan_count",
+            "stratify_features",
+            "strata_composition",
+            "strata_feature",
+        ]
+        with out_csv.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({k: row.get(k) for k in fieldnames})
+        print(f"Wrote results CSV: {out_csv}")
 
 
 if __name__ == "__main__":

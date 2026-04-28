@@ -24,6 +24,8 @@ FEATURE_COLUMNS = (
     "table_count",
     "complexity_score",
 )
+_MODE_COMPOSITE = "composite"
+_MODE_SINGLE = "single"
 
 
 def default_features_csv_path() -> Path:
@@ -33,8 +35,32 @@ def default_features_csv_path() -> Path:
     return Path.cwd() / "papers" / "paper_features.csv"
 
 
-def _validate_feature_csv_columns(df: pd.DataFrame, csv_path: Path) -> None:
-    for col in ("row_index", *FEATURE_COLUMNS):
+def _configured_feature_columns() -> tuple[str, ...]:
+    env = os.environ.get("PALIMPZEST_STRATIFIED_FEATURE_COLUMNS", "").strip()
+    if not env:
+        return FEATURE_COLUMNS
+    columns = tuple([c.strip() for c in env.split(",") if c.strip()])
+    if not columns:
+        raise ValueError("PALIMPZEST_STRATIFIED_FEATURE_COLUMNS is set but empty after parsing.")
+    return columns
+
+
+def _configured_mode() -> str:
+    mode = os.environ.get("PALIMPZEST_STRATIFIED_MODE", _MODE_COMPOSITE).strip().lower()
+    if mode not in {_MODE_COMPOSITE, _MODE_SINGLE}:
+        raise ValueError(
+            f"Unsupported PALIMPZEST_STRATIFIED_MODE={mode!r}; expected '{_MODE_COMPOSITE}' or '{_MODE_SINGLE}'."
+        )
+    return mode
+
+
+def _configured_single_feature() -> str | None:
+    value = os.environ.get("PALIMPZEST_STRATIFIED_SINGLE_FEATURE", "").strip()
+    return value or None
+
+
+def _validate_feature_csv_columns(df: pd.DataFrame, csv_path: Path, feature_columns: tuple[str, ...]) -> None:
+    for col in ("row_index", *feature_columns):
         if col not in df.columns:
             raise ValueError(f"CSV {csv_path} missing required column {col!r}")
 
@@ -48,7 +74,7 @@ def read_feature_table(csv_path: Path, *, max_rows: int | None = None) -> pd.Dat
             "or set PALIMPZEST_STRATIFIED_FEATURES_PATH."
         )
     df = pd.read_csv(csv_path)
-    _validate_feature_csv_columns(df, csv_path)
+    _validate_feature_csv_columns(df, csv_path, FEATURE_COLUMNS)
     df = df.sort_values("row_index").reset_index(drop=True)
     if max_rows is not None:
         df = df.iloc[:max_rows].copy()
@@ -63,7 +89,8 @@ def load_feature_frame(csv_path: Path, num_records: int) -> pd.DataFrame:
             "or set PALIMPZEST_STRATIFIED_FEATURES_PATH."
         )
     df = pd.read_csv(csv_path)
-    _validate_feature_csv_columns(df, csv_path)
+    feature_columns = _configured_feature_columns()
+    _validate_feature_csv_columns(df, csv_path, feature_columns)
     df = df.sort_values("row_index").reset_index(drop=True)
     if len(df) < num_records:
         raise ValueError(
@@ -81,8 +108,8 @@ def composite_strata(features: np.ndarray, num_strata: int) -> np.ndarray:
     n, d = features.shape
     if n == 0:
         return np.zeros(0, dtype=np.int64)
-    if d != len(FEATURE_COLUMNS):
-        raise ValueError(f"Expected {len(FEATURE_COLUMNS)} feature columns, got {d}")
+    if d < 1:
+        raise ValueError("Expected at least one feature column for composite stratification.")
     k = max(1, min(int(num_strata), n))
     pct = np.empty((n, d), dtype=np.float64)
     for j in range(d):
@@ -90,6 +117,17 @@ def composite_strata(features: np.ndarray, num_strata: int) -> np.ndarray:
         pct[:, j] = col.rank(pct=True, method="average").to_numpy(dtype=np.float64)
     comp = pct.mean(axis=1)
     raw = (comp * k).astype(np.int64)
+    return np.clip(raw, 0, k - 1)
+
+
+def single_feature_strata(feature_values: np.ndarray, num_strata: int) -> np.ndarray:
+    """Map one feature vector to strata via percentile bins."""
+    n = len(feature_values)
+    if n == 0:
+        return np.zeros(0, dtype=np.int64)
+    k = max(1, min(int(num_strata), n))
+    pct = pd.Series(feature_values).rank(pct=True, method="average").to_numpy(dtype=np.float64)
+    raw = (pct * k).astype(np.int64)
     return np.clip(raw, 0, k - 1)
 
 
@@ -123,8 +161,21 @@ def feature_stratified_row_order(
     """Return a permutation of ``0 .. num_records - 1`` (dataset row indices)."""
     path = features_csv if features_csv is not None else default_features_csv_path()
     df = load_feature_frame(path, num_records)
-    mat = df.loc[:, list(FEATURE_COLUMNS)].to_numpy(dtype=np.float64)
-    strata = composite_strata(mat, num_strata)
+    feature_columns = _configured_feature_columns()
+    mode = _configured_mode()
+    single_feature = _configured_single_feature()
+
+    if mode == _MODE_SINGLE:
+        chosen_feature = single_feature if single_feature is not None else feature_columns[0]
+        if chosen_feature not in feature_columns:
+            raise ValueError(
+                f"PALIMPZEST_STRATIFIED_SINGLE_FEATURE={chosen_feature!r} must be in selected columns {feature_columns}."
+            )
+        vals = df.loc[:, chosen_feature].to_numpy(dtype=np.float64)
+        strata = single_feature_strata(vals, num_strata)
+    else:
+        mat = df.loc[:, list(feature_columns)].to_numpy(dtype=np.float64)
+        strata = composite_strata(mat, num_strata)
     return round_robin_merge(strata, rng)
 
 
@@ -137,5 +188,12 @@ def feature_strata_per_index(
     """Stratum id for each row index (same assignment as :func:`feature_stratified_row_order`)."""
     path = features_csv if features_csv is not None else default_features_csv_path()
     df = load_feature_frame(path, num_records)
-    mat = df.loc[:, list(FEATURE_COLUMNS)].to_numpy(dtype=np.float64)
+    feature_columns = _configured_feature_columns()
+    mode = _configured_mode()
+    single_feature = _configured_single_feature()
+    if mode == _MODE_SINGLE:
+        chosen_feature = single_feature if single_feature is not None else feature_columns[0]
+        vals = df.loc[:, chosen_feature].to_numpy(dtype=np.float64)
+        return single_feature_strata(vals, num_strata)
+    mat = df.loc[:, list(feature_columns)].to_numpy(dtype=np.float64)
     return composite_strata(mat, num_strata)
