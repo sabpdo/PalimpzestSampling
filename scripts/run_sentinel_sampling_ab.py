@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """
-Run the same Palimpzest optimize-and-execute workload twice: sentinel **document order**
-is either baseline shuffle (``random``) or **feature stratified** (``stratified``).
+Run Palimpzest sentinel optimization at increasing sample budgets and compare
+random vs. feature-stratified document ordering.
 
-This measures **real** post-sample behavior: optimization cost/time, final plan cost/time,
-totals, and mean record-level **quality** from sentinel ``RecordOpStats`` (when the
-validator assigns scores).
+For each budget in --budgets, both methods are run and the quality of the plan
+chosen by MAB is recorded. Results are plotted as quality (and error) vs. sample budget.
 
-**Alignment with ``paper_features.csv``:** Row indices in the CSV must match
-``sorted(root.rglob('*.pdf'))`` — the same rule as ``scripts/extract_features.py --scan``.
-Use the same ``--papers`` root you used to build the feature table. Stratified ordering
-only affects the **training** corpus (first ``--train-n`` PDFs in that sort order).
-
-Requires API keys and dependencies as for other Palimpzest demos (see README).
+Ground truth is the quality at the largest budget.
 
 ::
 
     python scripts/run_sentinel_sampling_ab.py --papers ./papers --train-n 40
+    python scripts/run_sentinel_sampling_ab.py --papers ./papers --train-n 20 --budgets 5 10 15 20
 """
 
 from __future__ import annotations
@@ -121,15 +116,12 @@ def _print_results_table(rows: list[dict]) -> None:
 
 
 def iter_pdf_paths(papers_root: Path) -> list[Path]:
-    """Same ordering as ``scripts/extract_features.iter_pdf_paths``."""
     if not papers_root.is_dir():
         return []
     return sorted(papers_root.rglob("*.pdf"))
 
 
 class PDFPathsDataset(IterDataset):
-    """Root dataset over an explicit list of PDF paths (recursive scan, stable order)."""
-
     def __init__(self, dataset_id: str, paths: list[Path]) -> None:
         super().__init__(id=dataset_id, schema=PDFFile)
         self.paths = [str(p) for p in paths]
@@ -155,9 +147,24 @@ class PDFPathsDataset(IterDataset):
 
 _TITLE_MAP_FIELDS = [
     {
-        "name": "title",
+        "name": "primary_contribution",
         "type": str,
-        "desc": "A short descriptive title for the paper from its first page or heading.",
+        "desc": "The single most important technical contribution of the paper in one sentence.",
+    },
+    {
+        "name": "methodology",
+        "type": str,
+        "desc": "The core method or approach used (e.g. algorithm name, experimental design, proof technique).",
+    },
+    {
+        "name": "domain",
+        "type": str,
+        "desc": "The research domain: one of 'cs', 'biomedical', 'math', or 'physics'.",
+    },
+    {
+        "name": "uses_experiments",
+        "type": bool,
+        "desc": "True if the paper includes empirical experiments or evaluations, False if purely theoretical.",
     },
 ]
 
@@ -244,6 +251,8 @@ def run_once(
     train_dataset = {dataset_id: train_ds}
     plan = eval_ds.sem_map(_TITLE_MAP_FIELDS)
 
+    last_quality: list[float] = []
+
     config = pz.QueryProcessorConfig(
         policy=pz.MaxQuality(),
         execution_strategy="parallel",
@@ -256,42 +265,45 @@ def run_once(
         j=j,
         progress=progress,
         max_workers=max_workers,
+        on_sample=lambda n, q: last_quality.append(q),
     )
     if available_models:
         config.available_models = available_models
+
     result = plan.optimize_and_run(config=config, train_dataset=train_dataset, validator=validator)
     if result.execution_stats is None:
         raise RuntimeError("optimize_and_run returned no execution_stats")
+
     return result.execution_stats
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="A/B: MAB sentinel run with random vs feature-stratified document order."
+        description="Sample-efficiency sweep: random vs. stratified sentinel ordering across budgets."
     )
     parser.add_argument(
         "--papers",
         type=Path,
         default=Path("papers"),
-        help="Root directory scanned for PDFs (same as extract_features --scan)",
+        help="Root directory scanned for PDFs",
     )
     parser.add_argument(
         "--features-csv",
         type=Path,
         default=Path("papers/paper_features.csv"),
-        help="Feature table for stratified_source_keys (row_index matches sorted PDF order)",
+        help="Feature table CSV for stratified ordering",
     )
     parser.add_argument(
         "--train-n",
         type=int,
         default=40,
-        help="Number of PDFs (prefix of sorted list) used as sentinel training corpus",
+        help="Number of PDFs used as sentinel training corpus",
     )
     parser.add_argument(
         "--eval-n",
         type=int,
         default=None,
-        help="Cap evaluation corpus to first N PDFs (default: all under --papers)",
+        help="Cap evaluation corpus to first N PDFs (default: all)",
     )
     parser.add_argument(
         "--sample-budget",
@@ -375,9 +387,8 @@ def main() -> None:
     eval_paths = all_paths if args.eval_n is None else all_paths[: args.eval_n]
     train_n = min(args.train_n, len(eval_paths))
     if train_n < 1:
-        print("train-n must be >= 1 after clamping to corpus size", file=sys.stderr)
+        print("train-n must be >= 1", file=sys.stderr)
         sys.exit(1)
-
     train_paths = eval_paths[:train_n]
     dataset_id = "papers"
 
@@ -395,7 +406,7 @@ def main() -> None:
         feat_rows = sum(1 for _ in reader)
     if feat_rows < train_n:
         print(
-            f"Feature CSV has {feat_rows} rows but --train-n={train_n}; rebuild CSV for this corpus.",
+            f"Feature CSV has {feat_rows} rows but --train-n={train_n}; rebuild CSV.",
             file=sys.stderr,
         )
         sys.exit(1)

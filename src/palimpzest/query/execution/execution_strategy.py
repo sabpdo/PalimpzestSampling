@@ -97,6 +97,7 @@ class SentinelExecutionStrategy(BaseExecutionStrategy, ABC):
         document_sampling_method: Literal["random", "stratified"] = "random",
         stratified_num_strata: int = 8,
         document_sampler: DocumentSourceSampler | None = None,
+        on_sample=None,
         *args,
         **kwargs,
     ):
@@ -115,6 +116,7 @@ class SentinelExecutionStrategy(BaseExecutionStrategy, ABC):
         self.document_sampling_method = document_sampling_method
         self.stratified_num_strata = stratified_num_strata
         self.document_sampler = document_sampler
+        self.on_sample = on_sample
 
         # general cache which maps hash(logical_op_id, phys_op_id, hash(input)) --> record_set
         self.cache: dict[int, DataRecordSet] = {}
