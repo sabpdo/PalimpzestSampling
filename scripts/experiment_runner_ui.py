@@ -119,6 +119,61 @@ def main() -> None:
     st.title("Palimpzest Sentinel A/B Runner")
     st.caption("Run random vs stratified sampling experiments with configurable feature strata.")
 
+    # Keep conditional controls outside the form so they live-rerender.
+    train_selection = st.selectbox(
+        "Train set selection",
+        options=["prefix", "random", "stratified"],
+        help=(
+            "How train docs are chosen from eval docs: prefix (first N), "
+            "random, or stratified for diversity."
+        ),
+    )
+    if train_selection == "stratified":
+        train_selection_strata = st.number_input(
+            "Train selection strata",
+            min_value=1,
+            value=8,
+            step=1,
+            help="Only used when train set selection is stratified.",
+        )
+        train_selection_features = st.multiselect(
+            "Train selection features",
+            options=STRAT_FEATURE_COLUMNS,
+            default=STRAT_FEATURE_COLUMNS,
+            help="Features used to diversify the selected training subset.",
+        )
+    else:
+        train_selection_strata = 8
+        train_selection_features = STRAT_FEATURE_COLUMNS.copy()
+
+    train_skew = st.selectbox(
+        "Train skew policy",
+        options=[
+            "natural",
+            "balanced_domain",
+            "min_one_per_domain",
+            "focus_domain",
+            "custom_domain_ratios",
+        ],
+        help="Target domain mix in training set.",
+    )
+    if train_skew == "focus_domain":
+        train_skew_focus_domain = st.text_input(
+            "Train skew focus domain",
+            value="",
+            help="Example: cs",
+        )
+    else:
+        train_skew_focus_domain = ""
+    if train_skew == "custom_domain_ratios":
+        train_skew_domain_ratios = st.text_input(
+            "Train skew domain ratios",
+            value="",
+            help="Example: cs=0.5,biomedical=0.2,math=0.2,physics=0.1",
+        )
+    else:
+        train_skew_domain_ratios = ""
+
     with st.form("runner"):
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -176,7 +231,7 @@ def main() -> None:
                 help="Parallel worker count for model calls; blank lets Palimpzest choose.",
             )
 
-        c4, c5, c6 = st.columns(3)
+        c4, c5 = st.columns(2)
         with c4:
             k = st.number_input(
                 "MAB k",
@@ -225,50 +280,6 @@ def main() -> None:
                 value=False,
                 help="Disable progress bars in script output.",
             )
-        with c6:
-            train_selection = st.selectbox(
-                "Train set selection",
-                options=["prefix", "random", "stratified"],
-                help=(
-                    "How train docs are chosen from eval docs: prefix (first N), "
-                    "random, or stratified for diversity."
-                ),
-            )
-            train_selection_strata = st.number_input(
-                "Train selection strata",
-                min_value=1,
-                value=8,
-                step=1,
-                help="Only used when train set selection is stratified.",
-            )
-            train_selection_features = st.multiselect(
-                "Train selection features",
-                options=STRAT_FEATURE_COLUMNS,
-                default=STRAT_FEATURE_COLUMNS,
-                help="Features used to diversify the selected training subset.",
-            )
-            train_skew = st.selectbox(
-                "Train skew policy",
-                options=[
-                    "natural",
-                    "balanced_domain",
-                    "min_one_per_domain",
-                    "focus_domain",
-                    "custom_domain_ratios",
-                ],
-                help="Target domain mix in training set.",
-            )
-            train_skew_focus_domain = st.text_input(
-                "Train skew focus domain (for focus_domain)",
-                value="",
-                help="Example: cs",
-            )
-            train_skew_domain_ratios = st.text_input(
-                "Train skew domain ratios (for custom_domain_ratios)",
-                value="",
-                help="Example: cs=0.5,biomedical=0.2,math=0.2,physics=0.1",
-            )
-
         submitted = st.form_submit_button("Run experiment")
 
     if not submitted:
@@ -285,7 +296,7 @@ def main() -> None:
         if not stratify_features:
             st.error("Select at least one stratification feature.")
             return
-        if not train_selection_features:
+        if train_selection == "stratified" and not train_selection_features:
             st.error("Select at least one train selection feature.")
             return
         if train_skew == "focus_domain" and not train_skew_focus_domain.strip():
