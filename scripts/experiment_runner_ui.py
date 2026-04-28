@@ -212,8 +212,9 @@ def main() -> None:
         with c5:
             strata_composition = st.selectbox(
                 "Strata composition",
-                options=["composite", "exclusive"],
+                options=["cartesian", "composite", "exclusive"],
                 help=(
+                    "cartesian: stratify by the Cartesian product of all selected features. "
                     "composite: combine selected features into one stratifier. "
                     "exclusive: run one stratified pass per feature (mutually exclusive)."
                 ),

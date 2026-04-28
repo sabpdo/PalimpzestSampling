@@ -567,9 +567,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--strata-composition",
-        choices=["composite", "exclusive"],
-        default="composite",
+        choices=["cartesian", "composite", "exclusive"],
+        default="cartesian",
         help=(
+            "cartesian: one stratified run using the Cartesian product of all selected features. "
             "composite: one stratified run using all selected features. "
             "exclusive: one stratified run per selected feature (mutually exclusive)."
         ),
@@ -708,6 +709,8 @@ def main() -> None:
     def stratified_runs() -> list[tuple[str, str, str | None]]:
         if args.strata_composition == "exclusive":
             return [(f"stratified:{feat}", "single", feat) for feat in selected_features]
+        if args.strata_composition == "cartesian":
+            return [("stratified", "cartesian", None)]
         return [("stratified", "composite", None)]
 
     # parse --fields-json if provided
