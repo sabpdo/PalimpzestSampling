@@ -19,8 +19,11 @@ from __future__ import annotations
 import argparse
 import csv
 import os
+import random
 import sys
 from pathlib import Path
+
+import pandas as pd
 
 try:
     from dotenv import load_dotenv
@@ -67,6 +70,7 @@ STRAT_FEATURE_COLUMNS = (
     "figure_count",
     "table_count",
     "complexity_score",
+    "domain",
 )
 
 
@@ -119,6 +123,186 @@ def iter_pdf_paths(papers_root: Path) -> list[Path]:
     if not papers_root.is_dir():
         return []
     return sorted(papers_root.rglob("*.pdf"))
+
+
+def _eval_feature_frame(eval_paths: list[Path], features_csv: Path) -> pd.DataFrame:
+    from palimpzest.query.execution.feature_stratified_sampling import read_feature_table
+
+    feature_df = read_feature_table(features_csv)
+    feat_indexed = feature_df.set_index("path", drop=False)
+    rows = []
+    for p in eval_paths:
+        key = str(p)
+        if key not in feat_indexed.index:
+            raise ValueError(f"Path missing from features CSV: {key}")
+        rows.append(feat_indexed.loc[key])
+    return pd.DataFrame(rows).reset_index(drop=True)
+
+
+def _ranked_indices_by_method(
+    *,
+    eval_paths: list[Path],
+    seed: int,
+    method: str,
+    eval_df: pd.DataFrame,
+    feature_columns: list[str],
+    strata: int,
+) -> list[int]:
+    if method == "prefix":
+        return list(range(len(eval_paths)))
+    if method == "random":
+        rng = random.Random(seed)
+        idxs = list(range(len(eval_paths)))
+        rng.shuffle(idxs)
+        return idxs
+    if method == "stratified":
+        selected_cols = feature_columns
+        missing_cols = sorted(set(selected_cols) - set(eval_df.columns))
+        if missing_cols:
+            raise ValueError(f"Missing columns for train stratification: {missing_cols}")
+        bins = max(1, min(int(strata), len(eval_df)))
+        col_scores = []
+        for col in selected_cols:
+            series = eval_df[col]
+            if not pd.api.types.is_numeric_dtype(series):
+                codes, _ = pd.factorize(series.astype(str), sort=True)
+                series = pd.Series(codes, index=series.index)
+            col_scores.append(series.rank(pct=True, method="average"))
+        comp = sum(col_scores) / len(col_scores)
+        raw = (comp.to_numpy(dtype=float) * bins).astype(int)
+        strata_ids = raw.clip(0, bins - 1)
+        bucket_indices: dict[int, list[int]] = {}
+        for idx, sid in enumerate(strata_ids.tolist()):
+            bucket_indices.setdefault(int(sid), []).append(idx)
+        rng = random.Random(seed)
+        for ids in bucket_indices.values():
+            rng.shuffle(ids)
+        ranked: list[int] = []
+        while any(bucket_indices.values()):
+            for sid in sorted(bucket_indices):
+                ids = bucket_indices[sid]
+                if ids:
+                    ranked.append(ids.pop(0))
+        return ranked
+    raise ValueError(f"Unsupported --train-selection method: {method}")
+
+
+def _parse_domain_ratios(raw: str) -> dict[str, float]:
+    ratios: dict[str, float] = {}
+    for chunk in [p.strip() for p in raw.split(",") if p.strip()]:
+        if "=" not in chunk:
+            raise ValueError(f"Invalid domain ratio entry: {chunk!r}; expected form domain=value")
+        k, v = [x.strip() for x in chunk.split("=", 1)]
+        ratios[k] = float(v)
+    if not ratios:
+        raise ValueError("No domain ratios parsed.")
+    total = sum(ratios.values())
+    if total <= 0:
+        raise ValueError("Domain ratios must sum to a positive value.")
+    return {k: v / total for k, v in ratios.items()}
+
+
+def _allocate_counts(total: int, ratios: dict[str, float]) -> dict[str, int]:
+    exact = {k: total * v for k, v in ratios.items()}
+    base = {k: int(x) for k, x in exact.items()}
+    remain = total - sum(base.values())
+    order = sorted(exact, key=lambda k: (exact[k] - base[k]), reverse=True)
+    for i in range(remain):
+        base[order[i % len(order)]] += 1
+    return base
+
+
+def choose_train_paths(
+    *,
+    eval_paths: list[Path],
+    train_n: int,
+    seed: int,
+    method: str,
+    features_csv: Path,
+    feature_columns: list[str],
+    strata: int,
+    skew: str,
+    skew_focus_domain: str | None = None,
+    skew_domain_ratios: str | None = None,
+) -> list[Path]:
+    """Select train subset from eval paths using requested strategy."""
+    if train_n >= len(eval_paths):
+        return list(eval_paths)
+    eval_df = _eval_feature_frame(eval_paths, features_csv)
+    if "domain" not in eval_df.columns:
+        raise ValueError("Features CSV must include a 'domain' column for train skew controls.")
+    ranked = _ranked_indices_by_method(
+        eval_paths=eval_paths,
+        seed=seed,
+        method=method,
+        eval_df=eval_df,
+        feature_columns=feature_columns,
+        strata=strata,
+    )
+    if skew == "natural":
+        return [eval_paths[i] for i in sorted(ranked[:train_n])]
+
+    domains = eval_df["domain"].astype(str).tolist()
+    by_domain: dict[str, list[int]] = {}
+    for idx in ranked:
+        by_domain.setdefault(domains[idx], []).append(idx)
+    all_domains = sorted(by_domain.keys())
+
+    if skew == "balanced_domain":
+        ratios = {d: 1.0 / len(all_domains) for d in all_domains}
+    elif skew == "min_one_per_domain":
+        if train_n < len(all_domains):
+            raise ValueError(
+                f"train_n={train_n} is smaller than number of domains={len(all_domains)} for min_one_per_domain."
+            )
+        chosen: list[int] = []
+        for d in all_domains:
+            if by_domain[d]:
+                chosen.append(by_domain[d].pop(0))
+        for idx in ranked:
+            if len(chosen) >= train_n:
+                break
+            if idx not in chosen:
+                chosen.append(idx)
+        return [eval_paths[i] for i in sorted(chosen[:train_n])]
+    elif skew == "focus_domain":
+        if not skew_focus_domain:
+            raise ValueError("--train-skew-focus-domain is required for --train-skew=focus_domain")
+        if skew_focus_domain not in by_domain:
+            raise ValueError(f"Focus domain {skew_focus_domain!r} not present in eval corpus domains {all_domains}")
+        other_domains = [d for d in all_domains if d != skew_focus_domain]
+        ratios = {skew_focus_domain: 0.7}
+        rem = 0.3
+        if other_domains:
+            each = rem / len(other_domains)
+            ratios.update({d: each for d in other_domains})
+    elif skew == "custom_domain_ratios":
+        if not skew_domain_ratios:
+            raise ValueError("--train-skew-domain-ratios is required for --train-skew=custom_domain_ratios")
+        ratios = _parse_domain_ratios(skew_domain_ratios)
+        unknown = sorted(set(ratios) - set(all_domains))
+        if unknown:
+            raise ValueError(f"Custom ratio domains not present in eval corpus: {unknown}")
+        for d in all_domains:
+            ratios.setdefault(d, 0.0)
+    else:
+        raise ValueError(f"Unsupported --train-skew: {skew}")
+
+    targets = _allocate_counts(train_n, ratios)
+    chosen: list[int] = []
+    for d, want in targets.items():
+        take = min(want, len(by_domain.get(d, [])))
+        chosen.extend(by_domain.get(d, [])[:take])
+        by_domain[d] = by_domain.get(d, [])[take:]
+    chosen_set = set(chosen)
+    if len(chosen) < train_n:
+        for idx in ranked:
+            if len(chosen) >= train_n:
+                break
+            if idx not in chosen_set:
+                chosen.append(idx)
+                chosen_set.add(idx)
+    return [eval_paths[i] for i in sorted(chosen[:train_n])]
 
 
 class PDFPathsDataset(IterDataset):
@@ -324,6 +508,52 @@ def main() -> None:
     parser.add_argument("--j", type=int, default=4, help="MAB j")
     parser.add_argument("--max-workers", type=int, default=None, help="Parallel execution workers")
     parser.add_argument(
+        "--train-selection",
+        choices=["prefix", "random", "stratified"],
+        default="prefix",
+        help=(
+            "How to choose train subset from eval corpus: "
+            "prefix (first N, current behavior), random, or stratified."
+        ),
+    )
+    parser.add_argument(
+        "--train-selection-strata",
+        type=int,
+        default=8,
+        help="Number of strata bins when --train-selection=stratified.",
+    )
+    parser.add_argument(
+        "--train-selection-features",
+        type=str,
+        nargs="+",
+        default=None,
+        help=(
+            "Feature columns for stratified train-set selection. "
+            "Defaults to --stratify-features (or all defaults if unset)."
+        ),
+    )
+    parser.add_argument(
+        "--train-skew",
+        choices=["natural", "balanced_domain", "min_one_per_domain", "focus_domain", "custom_domain_ratios"],
+        default="natural",
+        help=(
+            "Target training-set domain composition: natural, balanced_domain, "
+            "min_one_per_domain, focus_domain, or custom_domain_ratios."
+        ),
+    )
+    parser.add_argument(
+        "--train-skew-focus-domain",
+        type=str,
+        default=None,
+        help="Domain to emphasize when --train-skew=focus_domain.",
+    )
+    parser.add_argument(
+        "--train-skew-domain-ratios",
+        type=str,
+        default=None,
+        help="Comma-separated ratios for --train-skew=custom_domain_ratios, e.g. cs=0.5,biomedical=0.2,math=0.2,physics=0.1.",
+    )
+    parser.add_argument(
         "--stratify-features",
         type=str,
         nargs="+",
@@ -389,7 +619,6 @@ def main() -> None:
     if train_n < 1:
         print("train-n must be >= 1", file=sys.stderr)
         sys.exit(1)
-    train_paths = eval_paths[:train_n]
     dataset_id = "papers"
 
     if not args.features_csv.is_file():
@@ -435,6 +664,34 @@ def main() -> None:
     if len(selected_features) == 0:
         print("At least one stratification feature is required.", file=sys.stderr)
         sys.exit(2)
+    train_selection_features = list(args.train_selection_features or selected_features)
+    unknown_train_features = sorted(set(train_selection_features) - set(STRAT_FEATURE_COLUMNS))
+    if unknown_train_features:
+        print(
+            f"Unknown --train-selection-features columns: {unknown_train_features}. "
+            f"Allowed: {list(STRAT_FEATURE_COLUMNS)}",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    if len(train_selection_features) == 0:
+        print("At least one --train-selection-features column is required.", file=sys.stderr)
+        sys.exit(2)
+    try:
+        train_paths = choose_train_paths(
+            eval_paths=eval_paths,
+            train_n=train_n,
+            seed=args.seed,
+            method=args.train_selection,
+            features_csv=features_csv_path,
+            feature_columns=train_selection_features,
+            strata=args.train_selection_strata,
+            skew=args.train_skew,
+            skew_focus_domain=args.train_skew_focus_domain,
+            skew_domain_ratios=args.train_skew_domain_ratios,
+        )
+    except Exception as exc:
+        print(f"Failed to build train subset: {exc}", file=sys.stderr)
+        sys.exit(2)
 
     def stratified_runs() -> list[tuple[str, str, str | None]]:
         if args.strata_composition == "exclusive":
@@ -470,6 +727,11 @@ def main() -> None:
             row_r["stratify_features"] = ",".join(selected_features)
             row_r["strata_composition"] = args.strata_composition
             row_r["strata_feature"] = ""
+            row_r["train_selection"] = args.train_selection
+            row_r["train_selection_features"] = ",".join(train_selection_features)
+            row_r["train_skew"] = args.train_skew
+            row_r["train_skew_focus_domain"] = args.train_skew_focus_domain or ""
+            row_r["train_skew_domain_ratios"] = args.train_skew_domain_ratios or ""
             rows.append(row_r)
 
         if not args.random_only:
@@ -490,12 +752,27 @@ def main() -> None:
                 row_s["stratify_features"] = ",".join(selected_features)
                 row_s["strata_composition"] = args.strata_composition
                 row_s["strata_feature"] = strat_single or ""
+                row_s["train_selection"] = args.train_selection
+                row_s["train_selection_features"] = ",".join(train_selection_features)
+                row_s["train_skew"] = args.train_skew
+                row_s["train_skew_focus_domain"] = args.train_skew_focus_domain or ""
+                row_s["train_skew_domain_ratios"] = args.train_skew_domain_ratios or ""
                 rows.append(row_s)
 
     print()
-    print(f"Papers root: {papers_root}  |  eval PDFs: {len(eval_paths)}  |  train PDFs: {train_n}")
+    print(f"Papers root: {papers_root}  |  eval PDFs: {len(eval_paths)}  |  train PDFs: {len(train_paths)}")
     print(f"Features CSV: {features_csv_path}")
     print(f"stratify_features={selected_features} strata_composition={args.strata_composition}")
+    print(
+        "train_selection="
+        f"{args.train_selection} "
+        f"(features={train_selection_features}, strata={args.train_selection_strata})"
+    )
+    print(
+        "train_skew="
+        f"{args.train_skew} "
+        f"(focus_domain={args.train_skew_focus_domain}, ratios={args.train_skew_domain_ratios})"
+    )
     print(f"budgets={budgets} seed={args.seed} strata={args.strata} k={args.k} j={args.j}")
     print()
     _print_results_table(rows)
@@ -525,6 +802,11 @@ def main() -> None:
             "stratify_features",
             "strata_composition",
             "strata_feature",
+            "train_selection",
+            "train_selection_features",
+            "train_skew",
+            "train_skew_focus_domain",
+            "train_skew_domain_ratios",
         ]
         with out_csv.open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)

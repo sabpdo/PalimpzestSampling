@@ -22,6 +22,7 @@ STRAT_FEATURE_COLUMNS = [
     "figure_count",
     "table_count",
     "complexity_score",
+    "domain",
 ]
 
 
@@ -49,6 +50,12 @@ def build_command(
     max_workers: int | None,
     stratify_features: list[str],
     strata_composition: str,
+    train_selection: str,
+    train_selection_strata: int,
+    train_selection_features: list[str],
+    train_skew: str,
+    train_skew_focus_domain: str | None,
+    train_skew_domain_ratios: str | None,
     random_only: bool,
     stratified_only: bool,
     no_progress: bool,
@@ -77,7 +84,19 @@ def build_command(
         strata_composition,
         "--stratify-features",
         *stratify_features,
+        "--train-selection",
+        train_selection,
+        "--train-selection-strata",
+        str(train_selection_strata),
+        "--train-selection-features",
+        *train_selection_features,
+        "--train-skew",
+        train_skew,
     ]
+    if train_skew_focus_domain:
+        cmd.extend(["--train-skew-focus-domain", train_skew_focus_domain])
+    if train_skew_domain_ratios:
+        cmd.extend(["--train-skew-domain-ratios", train_skew_domain_ratios])
     if eval_n is not None:
         cmd.extend(["--eval-n", str(eval_n)])
     if available_models:
@@ -157,7 +176,7 @@ def main() -> None:
                 help="Parallel worker count for model calls; blank lets Palimpzest choose.",
             )
 
-        c4, c5 = st.columns(2)
+        c4, c5, c6 = st.columns(3)
         with c4:
             k = st.number_input(
                 "MAB k",
@@ -206,6 +225,49 @@ def main() -> None:
                 value=False,
                 help="Disable progress bars in script output.",
             )
+        with c6:
+            train_selection = st.selectbox(
+                "Train set selection",
+                options=["prefix", "random", "stratified"],
+                help=(
+                    "How train docs are chosen from eval docs: prefix (first N), "
+                    "random, or stratified for diversity."
+                ),
+            )
+            train_selection_strata = st.number_input(
+                "Train selection strata",
+                min_value=1,
+                value=8,
+                step=1,
+                help="Only used when train set selection is stratified.",
+            )
+            train_selection_features = st.multiselect(
+                "Train selection features",
+                options=STRAT_FEATURE_COLUMNS,
+                default=STRAT_FEATURE_COLUMNS,
+                help="Features used to diversify the selected training subset.",
+            )
+            train_skew = st.selectbox(
+                "Train skew policy",
+                options=[
+                    "natural",
+                    "balanced_domain",
+                    "min_one_per_domain",
+                    "focus_domain",
+                    "custom_domain_ratios",
+                ],
+                help="Target domain mix in training set.",
+            )
+            train_skew_focus_domain = st.text_input(
+                "Train skew focus domain (for focus_domain)",
+                value="",
+                help="Example: cs",
+            )
+            train_skew_domain_ratios = st.text_input(
+                "Train skew domain ratios (for custom_domain_ratios)",
+                value="",
+                help="Example: cs=0.5,biomedical=0.2,math=0.2,physics=0.1",
+            )
 
         submitted = st.form_submit_button("Run experiment")
 
@@ -222,6 +284,15 @@ def main() -> None:
             return
         if not stratify_features:
             st.error("Select at least one stratification feature.")
+            return
+        if not train_selection_features:
+            st.error("Select at least one train selection feature.")
+            return
+        if train_skew == "focus_domain" and not train_skew_focus_domain.strip():
+            st.error("Provide focus domain when train skew policy is focus_domain.")
+            return
+        if train_skew == "custom_domain_ratios" and not train_skew_domain_ratios.strip():
+            st.error("Provide domain ratios when train skew policy is custom_domain_ratios.")
             return
     except ValueError as exc:
         st.error(f"Invalid numeric input: {exc}")
@@ -241,6 +312,12 @@ def main() -> None:
         max_workers=max_workers,
         stratify_features=stratify_features,
         strata_composition=strata_composition,
+        train_selection=train_selection,
+        train_selection_strata=int(train_selection_strata),
+        train_selection_features=train_selection_features,
+        train_skew=train_skew,
+        train_skew_focus_domain=train_skew_focus_domain.strip() or None,
+        train_skew_domain_ratios=train_skew_domain_ratios.strip() or None,
         random_only=random_only,
         stratified_only=stratified_only,
         no_progress=no_progress,

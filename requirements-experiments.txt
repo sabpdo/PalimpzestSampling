@@ -1,0 +1,3 @@
+# Experiment/UI tools on top of the core package.
+-r requirements.txt
+streamlit>=1.38.0

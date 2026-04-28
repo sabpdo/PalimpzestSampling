@@ -30,6 +30,18 @@ $ cd palimpzest
 $ pip install .
 ```
 
+For local development and scripts, you can also use the included requirements files:
+```bash
+# core package (editable install)
+$ pip install -r requirements.txt
+
+# test/lint tooling
+$ pip install -r requirements-dev.txt
+
+# experiment UI tooling (Streamlit)
+$ pip install -r requirements-experiments.txt
+```
+
 ## 🙋🏽 Join the PZ Community
 We are actively hacking on PZ and would love to have you join our community [![Discord](https://img.shields.io/discord/1245561987480420445?logo=discord)](https://discord.gg/dN85JJ6jaH)
 

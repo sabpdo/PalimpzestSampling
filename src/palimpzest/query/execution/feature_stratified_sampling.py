@@ -23,6 +23,7 @@ FEATURE_COLUMNS = (
     "figure_count",
     "table_count",
     "complexity_score",
+    "domain",
 )
 _MODE_COMPOSITE = "composite"
 _MODE_SINGLE = "single"
@@ -131,6 +132,19 @@ def single_feature_strata(feature_values: np.ndarray, num_strata: int) -> np.nda
     return np.clip(raw, 0, k - 1)
 
 
+def _column_to_numeric(series: pd.Series) -> np.ndarray:
+    """Convert numeric/categorical feature columns to float arrays for ranking."""
+    if pd.api.types.is_numeric_dtype(series):
+        return series.to_numpy(dtype=np.float64)
+    codes, _ = pd.factorize(series.astype(str), sort=True)
+    return codes.astype(np.float64)
+
+
+def _feature_matrix(df: pd.DataFrame, feature_columns: tuple[str, ...]) -> np.ndarray:
+    cols = [_column_to_numeric(df[c]) for c in feature_columns]
+    return np.column_stack(cols) if cols else np.empty((len(df), 0), dtype=np.float64)
+
+
 def round_robin_merge(strata: np.ndarray, rng: np.random.Generator) -> list[int]:
     """Shuffle within each stratum, then round-robin across strata for even interleaving."""
     n = len(strata)
@@ -171,10 +185,10 @@ def feature_stratified_row_order(
             raise ValueError(
                 f"PALIMPZEST_STRATIFIED_SINGLE_FEATURE={chosen_feature!r} must be in selected columns {feature_columns}."
             )
-        vals = df.loc[:, chosen_feature].to_numpy(dtype=np.float64)
+        vals = _column_to_numeric(df.loc[:, chosen_feature])
         strata = single_feature_strata(vals, num_strata)
     else:
-        mat = df.loc[:, list(feature_columns)].to_numpy(dtype=np.float64)
+        mat = _feature_matrix(df, feature_columns)
         strata = composite_strata(mat, num_strata)
     return round_robin_merge(strata, rng)
 
@@ -193,7 +207,7 @@ def feature_strata_per_index(
     single_feature = _configured_single_feature()
     if mode == _MODE_SINGLE:
         chosen_feature = single_feature if single_feature is not None else feature_columns[0]
-        vals = df.loc[:, chosen_feature].to_numpy(dtype=np.float64)
+        vals = _column_to_numeric(df.loc[:, chosen_feature])
         return single_feature_strata(vals, num_strata)
-    mat = df.loc[:, list(feature_columns)].to_numpy(dtype=np.float64)
+    mat = _feature_matrix(df, feature_columns)
     return composite_strata(mat, num_strata)

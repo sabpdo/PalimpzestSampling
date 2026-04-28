@@ -1,0 +1,2 @@
+# Core package install from this repo.
+-e .
