@@ -8,6 +8,7 @@ Run:
 
 from __future__ import annotations
 
+import json
 import shlex
 import subprocess
 from pathlib import Path
@@ -35,6 +36,14 @@ def parse_text_list(raw: str) -> list[str]:
     return [v.strip() for v in raw.replace(",", " ").split() if v.strip()]
 
 
+DEFAULT_FIELDS_JSON = json.dumps([
+    {"name": "primary_contribution", "type": "str", "desc": "The single most important technical contribution of the paper in one sentence."},
+    {"name": "methodology", "type": "str", "desc": "The core method or approach used (e.g. algorithm name, experimental design, proof technique)."},
+    {"name": "domain", "type": "str", "desc": "The research domain: one of 'cs', 'biomedical', 'math', or 'physics'."},
+    {"name": "uses_experiments", "type": "bool", "desc": "True if the paper includes empirical experiments or evaluations, False if purely theoretical."},
+], indent=2)
+
+
 def build_command(
     *,
     papers: str,
@@ -60,6 +69,7 @@ def build_command(
     stratified_only: bool,
     no_progress: bool,
     output_csv: str | None,
+    fields_json: str | None,
 ) -> list[str]:
     cmd = [
         "python3",
@@ -111,6 +121,8 @@ def build_command(
         cmd.append("--no-progress")
     if output_csv:
         cmd.extend(["--output-csv", output_csv])
+    if fields_json:
+        cmd.extend(["--fields-json", fields_json])
     return cmd
 
 
@@ -255,8 +267,9 @@ def main() -> None:
         with c5:
             strata_composition = st.selectbox(
                 "Strata composition",
-                options=["composite", "exclusive"],
+                options=["cartesian", "composite", "exclusive"],
                 help=(
+                    "cartesian: stratify by the Cartesian product of all selected features. "
                     "composite: combine selected features into one stratifier. "
                     "exclusive: run one stratified pass per feature (mutually exclusive)."
                 ),
@@ -280,6 +293,14 @@ def main() -> None:
                 value=False,
                 help="Disable progress bars in script output.",
             )
+        st.markdown("---")
+        st.markdown("**Extraction fields** — define what to extract from each PDF. Each entry needs `name`, `type` (`str`, `bool`, `int`, `float`), and `desc`.")
+        fields_json_raw = st.text_area(
+            "Fields JSON",
+            value=DEFAULT_FIELDS_JSON,
+            height=220,
+            help="JSON array of fields passed to sem_map. Edit to change what the LLM extracts.",
+        )
         submitted = st.form_submit_button("Run experiment")
 
     if not submitted:
@@ -304,6 +325,19 @@ def main() -> None:
             return
         if train_skew == "custom_domain_ratios" and not train_skew_domain_ratios.strip():
             st.error("Provide domain ratios when train skew policy is custom_domain_ratios.")
+            return
+        try:
+            parsed = json.loads(fields_json_raw)
+            if not isinstance(parsed, list) or not parsed:
+                raise ValueError("Must be a non-empty JSON array.")
+            for f in parsed:
+                if not all(k in f for k in ("name", "type", "desc")):
+                    raise ValueError(f"Each field needs 'name', 'type', and 'desc'. Got: {f}")
+                if f["type"] not in ("str", "bool", "int", "float"):
+                    raise ValueError(f"Invalid type {f['type']!r}. Use str, bool, int, or float.")
+            fields_json = fields_json_raw.strip()
+        except (json.JSONDecodeError, ValueError) as exc:
+            st.error(f"Invalid Fields JSON: {exc}")
             return
     except ValueError as exc:
         st.error(f"Invalid numeric input: {exc}")
@@ -333,6 +367,7 @@ def main() -> None:
         stratified_only=stratified_only,
         no_progress=no_progress,
         output_csv=output_csv.strip() or None,
+        fields_json=fields_json,
     )
 
     st.code(" ".join(shlex.quote(part) for part in cmd), language="bash")

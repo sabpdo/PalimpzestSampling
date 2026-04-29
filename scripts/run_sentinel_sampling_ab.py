@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
 import random
 import sys
@@ -419,6 +420,7 @@ def run_once(
     strat_feature_columns: list[str] | None = None,
     strat_mode: str = "composite",
     strat_single_feature: str | None = None,
+    map_fields: list[dict] | None = None,
 ) -> ExecutionStats:
     os.environ["PALIMPZEST_STRATIFIED_FEATURES_PATH"] = str(features_csv.resolve())
     if strat_feature_columns:
@@ -433,7 +435,7 @@ def run_once(
     train_ds = PDFPathsDataset(dataset_id, train_paths)
     eval_ds = PDFPathsDataset(dataset_id, eval_paths)
     train_dataset = {dataset_id: train_ds}
-    plan = eval_ds.sem_map(_TITLE_MAP_FIELDS)
+    plan = eval_ds.sem_map(map_fields if map_fields is not None else _TITLE_MAP_FIELDS)
 
     last_quality: list[float] = []
 
@@ -565,9 +567,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--strata-composition",
-        choices=["composite", "exclusive"],
-        default="composite",
+        choices=["cartesian", "composite", "exclusive"],
+        default="cartesian",
         help=(
+            "cartesian: one stratified run using the Cartesian product of all selected features. "
             "composite: one stratified run using all selected features. "
             "exclusive: one stratified run per selected feature (mutually exclusive)."
         ),
@@ -599,6 +602,16 @@ def main() -> None:
         type=Path,
         default=None,
         help="Optional path to save detailed run results CSV.",
+    )
+    parser.add_argument(
+        "--fields-json",
+        type=str,
+        default=None,
+        help=(
+            "JSON array defining extraction fields, e.g. "
+            "'[{\"name\": \"title\", \"type\": \"str\", \"desc\": \"Paper title.\"}]'. "
+            "Overrides the default _TITLE_MAP_FIELDS. Supported types: str, bool, int, float."
+        ),
     )
     args = parser.parse_args()
 
@@ -696,7 +709,26 @@ def main() -> None:
     def stratified_runs() -> list[tuple[str, str, str | None]]:
         if args.strata_composition == "exclusive":
             return [(f"stratified:{feat}", "single", feat) for feat in selected_features]
+        if args.strata_composition == "cartesian":
+            return [("stratified", "cartesian", None)]
         return [("stratified", "composite", None)]
+
+    # parse --fields-json if provided
+    _TYPE_MAP = {"str": str, "bool": bool, "int": int, "float": float}
+    map_fields: list[dict] | None = None
+    if args.fields_json:
+        try:
+            raw_fields = json.loads(args.fields_json)
+            map_fields = []
+            for f in raw_fields:
+                type_str = f.get("type", "str")
+                if type_str not in _TYPE_MAP:
+                    print(f"Unknown field type {type_str!r}. Use one of: {list(_TYPE_MAP)}", file=sys.stderr)
+                    sys.exit(2)
+                map_fields.append({"name": f["name"], "type": _TYPE_MAP[type_str], "desc": f["desc"]})
+        except (json.JSONDecodeError, KeyError) as exc:
+            print(f"Invalid --fields-json: {exc}", file=sys.stderr)
+            sys.exit(2)
 
     for budget in budgets:
         run_kwargs = dict(
@@ -714,6 +746,7 @@ def main() -> None:
             max_workers=args.max_workers,
             available_models=args.available_models,
             strat_feature_columns=selected_features,
+            map_fields=map_fields,
         )
 
         if not args.stratified_only:

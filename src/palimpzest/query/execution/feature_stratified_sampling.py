@@ -27,6 +27,7 @@ FEATURE_COLUMNS = (
 )
 _MODE_COMPOSITE = "composite"
 _MODE_SINGLE = "single"
+_MODE_CARTESIAN = "cartesian"
 
 
 def default_features_csv_path() -> Path:
@@ -47,10 +48,11 @@ def _configured_feature_columns() -> tuple[str, ...]:
 
 
 def _configured_mode() -> str:
-    mode = os.environ.get("PALIMPZEST_STRATIFIED_MODE", _MODE_COMPOSITE).strip().lower()
-    if mode not in {_MODE_COMPOSITE, _MODE_SINGLE}:
+    mode = os.environ.get("PALIMPZEST_STRATIFIED_MODE", _MODE_CARTESIAN).strip().lower()
+    if mode not in {_MODE_COMPOSITE, _MODE_SINGLE, _MODE_CARTESIAN}:
         raise ValueError(
-            f"Unsupported PALIMPZEST_STRATIFIED_MODE={mode!r}; expected '{_MODE_COMPOSITE}' or '{_MODE_SINGLE}'."
+            f"Unsupported PALIMPZEST_STRATIFIED_MODE={mode!r}; "
+            f"expected '{_MODE_COMPOSITE}', '{_MODE_SINGLE}', or '{_MODE_CARTESIAN}'."
         )
     return mode
 
@@ -132,6 +134,52 @@ def single_feature_strata(feature_values: np.ndarray, num_strata: int) -> np.nda
     return np.clip(raw, 0, k - 1)
 
 
+def cartesian_strata(df: pd.DataFrame, feature_columns: tuple[str, ...], num_strata: int) -> np.ndarray:
+    """
+    Assign each row to a bucket from the Cartesian product of per-feature bins.
+
+    - Numeric features: binned into ``num_strata`` quantile buckets.
+    - Categorical features (e.g. domain): each unique value is its own bin.
+
+    With two features having 4 and 3 bins respectively, there are up to 12 buckets.
+    Empty bucket combinations are remapped so IDs are contiguous.
+    """
+    n = len(df)
+    if n == 0:
+        return np.zeros(0, dtype=np.int64)
+
+    per_feature_bins: list[np.ndarray] = []
+    per_feature_sizes: list[int] = []
+
+    for col in feature_columns:
+        series = df[col]
+        if pd.api.types.is_numeric_dtype(series):
+            k = max(1, min(int(num_strata), n))
+            try:
+                bins = pd.qcut(series, q=k, labels=False, duplicates="drop")
+            except ValueError:
+                bins = pd.Series(np.zeros(n, dtype=int), index=series.index)
+            bins = bins.fillna(0).astype(int)
+            n_bins = int(bins.max()) + 1
+        else:
+            codes, uniques = pd.factorize(series.astype(str), sort=True)
+            bins = pd.Series(codes, index=series.index)
+            n_bins = len(uniques)
+        per_feature_bins.append(bins.to_numpy(dtype=np.int64))
+        per_feature_sizes.append(n_bins)
+
+    # encode as a single integer using mixed-radix representation
+    strata = np.zeros(n, dtype=np.int64)
+    stride = 1
+    for bins_arr, size in zip(reversed(per_feature_bins), reversed(per_feature_sizes)):
+        strata += bins_arr * stride
+        stride *= size
+
+    # remap to contiguous 0..k-1 (empty combinations are dropped)
+    _, strata = np.unique(strata, return_inverse=True)
+    return strata.astype(np.int64)
+
+
 def _column_to_numeric(series: pd.Series) -> np.ndarray:
     """Convert numeric/categorical feature columns to float arrays for ranking."""
     if pd.api.types.is_numeric_dtype(series):
@@ -187,6 +235,8 @@ def feature_stratified_row_order(
             )
         vals = _column_to_numeric(df.loc[:, chosen_feature])
         strata = single_feature_strata(vals, num_strata)
+    elif mode == _MODE_CARTESIAN:
+        strata = cartesian_strata(df, feature_columns, num_strata)
     else:
         mat = _feature_matrix(df, feature_columns)
         strata = composite_strata(mat, num_strata)
