@@ -288,24 +288,38 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             mime="text/csv",
         )
 
-    # Select whichever quality metric is actually populated.
-    quality_col, quality_label = _choose_quality_metric(df)
+    # Show both quality types separately and explicitly (no mixed fallback labeling).
+    quality_metrics: list[tuple[str, str, str]] = []
+    if "mean_plan_quality" in df.columns and df["mean_plan_quality"].notna().any():
+        quality_metrics.append(("mean_plan_quality", "Mean final-plan quality", "final_plan"))
+    if "mean_sentinel_quality" in df.columns and df["mean_sentinel_quality"].notna().any():
+        quality_metrics.append(("mean_sentinel_quality", "Mean sentinel quality", "sentinel"))
     time_delta = _paired_budget_deltas(df.dropna(subset=["total_time_s"]), "total_time_s") if {"sample_budget", "mode", "total_time_s"}.issubset(df.columns) else pd.DataFrame()
+    # For "final-plan quality", only use rows explicitly marked as true final plan quality.
+    final_source_available = "plan_quality_source" in df.columns
+    if any(q[0] == "mean_plan_quality" for q in quality_metrics) and not final_source_available:
+        st.warning("Final-plan quality source labels are unavailable in this CSV; strict final-only filtering cannot be enforced.")
 
     # Compact baseline-vs-stratified summary first.
     if not time_delta.empty:
-        mean_speedup = float(((time_delta["random"] - time_delta["stratified"]) / time_delta["random"] * 100.0).mean())
+        denom = time_delta["random"].replace(0, pd.NA)
+        speedup_series = (time_delta["random"] - time_delta["stratified"]) / denom * 100.0
+        mean_speedup = float(speedup_series.mean()) if speedup_series.notna().any() else 0.0
         faster_budgets = int((time_delta["delta"] < 0).sum())
         total_budgets = int(len(time_delta))
         c1, c2 = st.columns(2)
         c1.metric("Stratified faster budgets", f"{faster_budgets}/{total_budgets}")
         c2.metric("Avg runtime speedup", f"{mean_speedup:.1f}%")
-    if quality_col and {"sample_budget", "mode", quality_col}.issubset(df.columns):
-        qd = _paired_budget_deltas(df.dropna(subset=[quality_col]), quality_col)
-        if not qd.empty:
-            q_wins = int((qd["delta"] > 0).sum())
-            q_total = int(len(qd))
-            st.metric(f"Stratified quality wins ({quality_label})", f"{q_wins}/{q_total}")
+    for q_col, q_label, q_slug in quality_metrics:
+        if {"sample_budget", "mode", q_col}.issubset(df.columns):
+            source_df = df.copy()
+            if q_slug == "final_plan" and "plan_quality_source" in source_df.columns:
+                source_df = source_df[source_df["plan_quality_source"].astype(str) == "final_plan"].copy()
+            qd = _paired_budget_deltas(source_df.dropna(subset=[q_col]), q_col)
+            if not qd.empty:
+                q_wins = int((qd["delta"] > 0).sum())
+                q_total = int(len(qd))
+                st.metric(f"Stratified quality wins ({q_label})", f"{q_wins}/{q_total}")
 
     left_col, right_col = st.columns(2)
     panel = 0
@@ -316,66 +330,69 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
         panel += 1
         return col
 
-    # Plot 1: quality vs budget
-    if quality_col and {"sample_budget", "mode", quality_col}.issubset(df.columns):
-        qdf = df.dropna(subset=[quality_col]).copy()
-        if not qdf.empty:
-            with _next_col():
-                _graph_heading(
-                    f"{quality_label} vs sample budget",
-                    "What it shows: average output quality at each budget for random vs stratified sampling. How to use it: if the stratified line is higher earlier, it reaches good quality with fewer samples.",
-                )
-                p1 = _plot_line_by_mode(
-                    qdf,
-                    quality_col,
-                    f"{quality_label} vs sample budget",
-                    quality_label,
-                )
-                st.download_button(
-                    "Download quality plot (PNG)",
-                    data=p1,
-                    file_name="quality_vs_budget.png",
-                    mime="image/png",
-                )
-
-    # Plot 2: absolute quality error vs budget (relative to max budget per mode)
-    if quality_col and {"sample_budget", "mode", quality_col}.issubset(df.columns):
-        tmp = df.dropna(subset=[quality_col]).copy()
-        if not tmp.empty:
-            ref = (
-                tmp.sort_values("sample_budget")
-                .groupby("mode", as_index=False)
-                .tail(1)
-                .loc[:, ["mode", quality_col]]
-                .rename(columns={quality_col: "ref_quality"})
+    # Plot quality curves/deltas/errors for each available quality metric.
+    for q_col, q_label, q_slug in quality_metrics:
+        if not {"sample_budget", "mode", q_col}.issubset(df.columns):
+            continue
+        qdf = df.copy()
+        if q_slug == "final_plan" and "plan_quality_source" in qdf.columns:
+            qdf = qdf[qdf["plan_quality_source"].astype(str) == "final_plan"].copy()
+        qdf = qdf.dropna(subset=[q_col]).copy()
+        if qdf.empty:
+            if q_slug == "final_plan":
+                with _next_col():
+                    st.info("No true final-plan quality rows for this run (only fallback or missing).")
+            continue
+        with _next_col():
+            _graph_heading(
+                f"{q_label} vs sample budget",
+                "What it shows: average output quality at each budget for random vs stratified sampling. How to use it: if the stratified line is higher earlier, it reaches good quality with fewer samples.",
             )
-            err_df = tmp.merge(ref, on="mode", how="left")
-            err_df["abs_quality_error"] = (err_df[quality_col] - err_df["ref_quality"]).abs()
-            with _next_col():
-                _graph_heading(
-                    "Quality estimation error vs sample budget",
-                    "What it shows: how far each budget is from that mode's highest-budget quality in this run. How to use it: lower values mean the estimate is stabilizing sooner.",
-                )
-                p2 = _plot_line_by_mode(
-                    err_df,
-                    "abs_quality_error",
-                    "Absolute quality error vs sample budget",
-                    "|quality - quality@max_budget|",
-                )
-                st.download_button(
-                    "Download error plot (PNG)",
-                    data=p2,
-                    file_name="quality_error_vs_budget.png",
-                    mime="image/png",
-                )
+            p1 = _plot_line_by_mode(
+                qdf,
+                q_col,
+                f"{q_label} vs sample budget",
+                q_label,
+            )
+            st.download_button(
+                f"Download {q_label} plot (PNG)",
+                data=p1,
+                file_name=f"{q_slug}_quality_vs_budget.png",
+                mime="image/png",
+            )
 
-    # Plot 3: stratified quality lift over random per budget (most persuasive).
-    if quality_col and {"sample_budget", "mode", quality_col}.issubset(df.columns):
-        ddf = _paired_budget_deltas(df.dropna(subset=[quality_col]), quality_col)
+        ref = (
+            qdf.sort_values("sample_budget")
+            .groupby("mode", as_index=False)
+            .tail(1)
+            .loc[:, ["mode", q_col]]
+            .rename(columns={q_col: "ref_quality"})
+        )
+        err_df = qdf.merge(ref, on="mode", how="left")
+        err_df["abs_quality_error"] = (err_df[q_col] - err_df["ref_quality"]).abs()
+        with _next_col():
+            _graph_heading(
+                f"Quality estimation error vs sample budget ({q_label.lower()})",
+                "What it shows: how far each budget is from that mode's highest-budget quality in this run. How to use it: lower values mean the estimate is stabilizing sooner.",
+            )
+            p2 = _plot_line_by_mode(
+                err_df,
+                "abs_quality_error",
+                f"Absolute quality error vs sample budget ({q_label.lower()})",
+                "|quality - quality@max_budget|",
+            )
+            st.download_button(
+                f"Download {q_label} error plot (PNG)",
+                data=p2,
+                file_name=f"{q_slug}_quality_error_vs_budget.png",
+                mime="image/png",
+            )
+
+        ddf = _paired_budget_deltas(qdf, q_col)
         if not ddf.empty:
             with _next_col():
                 _graph_heading(
-                    "Stratified quality lift vs random (by budget)",
+                    f"Stratified quality lift vs random (by budget, {q_label.lower()})",
                     "What it shows: stratified quality minus random quality at each budget. How to use it: bars above zero mean stratified performed better.",
                 )
                 fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
@@ -390,13 +407,13 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
                 )
                 ax.axhline(0.0, color="black", linewidth=1)
                 ax.set_xlabel("Sample budget")
-                ax.set_ylabel(f"Delta {quality_label} (stratified - random)")
+                ax.set_ylabel(f"Delta {q_label} (stratified - random)")
                 ax.set_title("Quality lift by budget")
                 ax.grid(True, axis="y", alpha=0.3)
                 if (ddf["delta"] == 0).all():
                     ax.set_ylim(-0.05, 0.05)
                     ax.text(0.02, 0.95, "No quality difference vs random in this run.", transform=ax.transAxes, va="top", fontsize=8)
-                _render_and_download(fig, "Download quality lift plot (PNG)", "quality_lift_vs_random.png")
+                _render_and_download(fig, f"Download {q_label} lift plot (PNG)", f"{q_slug}_quality_lift_vs_random.png")
 
     # Plot 4: total cost vs budget (random baseline vs stratified).
     if {"sample_budget", "mode", "total_cost"}.issubset(df.columns):
@@ -474,7 +491,8 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
     # Plot 7: stratified speedup over random at each budget.
     if {"sample_budget", "mode", "total_time_s"}.issubset(df.columns):
         if not time_delta.empty:
-            time_delta["speedup_pct"] = (time_delta["random"] - time_delta["stratified"]) / time_delta["random"] * 100.0
+            denom = time_delta["random"].replace(0, pd.NA)
+            time_delta["speedup_pct"] = (time_delta["random"] - time_delta["stratified"]) / denom * 100.0
             with _next_col():
                 _graph_heading(
                     "Stratified runtime speedup vs random (by budget)",
@@ -497,31 +515,113 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
                 ax.grid(True, axis="y", alpha=0.3)
                 _render_and_download(fig, "Download runtime speedup plot (PNG)", "runtime_speedup_vs_random.png")
 
-    # Plot 8: head-to-head win rate as bar chart.
-    if quality_col and {"sample_budget", "mode", quality_col, "total_time_s"}.issubset(df.columns):
-        qd = _paired_budget_deltas(df.dropna(subset=[quality_col]), quality_col)
-        td = _paired_budget_deltas(df.dropna(subset=["total_time_s"]), "total_time_s")
-        if not qd.empty and not td.empty:
-            q_win_rate = float((qd["delta"] > 0).mean() * 100.0)
-            t_win_rate = float((td["delta"] < 0).mean() * 100.0)  # lower runtime is better
-            with _next_col():
-                _graph_heading(
-                    "Stratified win rate across budgets",
-                    "What it shows: the percentage of tested budgets where stratified beats random (quality and runtime separately). How to use it: higher bars mean more consistent wins.",
-                )
-                fig, ax = plt.subplots(figsize=FIGSIZE_WIN)
-                labels = [f"{quality_label} win rate", "Runtime win rate"]
-                vals = [q_win_rate, t_win_rate]
-                bars = ax.bar(labels, vals, color=["#1f77b4", "#ff7f0e"], alpha=0.9)
-                for b, v in zip(bars, vals):
-                    y = v - 3 if v >= 10 else v + 1.5
-                    va = "top" if v >= 10 else "bottom"
-                    ax.text(b.get_x() + b.get_width() / 2, y, f"{v:.1f}%", ha="center", va=va, fontsize=9)
-                ax.set_ylim(0, 110)
-                ax.set_ylabel("Win rate (%) vs random baseline")
-                ax.set_title("Stratified win rate across budgets", pad=8)
-                ax.grid(True, axis="y", alpha=0.3)
-                _render_and_download(fig, "Download win-rate plot (PNG)", "win_rate_vs_random.png")
+    # Plot 8: head-to-head win rates as separate sentinel/final/runtime bars.
+    td = _paired_budget_deltas(df.dropna(subset=["total_time_s"]), "total_time_s") if {"sample_budget", "mode", "total_time_s"}.issubset(df.columns) else pd.DataFrame()
+    sentinel_qd = _paired_budget_deltas(df.dropna(subset=["mean_sentinel_quality"]), "mean_sentinel_quality") if {"sample_budget", "mode", "mean_sentinel_quality"}.issubset(df.columns) else pd.DataFrame()
+    if {"sample_budget", "mode", "mean_plan_quality"}.issubset(df.columns):
+        final_df = df.copy()
+        if "plan_quality_source" in final_df.columns:
+            final_df = final_df[final_df["plan_quality_source"].astype(str) == "final_plan"].copy()
+        final_qd = _paired_budget_deltas(final_df.dropna(subset=["mean_plan_quality"]), "mean_plan_quality")
+    else:
+        final_qd = pd.DataFrame()
+    if not td.empty:
+        labels: list[str] = []
+        vals: list[float] = []
+        colors: list[str] = []
+        if not sentinel_qd.empty:
+            labels.append("Sentinel quality win rate")
+            vals.append(float((sentinel_qd["delta"] > 0).mean() * 100.0))
+            colors.append("#1f77b4")
+        if not final_qd.empty:
+            labels.append("Final-plan quality win rate")
+            vals.append(float((final_qd["delta"] > 0).mean() * 100.0))
+            colors.append("#2ca02c")
+        labels.append("Runtime win rate")
+        vals.append(float((td["delta"] < 0).mean() * 100.0))
+        colors.append("#ff7f0e")
+        with _next_col():
+            _graph_heading(
+                "Stratified win rate across budgets",
+                "What it shows: the percentage of tested budgets where stratified beats random, reported separately for sentinel quality, final-plan quality, and runtime.",
+            )
+            fig, ax = plt.subplots(figsize=FIGSIZE_WIN)
+            bars = ax.bar(labels, vals, color=colors, alpha=0.9)
+            for b, v in zip(bars, vals):
+                y = v - 3 if v >= 10 else v + 1.5
+                va = "top" if v >= 10 else "bottom"
+                ax.text(b.get_x() + b.get_width() / 2, y, f"{v:.1f}%", ha="center", va=va, fontsize=9)
+            ax.set_ylim(0, 110)
+            ax.set_ylabel("Win rate (%) vs random baseline")
+            ax.set_title("Stratified win rate across budgets", pad=8)
+            ax.grid(True, axis="y", alpha=0.3)
+            _render_and_download(fig, "Download win-rate plot (PNG)", "win_rate_vs_random.png")
+
+    # Render + download run tables directly inside the popup.
+    st.markdown("---")
+    st.markdown("### Run Tables")
+    run_table = df.copy()
+    show_cols = [
+        c
+        for c in [
+            "sample_budget",
+            "mode",
+            "mean_sentinel_quality",
+            "mean_plan_quality",
+            "plan_quality_source",
+            "total_sampled_records",
+            "candidate_ops_explored",
+            "candidate_ops_pruned_estimate",
+            "quality_scored_records",
+            "total_time_s",
+            "total_cost",
+        ]
+        if c in run_table.columns
+    ]
+    if show_cols:
+        st.dataframe(run_table[show_cols].sort_values(["sample_budget", "mode"]), width="stretch", hide_index=True)
+        st.download_button(
+            "Download run table (CSV)",
+            data=run_table[show_cols].to_csv(index=False).encode("utf-8"),
+            file_name="run_popup_table.csv",
+            mime="text/csv",
+        )
+    if {"sample_budget", "mode", "mean_sentinel_quality"}.issubset(df.columns):
+        paired_q_s = _paired_budget_deltas(df.dropna(subset=["mean_sentinel_quality"]), "mean_sentinel_quality")
+        if not paired_q_s.empty:
+            st.markdown("**Paired quality deltas (sentinel quality, stratified - random)**")
+            st.dataframe(paired_q_s, width="stretch", hide_index=True)
+            st.download_button(
+                "Download paired sentinel quality deltas (CSV)",
+                data=paired_q_s.to_csv(index=False).encode("utf-8"),
+                file_name="paired_sentinel_quality_deltas.csv",
+                mime="text/csv",
+            )
+    if {"sample_budget", "mode", "mean_plan_quality"}.issubset(df.columns):
+        final_df = df.copy()
+        if "plan_quality_source" in final_df.columns:
+            final_df = final_df[final_df["plan_quality_source"].astype(str) == "final_plan"].copy()
+        paired_q_f = _paired_budget_deltas(final_df.dropna(subset=["mean_plan_quality"]), "mean_plan_quality")
+        if not paired_q_f.empty:
+            st.markdown("**Paired quality deltas (final-plan quality, stratified - random)**")
+            st.dataframe(paired_q_f, width="stretch", hide_index=True)
+            st.download_button(
+                "Download paired final-plan quality deltas (CSV)",
+                data=paired_q_f.to_csv(index=False).encode("utf-8"),
+                file_name="paired_final_plan_quality_deltas.csv",
+                mime="text/csv",
+            )
+    if {"sample_budget", "mode", "total_time_s"}.issubset(df.columns):
+        paired_t = _paired_budget_deltas(df.dropna(subset=["total_time_s"]), "total_time_s")
+        if not paired_t.empty:
+            st.markdown("**Paired runtime deltas (stratified - random)**")
+            st.dataframe(paired_t, width="stretch", hide_index=True)
+            st.download_button(
+                "Download paired runtime deltas (CSV)",
+                data=paired_t.to_csv(index=False).encode("utf-8"),
+                file_name="paired_runtime_deltas.csv",
+                mime="text/csv",
+            )
 
 
 def _clean_stdout(stdout: str) -> tuple[str, int]:
@@ -681,11 +781,21 @@ def _init_history_db(repo_root: Path) -> str:
                         total_time_s DOUBLE PRECISION,
                         total_cost DOUBLE PRECISION,
                         mean_sentinel_quality DOUBLE PRECISION,
-                        mean_plan_quality DOUBLE PRECISION
+                        mean_plan_quality DOUBLE PRECISION,
+                        plan_quality_source TEXT,
+                        total_sampled_records DOUBLE PRECISION,
+                        candidate_ops_explored DOUBLE PRECISION,
+                        candidate_ops_pruned_estimate DOUBLE PRECISION,
+                        quality_scored_records DOUBLE PRECISION
                     )
                     """
                 )
             )
+            conn.execute(text("ALTER TABLE run_rows ADD COLUMN IF NOT EXISTS plan_quality_source TEXT"))
+            conn.execute(text("ALTER TABLE run_rows ADD COLUMN IF NOT EXISTS total_sampled_records DOUBLE PRECISION"))
+            conn.execute(text("ALTER TABLE run_rows ADD COLUMN IF NOT EXISTS candidate_ops_explored DOUBLE PRECISION"))
+            conn.execute(text("ALTER TABLE run_rows ADD COLUMN IF NOT EXISTS candidate_ops_pruned_estimate DOUBLE PRECISION"))
+            conn.execute(text("ALTER TABLE run_rows ADD COLUMN IF NOT EXISTS quality_scored_records DOUBLE PRECISION"))
         return db_url
 
     db_path = _history_db_path(repo_root)
@@ -739,6 +849,17 @@ def _init_history_db(repo_root: Path) -> str:
             )
             """
         )
+        row_cols = {row[1] for row in conn.execute("PRAGMA table_info(run_rows)")}
+        if "plan_quality_source" not in row_cols:
+            conn.execute("ALTER TABLE run_rows ADD COLUMN plan_quality_source TEXT")
+        if "total_sampled_records" not in row_cols:
+            conn.execute("ALTER TABLE run_rows ADD COLUMN total_sampled_records REAL")
+        if "candidate_ops_explored" not in row_cols:
+            conn.execute("ALTER TABLE run_rows ADD COLUMN candidate_ops_explored REAL")
+        if "candidate_ops_pruned_estimate" not in row_cols:
+            conn.execute("ALTER TABLE run_rows ADD COLUMN candidate_ops_pruned_estimate REAL")
+        if "quality_scored_records" not in row_cols:
+            conn.execute("ALTER TABLE run_rows ADD COLUMN quality_scored_records REAL")
     return str(db_path)
 
 
@@ -805,8 +926,14 @@ def _save_run_history(
                     conn.execute(
                         text(
                             """
-                            INSERT INTO run_rows(run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality)
-                            VALUES (:run_id, :sample_budget, :mode, :total_time_s, :total_cost, :mean_sentinel_quality, :mean_plan_quality)
+                            INSERT INTO run_rows(
+                                run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality, plan_quality_source,
+                                total_sampled_records, candidate_ops_explored, candidate_ops_pruned_estimate, quality_scored_records
+                            )
+                            VALUES (
+                                :run_id, :sample_budget, :mode, :total_time_s, :total_cost, :mean_sentinel_quality, :mean_plan_quality, :plan_quality_source,
+                                :total_sampled_records, :candidate_ops_explored, :candidate_ops_pruned_estimate, :quality_scored_records
+                            )
                             """
                         ),
                         {
@@ -817,6 +944,11 @@ def _save_run_history(
                             "total_cost": float(row["total_cost"]) if pd.notna(row.get("total_cost")) else None,
                             "mean_sentinel_quality": float(row["mean_sentinel_quality"]) if pd.notna(row.get("mean_sentinel_quality")) else None,
                             "mean_plan_quality": float(row["mean_plan_quality"]) if pd.notna(row.get("mean_plan_quality")) else None,
+                            "plan_quality_source": str(row.get("plan_quality_source", "")) if pd.notna(row.get("plan_quality_source")) else None,
+                            "total_sampled_records": float(row["total_sampled_records"]) if pd.notna(row.get("total_sampled_records")) else None,
+                            "candidate_ops_explored": float(row["candidate_ops_explored"]) if pd.notna(row.get("candidate_ops_explored")) else None,
+                            "candidate_ops_pruned_estimate": float(row["candidate_ops_pruned_estimate"]) if pd.notna(row.get("candidate_ops_pruned_estimate")) else None,
+                            "quality_scored_records": float(row["quality_scored_records"]) if pd.notna(row.get("quality_scored_records")) else None,
                         },
                     )
         return run_id
@@ -844,12 +976,20 @@ def _save_run_history(
                         float(row["total_cost"]) if pd.notna(row.get("total_cost")) else None,
                         float(row["mean_sentinel_quality"]) if pd.notna(row.get("mean_sentinel_quality")) else None,
                         float(row["mean_plan_quality"]) if pd.notna(row.get("mean_plan_quality")) else None,
+                        str(row.get("plan_quality_source", "")) if pd.notna(row.get("plan_quality_source")) else None,
+                        float(row["total_sampled_records"]) if pd.notna(row.get("total_sampled_records")) else None,
+                        float(row["candidate_ops_explored"]) if pd.notna(row.get("candidate_ops_explored")) else None,
+                        float(row["candidate_ops_pruned_estimate"]) if pd.notna(row.get("candidate_ops_pruned_estimate")) else None,
+                        float(row["quality_scored_records"]) if pd.notna(row.get("quality_scored_records")) else None,
                     )
                 )
             conn.executemany(
                 """
-                INSERT INTO run_rows(run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO run_rows(
+                    run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality, plan_quality_source,
+                    total_sampled_records, candidate_ops_explored, candidate_ops_pruned_estimate, quality_scored_records
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 rows,
             )
@@ -1086,7 +1226,8 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
         local_rows = pd.read_sql_query(
             """
             SELECT
-                id, run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality
+                id, run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality, plan_quality_source,
+                total_sampled_records, candidate_ops_explored, candidate_ops_pruned_estimate, quality_scored_records
             FROM run_rows
             ORDER BY id
             """,
@@ -1118,10 +1259,12 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
                 text(
                     """
                     INSERT INTO run_rows(
-                        id, run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality
+                        id, run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality, plan_quality_source,
+                        total_sampled_records, candidate_ops_explored, candidate_ops_pruned_estimate, quality_scored_records
                     )
                     VALUES (
-                        :id, :run_id, :sample_budget, :mode, :total_time_s, :total_cost, :mean_sentinel_quality, :mean_plan_quality
+                        :id, :run_id, :sample_budget, :mode, :total_time_s, :total_cost, :mean_sentinel_quality, :mean_plan_quality, :plan_quality_source,
+                        :total_sampled_records, :candidate_ops_explored, :candidate_ops_pruned_estimate, :quality_scored_records
                     )
                     """
                 ),
@@ -1158,7 +1301,10 @@ def _load_history_rows(repo_root: Path, run_ids: list[int]) -> pd.DataFrame:
     db_ref = _init_history_db(repo_root)
     placeholders = ",".join(str(int(x)) for x in run_ids)
     query = f"""
-        SELECT rr.run_id, rr.sample_budget, rr.mode, rr.total_time_s, rr.total_cost, rr.mean_sentinel_quality, rr.mean_plan_quality
+        SELECT
+            rr.run_id, rr.sample_budget, rr.mode, rr.total_time_s, rr.total_cost,
+            rr.mean_sentinel_quality, rr.mean_plan_quality, rr.plan_quality_source,
+            rr.total_sampled_records, rr.candidate_ops_explored, rr.candidate_ops_pruned_estimate, rr.quality_scored_records
         FROM run_rows rr
         WHERE rr.run_id IN ({placeholders})
         ORDER BY rr.run_id, rr.sample_budget, rr.mode
@@ -1202,7 +1348,10 @@ def _load_history_rows_with_fallback(repo_root: Path, run_ids: list[int]) -> pd.
         csv_df = _read_results_csv(repo_root, output_csv)
         if csv_df is None or csv_df.empty:
             continue
-        needed_cols = ["sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"]
+        needed_cols = [
+            "sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality", "plan_quality_source",
+            "total_sampled_records", "candidate_ops_explored", "candidate_ops_pruned_estimate", "quality_scored_records",
+        ]
         safe_cols = [c for c in needed_cols if c in csv_df.columns]
         if "sample_budget" not in safe_cols or "mode" not in safe_cols:
             continue
@@ -1211,7 +1360,15 @@ def _load_history_rows_with_fallback(repo_root: Path, run_ids: list[int]) -> pd.
         for col in needed_cols:
             if col not in sub.columns:
                 sub[col] = pd.NA
-        fallback_rows.append(sub[["run_id", "sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"]])
+        fallback_rows.append(
+            sub[
+                [
+                    "run_id", "sample_budget", "mode", "total_time_s", "total_cost",
+                    "mean_sentinel_quality", "mean_plan_quality", "plan_quality_source",
+                    "total_sampled_records", "candidate_ops_explored", "candidate_ops_pruned_estimate", "quality_scored_records",
+                ]
+            ]
+        )
 
     if fallback_rows:
         merged = pd.concat([rows_df] + fallback_rows, ignore_index=True) if not rows_df.empty else pd.concat(fallback_rows, ignore_index=True)
@@ -1357,6 +1514,20 @@ def _render_analysis_tab(repo_root: Path) -> None:
     ]
     meta = runs_df.loc[:, meta_cols].drop_duplicates(subset=["run_id"])
     df = rows_df.merge(meta, on="run_id", how="left")
+    if "plan_quality_source" in df.columns:
+        sources = sorted(str(x) for x in df["plan_quality_source"].dropna().unique().tolist() if str(x).strip())
+        if sources:
+            selected_sources = st.multiselect(
+                "Plan quality source filter",
+                options=sources,
+                default=sources,
+                help="Use this to keep only true final-plan quality rows (e.g. final_plan) or include fallback rows.",
+            )
+            if selected_sources:
+                df = df[df["plan_quality_source"].astype(str).isin(selected_sources)].copy()
+            if df.empty:
+                st.info("No rows remain after plan quality source filtering.")
+                return
     # Rich config label for clearer paper-facing comparisons.
     df["setting_label"] = df.apply(
         lambda r: (
@@ -1372,15 +1543,28 @@ def _render_analysis_tab(repo_root: Path) -> None:
     # Quality metric selection: plan quality preferred if present.
     has_plan = df["mean_plan_quality"].notna().any()
     has_sentinel = df["mean_sentinel_quality"].notna().any()
+    metric_options = (
+        ["mean_plan_quality", "mean_sentinel_quality"]
+        if has_plan and has_sentinel
+        else (["mean_plan_quality"] if has_plan else ["mean_sentinel_quality"])
+    )
+    metric_labels = {
+        "mean_plan_quality": "Final-plan quality",
+        "mean_sentinel_quality": "Sentinel-stage quality",
+    }
     quality_metric = st.selectbox(
         "Quality metric",
-        options=(
-            ["mean_plan_quality", "mean_sentinel_quality"]
-            if has_plan and has_sentinel
-            else (["mean_plan_quality"] if has_plan else ["mean_sentinel_quality"])
-        ),
-        help="Select which quality proxy to analyze across runs.",
+        options=metric_options,
+        format_func=lambda x: metric_labels.get(str(x), str(x)),
+        help="Choose whether comparisons use final executed plan quality or sentinel-stage quality.",
     )
+    if has_plan and has_sentinel:
+        st.caption("Both quality types are available below: sentinel-stage and final-plan quality.")
+    if "mean_plan_quality" in df.columns and not df["mean_plan_quality"].notna().any():
+        st.warning(
+            "Final-plan quality column exists but has no values. "
+            "This usually means judge/model scoring failed during runs."
+        )
 
     groupby_col = st.selectbox(
         "Group runs by",
@@ -1415,9 +1599,14 @@ def _render_analysis_tab(repo_root: Path) -> None:
 
     # Deltas and win flags.
     paired["quality_delta"] = paired.get(f"{quality_metric}__stratified") - paired.get(f"{quality_metric}__random")
+    if {"mean_sentinel_quality__random", "mean_sentinel_quality__stratified"}.issubset(paired.columns):
+        paired["sentinel_quality_delta"] = paired["mean_sentinel_quality__stratified"] - paired["mean_sentinel_quality__random"]
+    if {"mean_plan_quality__random", "mean_plan_quality__stratified"}.issubset(paired.columns):
+        paired["plan_quality_delta"] = paired["mean_plan_quality__stratified"] - paired["mean_plan_quality__random"]
     paired["runtime_delta_s"] = paired["total_time_s__stratified"] - paired["total_time_s__random"]
     paired["cost_delta"] = paired.get("total_cost__stratified") - paired.get("total_cost__random")
-    paired["runtime_speedup_pct"] = (paired["total_time_s__random"] - paired["total_time_s__stratified"]) / paired["total_time_s__random"] * 100.0
+    denom = paired["total_time_s__random"].replace(0, pd.NA)
+    paired["runtime_speedup_pct"] = (paired["total_time_s__random"] - paired["total_time_s__stratified"]) / denom * 100.0
     paired["quality_win"] = paired["quality_delta"] > 0
     paired["runtime_win"] = paired["runtime_delta_s"] < 0
 
@@ -1450,6 +1639,12 @@ def _render_analysis_tab(repo_root: Path) -> None:
     )
     leaderboard["quality_win_rate"] = leaderboard["quality_win_rate"] * 100.0
     leaderboard["runtime_win_rate"] = leaderboard["runtime_win_rate"] * 100.0
+    if "sentinel_quality_delta" in paired.columns:
+        sentinel_mean = paired.groupby(groupby_col, dropna=False)["sentinel_quality_delta"].mean().rename("mean_sentinel_quality_delta")
+        leaderboard = leaderboard.merge(sentinel_mean.reset_index(), on=groupby_col, how="left")
+    if "plan_quality_delta" in paired.columns:
+        plan_mean = paired.groupby(groupby_col, dropna=False)["plan_quality_delta"].mean().rename("mean_plan_quality_delta")
+        leaderboard = leaderboard.merge(plan_mean.reset_index(), on=groupby_col, how="left")
     leaderboard = leaderboard.sort_values(["quality_win_rate", "mean_runtime_speedup_pct"], ascending=False)
     st.dataframe(leaderboard, width="stretch", hide_index=True)
 
@@ -1459,6 +1654,12 @@ def _render_analysis_tab(repo_root: Path) -> None:
         "run_id",
         groupby_col,
         "sample_budget",
+        "mean_sentinel_quality__random",
+        "mean_sentinel_quality__stratified",
+        "sentinel_quality_delta",
+        "mean_plan_quality__random",
+        "mean_plan_quality__stratified",
+        "plan_quality_delta",
         f"{quality_metric}__random",
         f"{quality_metric}__stratified",
         "quality_delta",
@@ -1470,7 +1671,10 @@ def _render_analysis_tab(repo_root: Path) -> None:
         "total_cost__stratified",
         "cost_delta",
     ]
-    available_cols = [c for c in per_budget_cols if c in paired.columns]
+    # Avoid duplicate column names when the selected quality metric overlaps
+    # with explicitly included sentinel/final quality columns.
+    deduped_per_budget_cols = list(dict.fromkeys(per_budget_cols))
+    available_cols = [c for c in deduped_per_budget_cols if c in paired.columns]
     st.dataframe(paired.loc[:, available_cols].sort_values(["run_id", "sample_budget"]), width="stretch", hide_index=True)
 
     st.markdown("### Robustness Table (Across Seeds)")
@@ -1489,6 +1693,18 @@ def _render_analysis_tab(repo_root: Path) -> None:
         .reset_index()
         .sort_values("runtime_speedup_mean", ascending=False)
     )
+    if "sentinel_quality_delta" in paired.columns:
+        s_stats = paired.groupby(groupby_col, dropna=False).agg(
+            sentinel_quality_delta_mean=("sentinel_quality_delta", "mean"),
+            sentinel_quality_delta_std=("sentinel_quality_delta", "std"),
+        )
+        robust = robust.merge(s_stats.reset_index(), on=groupby_col, how="left")
+    if "plan_quality_delta" in paired.columns:
+        p_stats = paired.groupby(groupby_col, dropna=False).agg(
+            plan_quality_delta_mean=("plan_quality_delta", "mean"),
+            plan_quality_delta_std=("plan_quality_delta", "std"),
+        )
+        robust = robust.merge(p_stats.reset_index(), on=groupby_col, how="left")
     st.dataframe(robust, width="stretch", hide_index=True)
 
     # --- Charts ---
@@ -1534,8 +1750,8 @@ def _render_analysis_tab(repo_root: Path) -> None:
             c_err1, c_err2 = st.columns(2)
             with c_err1:
                 _graph_heading(
-                    "Quality Error vs Number of Samples",
-                    "What it shows: absolute quality error at each budget, using each run's highest-budget value as the true-quality proxy. How to use it: a line that drops faster is more sample-efficient.",
+                    f"{metric_labels.get(quality_metric, quality_metric)} Error vs Number of Samples",
+                    f"What it shows: absolute {metric_labels.get(quality_metric, quality_metric).lower()} error at each budget, using each run's highest-budget value as the true proxy. How to use it: a line that drops faster is more sample-efficient.",
                 )
                 fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
                 qagg = err_df.groupby(["mode", "sample_budget"], dropna=False)["quality_error"].mean().reset_index()
@@ -1682,6 +1898,169 @@ def _render_analysis_tab(repo_root: Path) -> None:
         plt.close(fig)
 
 
+def _render_misc_tab(repo_root: Path) -> None:
+    st.subheader("Miscellaneous CSV Analytics")
+    st.caption("Loads all experiment CSVs in papers/results and builds combined quality/runtime summaries.")
+
+    csv_paths = sorted((repo_root / "results").rglob("*.csv"))
+    csv_paths.extend(sorted((repo_root / "papers").glob("ab_results*.csv")))
+    if not csv_paths:
+        st.info("No CSV files found under results/ or papers/")
+        return
+
+    rows: list[pd.DataFrame] = []
+    loaded_files: list[str] = []
+    for p in csv_paths:
+        try:
+            df = pd.read_csv(p)
+        except Exception:
+            continue
+        if "sample_budget" not in df.columns or "mode" not in df.columns:
+            continue
+        use_cols = [c for c in ["sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"] if c in df.columns]
+        if len(use_cols) < 2:
+            continue
+        sub = df[use_cols].copy()
+        sub["source_file"] = str(p.relative_to(repo_root))
+        rows.append(sub)
+        loaded_files.append(str(p.relative_to(repo_root)))
+
+    if not rows:
+        st.info("Found CSV files, but none match experiment schema (sample_budget + mode).")
+        return
+
+    all_df = pd.concat(rows, ignore_index=True)
+    for col in ["sample_budget", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"]:
+        if col in all_df.columns:
+            all_df[col] = pd.to_numeric(all_df[col], errors="coerce")
+    all_df["mode"] = all_df["mode"].astype(str).str.lower()
+    all_df = all_df[all_df["mode"].isin(["random", "stratified"])].copy()
+    if all_df.empty:
+        st.info("No random/stratified rows available in loaded CSVs.")
+        return
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("CSV files loaded", str(len(set(loaded_files))))
+    c2.metric("Rows loaded", str(len(all_df)))
+    c3.metric("Budgets found", str(all_df["sample_budget"].dropna().nunique()))
+
+    with st.expander("Loaded CSV files", expanded=False):
+        st.dataframe(pd.DataFrame({"file": sorted(set(loaded_files))}), width="stretch", hide_index=True)
+
+    st.markdown("### Combined Quality Curves")
+    q1, q2 = st.columns(2)
+    with q1:
+        _graph_heading(
+            "Sentinel Quality vs Samples",
+            "Shows average sentinel-stage quality at each budget for random vs stratified across all loaded CSVs.",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        if "mean_sentinel_quality" in all_df.columns and all_df["mean_sentinel_quality"].notna().any():
+            agg = all_df.groupby(["mode", "sample_budget"], dropna=False)["mean_sentinel_quality"].mean().reset_index()
+            for mode, grp in agg.groupby("mode", dropna=False):
+                style = {"linestyle": "--", "marker": "o"} if mode == "random" else {"linestyle": "-", "marker": "s"}
+                ax.plot(grp["sample_budget"], grp["mean_sentinel_quality"], label=mode, linewidth=2, **style)
+            ax.set_xlabel("Samples (budget)")
+            ax.set_ylabel("Mean sentinel quality")
+            ax.grid(True, alpha=0.3)
+            ax.legend(fontsize=8)
+            st.pyplot(fig, width="content")
+        else:
+            st.caption("No sentinel quality values found.")
+        plt.close(fig)
+    with q2:
+        _graph_heading(
+            "Final Plan Quality vs Samples",
+            "Shows average final executed-plan quality at each budget for random vs stratified across all loaded CSVs.",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        if "mean_plan_quality" in all_df.columns and all_df["mean_plan_quality"].notna().any():
+            agg = all_df.groupby(["mode", "sample_budget"], dropna=False)["mean_plan_quality"].mean().reset_index()
+            for mode, grp in agg.groupby("mode", dropna=False):
+                style = {"linestyle": "--", "marker": "o"} if mode == "random" else {"linestyle": "-", "marker": "s"}
+                ax.plot(grp["sample_budget"], grp["mean_plan_quality"], label=mode, linewidth=2, **style)
+            ax.set_xlabel("Samples (budget)")
+            ax.set_ylabel("Mean plan quality")
+            ax.grid(True, alpha=0.3)
+            ax.legend(fontsize=8)
+            st.pyplot(fig, width="content")
+        else:
+            st.caption("No final-plan quality values found (scoring likely failed in those runs).")
+        plt.close(fig)
+
+    st.markdown("### Paired Delta Analytics (Stratified - Random)")
+    piv = all_df.pivot_table(
+        index=["source_file", "sample_budget"],
+        columns="mode",
+        values=["total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"],
+        aggfunc="mean",
+    )
+    need = [("total_time_s", "random"), ("total_time_s", "stratified")]
+    if any(col not in piv.columns for col in need):
+        st.info("Need both random and stratified rows in the same CSV budget to compute deltas.")
+        return
+    piv = piv.dropna(subset=need).copy()
+    piv.columns = [f"{a}__{b}" for a, b in piv.columns]
+    paired = piv.reset_index()
+    paired["runtime_delta_s"] = paired["total_time_s__stratified"] - paired["total_time_s__random"]
+    if "mean_sentinel_quality__stratified" in paired.columns and "mean_sentinel_quality__random" in paired.columns:
+        paired["sentinel_quality_delta"] = paired["mean_sentinel_quality__stratified"] - paired["mean_sentinel_quality__random"]
+    if "mean_plan_quality__stratified" in paired.columns and "mean_plan_quality__random" in paired.columns:
+        paired["plan_quality_delta"] = paired["mean_plan_quality__stratified"] - paired["mean_plan_quality__random"]
+
+    d1, d2 = st.columns(2)
+    with d1:
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        ragg = paired.groupby("sample_budget", dropna=False)["runtime_delta_s"].mean().reset_index()
+        ax.plot(ragg["sample_budget"], ragg["runtime_delta_s"], marker="o", linewidth=2, color="#9467bd")
+        ax.axhline(0.0, color="black", linewidth=1)
+        ax.set_xlabel("Samples (budget)")
+        ax.set_ylabel("Runtime delta (s)")
+        ax.grid(True, alpha=0.3)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+    with d2:
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        if "sentinel_quality_delta" in paired.columns:
+            qagg = paired.groupby("sample_budget", dropna=False)["sentinel_quality_delta"].mean().reset_index()
+            ax.plot(qagg["sample_budget"], qagg["sentinel_quality_delta"], marker="o", linewidth=2, label="sentinel delta")
+        if "plan_quality_delta" in paired.columns:
+            pagg = paired.groupby("sample_budget", dropna=False)["plan_quality_delta"].mean().reset_index()
+            ax.plot(pagg["sample_budget"], pagg["plan_quality_delta"], marker="s", linewidth=2, label="plan delta")
+        ax.axhline(0.0, color="black", linewidth=1)
+        ax.set_xlabel("Samples (budget)")
+        ax.set_ylabel("Quality delta")
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=8)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+
+    st.markdown("### CSV-Level Summary")
+    summary = (
+        paired.groupby("source_file", dropna=False)
+        .agg(
+            n_budgets=("sample_budget", "count"),
+            mean_runtime_delta_s=("runtime_delta_s", "mean"),
+        )
+        .reset_index()
+    )
+    if "sentinel_quality_delta" in paired.columns:
+        s_mean = paired.groupby("source_file", dropna=False)["sentinel_quality_delta"].mean().rename("mean_sentinel_quality_delta")
+        summary = summary.merge(s_mean, on="source_file", how="left")
+    else:
+        summary["mean_sentinel_quality_delta"] = float("nan")
+    if "plan_quality_delta" in paired.columns:
+        p_mean = paired.groupby("source_file", dropna=False)["plan_quality_delta"].mean().rename("mean_plan_quality_delta")
+        summary = summary.merge(p_mean, on="source_file", how="left")
+    else:
+        summary["mean_plan_quality_delta"] = float("nan")
+    st.dataframe(
+        summary.sort_values(["mean_plan_quality_delta", "mean_sentinel_quality_delta"], ascending=False),
+        width="stretch",
+        hide_index=True,
+    )
+
+
 def build_command(
     *,
     papers: str,
@@ -1798,12 +2177,15 @@ def main() -> None:
         _apply_worst_case_stress_defaults()
         st.success("Applied worst-case baseline stress settings (targeting low-budget heterogeneity).")
     st.caption("Quick graph-test settings are for smoke-testing plot generation only, not final experiments.")
-    view = st.segmented_control("View", options=["Run", "History", "Analysis"], default="Run")
+    view = st.segmented_control("View", options=["Run", "History", "Analysis", "Misc"], default="Run")
     if view == "History":
         _render_history_tab(repo_root)
         return
     if view == "Analysis":
         _render_analysis_tab(repo_root)
+        return
+    if view == "Misc":
+        _render_misc_tab(repo_root)
         return
 
     # Keep conditional controls outside the form so they live-rerender.

@@ -394,9 +394,91 @@ def mean_plan_record_quality(stats: ExecutionStats) -> float | None:
     return sum(qualities) / len(qualities)
 
 
+def _sentinel_record_op_stats(stats: ExecutionStats) -> list:
+    """Flatten sentinel-phase RecordOpStats across all logical/physical operators."""
+    out = []
+    for plan_stats in stats.sentinel_plan_stats.values():
+        for phys_map in plan_stats.operator_stats.values():
+            if not isinstance(phys_map, dict):
+                continue
+            for op_stats in phys_map.values():
+                out.extend(op_stats.record_op_stats_lst)
+    return out
+
+
+def _record_key_from_stats(r) -> tuple[str, ...]:
+    """Stable key for a sampled record based on source indices."""
+    src = getattr(r, "record_source_indices", None)
+    if src is None:
+        return ()
+    try:
+        return tuple(str(x) for x in src)
+    except Exception:
+        return (str(src),)
+
+
+def _sampled_record_counts(stats: ExecutionStats) -> tuple[int, int]:
+    """
+    Return (unique_sampled_records, unique_quality_scored_records) from sentinel stats.
+    """
+    sentinel_ros = _sentinel_record_op_stats(stats)
+    sampled_keys: set[tuple[str, ...]] = set()
+    quality_keys: set[tuple[str, ...]] = set()
+    for r in sentinel_ros:
+        key = _record_key_from_stats(r)
+        if key:
+            sampled_keys.add(key)
+            if r.quality is not None:
+                quality_keys.add(key)
+    return len(sampled_keys), len(quality_keys)
+
+
+def _candidate_ops_metrics(stats: ExecutionStats) -> tuple[int, int]:
+    """
+    Return (candidate_ops_explored, candidate_ops_pruned_estimate).
+
+    explored: operator candidates with at least one sampled RecordOpStats in sentinel phase.
+    pruned_estimate: candidates known to sentinel but never sampled in this run
+                     (rough proxy for eliminated/unused candidates).
+    """
+    total_candidates: set[tuple[str, str]] = set()
+    explored_candidates: set[tuple[str, str]] = set()
+    for plan_stats in stats.sentinel_plan_stats.values():
+        for unique_logical_op_id, phys_map in plan_stats.operator_stats.items():
+            if not isinstance(phys_map, dict):
+                continue
+            for full_op_id, op_stats in phys_map.items():
+                key = (str(unique_logical_op_id), str(full_op_id))
+                total_candidates.add(key)
+                if len(op_stats.record_op_stats_lst) > 0:
+                    explored_candidates.add(key)
+    candidate_ops_explored = len(explored_candidates)
+    candidate_ops_pruned_estimate = max(0, len(total_candidates) - candidate_ops_explored)
+    return candidate_ops_explored, candidate_ops_pruned_estimate
+
+
+def resolved_plan_quality(stats: ExecutionStats) -> tuple[float | None, str]:
+    """
+    Resolve plan quality with an explicit fallback.
+
+    Priority:
+    1) True final-plan quality from executed plan stats.
+    2) Sentinel-stage quality fallback when final-plan quality is unavailable.
+    """
+    plan_q = mean_plan_record_quality(stats)
+    if plan_q is not None:
+        return plan_q, "final_plan"
+    sentinel_q = mean_sentinel_record_quality(stats)
+    if sentinel_q is not None:
+        return sentinel_q, "sentinel_fallback"
+    return None, "missing"
+
+
 def summarize_run(label: str, stats: ExecutionStats) -> dict:
     mq = mean_sentinel_record_quality(stats)
-    plan_q = mean_plan_record_quality(stats)
+    plan_q, plan_q_source = resolved_plan_quality(stats)
+    total_sampled_records, quality_scored_records = _sampled_record_counts(stats)
+    candidate_ops_explored, candidate_ops_pruned_estimate = _candidate_ops_metrics(stats)
     return {
         "mode": label,
         "optimization_cost": stats.optimization_cost,
@@ -407,8 +489,11 @@ def summarize_run(label: str, stats: ExecutionStats) -> dict:
         "total_time_s": stats.total_execution_time,
         "mean_sentinel_quality": mq,
         "mean_plan_quality": plan_q,
-        "sentinel_plan_count": len(stats.sentinel_plan_stats),
-        "final_plan_count": len(stats.plan_stats),
+        "plan_quality_source": plan_q_source,
+        "total_sampled_records": total_sampled_records,
+        "candidate_ops_explored": candidate_ops_explored,
+        "candidate_ops_pruned_estimate": candidate_ops_pruned_estimate,
+        "quality_scored_records": quality_scored_records,
     }
 
 
@@ -428,6 +513,7 @@ def run_once(
     progress: bool,
     max_workers: int | None,
     available_models: list[str] | None,
+    use_final_op_quality: bool = True,
     strat_feature_columns: list[str] | None = None,
     strat_mode: str = "composite",
     strat_single_feature: str | None = None,
@@ -454,6 +540,7 @@ def run_once(
         policy=pz.MaxQuality(),
         execution_strategy="parallel",
         sentinel_execution_strategy="mab",
+        use_final_op_quality=use_final_op_quality,
         document_sampling_method=document_sampling_method,  # type: ignore[arg-type]
         stratified_num_strata=strata,
         sample_budget=sample_budget,
@@ -520,6 +607,14 @@ def main() -> None:
     parser.add_argument("--k", type=int, default=6, help="MAB k")
     parser.add_argument("--j", type=int, default=4, help="MAB j")
     parser.add_argument("--max-workers", type=int, default=None, help="Parallel execution workers")
+    parser.add_argument(
+        "--no-final-plan-quality",
+        action="store_true",
+        help=(
+            "Disable final-plan quality scoring. "
+            "By default, final-plan quality scoring is enabled so mean_plan_quality is populated."
+        ),
+    )
     parser.add_argument(
         "--train-selection",
         choices=["prefix", "random", "stratified"],
@@ -756,6 +851,7 @@ def main() -> None:
             progress=progress,
             max_workers=args.max_workers,
             available_models=args.available_models,
+            use_final_op_quality=not args.no_final_plan_quality,
             strat_feature_columns=selected_features,
             map_fields=map_fields,
         )
@@ -825,7 +921,10 @@ def main() -> None:
         "mean_Q_sentinel = mean of non-null RecordOpStats.quality over sentinel ops "
         "(default Validator uses an LLM judge when map_score_fn is not overridden)."
     )
-    print("mean_Q_plan = mean of non-null RecordOpStats.quality over final executed plan operators.")
+    print(
+        "mean_Q_plan = final-plan quality when available; otherwise sentinel fallback "
+        "(see plan_quality_source column)."
+    )
 
     if args.output_csv is not None:
         out_csv = args.output_csv.resolve()
@@ -841,8 +940,11 @@ def main() -> None:
             "total_time_s",
             "mean_sentinel_quality",
             "mean_plan_quality",
-            "sentinel_plan_count",
-            "final_plan_count",
+            "plan_quality_source",
+            "total_sampled_records",
+            "candidate_ops_explored",
+            "candidate_ops_pruned_estimate",
+            "quality_scored_records",
             "stratify_features",
             "strata_composition",
             "strata_feature",
