@@ -209,7 +209,7 @@ class TopKOp(PhysicalOperator):
         record_op_stats_lst = [record_op_stats]
 
         # construct and return the record set
-        return DataRecordSet(drs, record_op_stats_lst)
+        return DataRecordSet(drs, record_op_stats_lst, input=candidate)
 
     def __call__(self, candidate: DataRecord) -> DataRecordSet:
         start_time = time.time()

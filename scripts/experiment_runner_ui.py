@@ -55,17 +55,50 @@ def parse_text_list(raw: str) -> list[str]:
     return [v.strip() for v in raw.replace(",", " ").split() if v.strip()]
 
 
-DEFAULT_FIELDS_JSON = json.dumps([
-    {"name": "primary_contribution", "type": "str", "desc": "The single most important technical contribution of the paper in one sentence."},
-    {"name": "methodology", "type": "str", "desc": "The core method or approach used (e.g. algorithm name, experimental design, proof technique)."},
-    {"name": "domain", "type": "str", "desc": "The research domain: one of 'cs', 'biomedical', 'math', or 'physics'."},
-    {"name": "uses_experiments", "type": "bool", "desc": "True if the paper includes empirical experiments or evaluations, False if purely theoretical."},
-], indent=2)
+DEFAULT_FIELDS_JSON = json.dumps(
+    [
+        {
+            "name": "reported_main_metric",
+            "type": "str",
+            "desc": (
+                "The primary numeric result the paper emphasizes for its main claim "
+                "(e.g. F1=0.62, AUROC=0.91, error 3.2%). If multiple metrics appear, give only the one "
+                "highlighted as main in the abstract or introduction. If none is clearly numeric, answer "
+                "exactly none_stated."
+            ),
+        },
+        {
+            "name": "metric_evidence_quote",
+            "type": "str",
+            "desc": (
+                "Verbatim at most 25 words copied from the paper that contains the number or token from "
+                "reported_main_metric (same sentence or immediately adjacent). If you cannot find a "
+                "supporting span, answer exactly not_found."
+            ),
+        },
+        {
+            "name": "primary_baseline_name",
+            "type": "str",
+            "desc": (
+                "The single main baseline the authors compare against in the central experiments "
+                "(proper noun or method name). If unclear, answer exactly unclear."
+            ),
+        },
+    ],
+    indent=2,
+)
 
 
-QUICK_GRAPH_FIELDS_JSON = json.dumps([
-    {"name": "primary_contribution", "type": "str", "desc": "Main contribution in one sentence."},
-], indent=2)
+QUICK_GRAPH_FIELDS_JSON = json.dumps(
+    [
+        {
+            "name": "reported_main_metric",
+            "type": "str",
+            "desc": "Primary numeric main result (e.g. F1=0.62); none_stated if none.",
+        },
+    ],
+    indent=2,
+)
 
 FIGSIZE_LINE = (4.8, 2.8)
 FIGSIZE_BAR = (4.8, 2.8)
@@ -1077,6 +1110,166 @@ def _job_started_at_text(row: dict) -> str:
         return time.strftime("%Y-%m-%d %H:%M:%S", ts)
     except Exception:
         return "unknown"
+
+
+_ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+
+
+def _strip_ansi(text: str) -> str:
+    return _ANSI_ESCAPE_RE.sub("", text)
+
+
+def _stratified_passes_per_budget(strata_composition: str, stratify_features: list | None) -> int:
+    feats = stratify_features if isinstance(stratify_features, list) else []
+    if strata_composition == "exclusive":
+        return max(1, len(feats))
+    return 1
+
+
+def _runs_per_budget_from_job(job: dict) -> int:
+    cmd = str(job.get("command", "") or "")
+    random_only = bool(job.get("random_only")) or "--random-only" in cmd
+    stratified_only = bool(job.get("stratified_only")) or "--stratified-only" in cmd
+    comp = str(job.get("strata_composition") or "composite")
+    raw_feats = job.get("stratify_features")
+    feats_list = raw_feats if isinstance(raw_feats, list) else None
+    strat_passes = _stratified_passes_per_budget(comp, feats_list)
+    n = 0
+    if not stratified_only:
+        n += 1
+    if not random_only:
+        n += strat_passes
+    return max(1, n)
+
+
+def _expected_ab_phases_from_job(job: dict) -> int:
+    budgets = job.get("budgets")
+    if isinstance(budgets, list) and budgets:
+        n_budgets = len(budgets)
+    else:
+        cmd = str(job.get("command", "") or "")
+        m = re.search(r"--budgets\s+([\d\s]+)", cmd)
+        if m:
+            n_budgets = len([p for p in m.group(1).split() if p.isdigit()])
+        else:
+            n_budgets = 1
+    return max(1, n_budgets * _runs_per_budget_from_job(job))
+
+
+def _read_file_tail_bytes(path: Path, max_bytes: int = 262_144) -> str:
+    try:
+        size = path.stat().st_size
+        with path.open("rb") as f:
+            if size <= max_bytes:
+                return f.read().decode("utf-8", errors="replace")
+            f.seek(size - max_bytes)
+            return f.read().decode("utf-8", errors="replace")
+    except OSError:
+        return ""
+
+
+def _count_lines_matching(path: Path, pred) -> int:
+    n = 0
+    try:
+        with path.open("r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if pred(line):
+                    n += 1
+    except OSError:
+        return 0
+    return n
+
+
+def _last_percent_from_text(text: str) -> float | None:
+    plain = _strip_ansi(text)
+    matches = list(re.finditer(r"(\d+(?:\.\d+)?)\s*%", plain))
+    if not matches:
+        return None
+    v = float(matches[-1].group(1))
+    if 0.0 <= v <= 100.0:
+        return v
+    return None
+
+
+def _job_progress_bars_enabled(job: dict) -> bool:
+    """False when --no-progress / MockProgressManager (no Total opt/time lines)."""
+    np = job.get("no_progress")
+    if np is True:
+        return False
+    if np is False:
+        return True
+    return "--no-progress" not in str(job.get("command", "") or "")
+
+
+def _is_optimizer_finish_line(line: str) -> bool:
+    """One line per sub-phase: sentinel finish, then final-plan finish (see QueryProcessor.execute)."""
+    s = line.strip()
+    return s.startswith("Total opt. time:") or s.startswith("Total time:")
+
+
+def _job_progress_from_log(repo_root: Path, job: dict) -> tuple[float, str]:
+    """
+    Estimate overall completion ratio in [0, 1] from the job log and manifest.
+    Returns (ratio, human-readable detail).
+    """
+    total_phases = _expected_ab_phases_from_job(job)
+    progress_bars = _job_progress_bars_enabled(job)
+    log_rel = str(job.get("log_file", "") or "").strip()
+    if not log_rel:
+        return 0.0, f"No log path (expected {total_phases} run phase(s))."
+    path = repo_root / log_rel
+    if not path.is_file():
+        return 0.0, f"Log not created yet ({total_phases} phase(s) planned)."
+
+    finish_lines = _count_lines_matching(path, _is_optimizer_finish_line)
+    run_headers = _count_lines_matching(
+        path, lambda ln: "=== Run A:" in ln or "=== Run B:" in ln
+    )
+
+    tail = _read_file_tail_bytes(path)
+    tail_pct = _last_percent_from_text(tail)
+
+    if progress_bars:
+        # Each A/B "phase" runs sentinel optimization then final physical plan — two finish prints.
+        finish_target = total_phases * 2
+        if finish_lines >= finish_target:
+            ratio = 1.0
+            detail = (
+                f"All {total_phases} phase(s) done ({finish_lines}/{finish_target} finish lines: "
+                f"sentinel + final plan per phase)."
+            )
+            return ratio, detail
+
+        within = 0.0
+        if tail_pct is not None:
+            within = tail_pct / 100.0
+        elif run_headers > (finish_lines + 1) // 2:
+            within = 0.05
+
+        ratio = (finish_lines + within) / float(finish_target)
+        ratio = max(0.0, min(1.0, ratio))
+        remain = max(0.0, 1.0 - ratio)
+        detail = (
+            f"Finish lines in log: {finish_lines}/{finish_target} "
+            f"(2 per phase: `Total opt. time` after sentinel, `Total time` after final plan). "
+            f"Within current sub-step: ~{within * 100:.0f}% from Rich % in log tail. "
+            f"~{remain * 100:.0f}% of total remaining (estimate)."
+        )
+        if finish_lines == 0 and run_headers == 0:
+            detail = (
+                f"Starting… ({total_phases} phase(s) planned, {finish_target} finish lines expected). "
+                "Parsing log tail for Rich progress."
+            )
+        return ratio, detail
+
+    # --no-progress: progress managers do not print finish lines; use Run A/B headers only.
+    eff = max(0.0, float(run_headers) - 0.5)
+    ratio = min(1.0, eff / float(total_phases))
+    detail = (
+        f"Progress bars disabled — estimating from `=== Run A/B ===` headers: "
+        f"{run_headers}/{total_phases} started (~{ratio * 100:.0f}% overall, coarse)."
+    )
+    return ratio, detail
 
 
 def _maybe_start_queued_jobs(repo_root: Path, max_parallel: int = 1) -> tuple[int, list[str]]:
@@ -2436,6 +2629,25 @@ def main() -> None:
                 width="stretch",
                 hide_index=True,
             )
+            running_for_progress = [j for j in jobs if _job_state(repo_root, j) == "running"]
+            if running_for_progress:
+                st.markdown("**Estimated progress (from log file)**")
+                st.caption(
+                    "Each A/B phase runs sentinel optimization then the final plan, so the log gets **two** "
+                    "finish lines per phase (`Total opt. time:` then `Total time:`). The bar counts those, "
+                    "plus Rich `%` from the log tail for the current sub-step. "
+                    "With **No progress bars**, only `=== Run A/B ===` headers are used (coarser). "
+                    "Auto-refresh updates every few seconds."
+                )
+                for job in running_for_progress:
+                    ratio, detail = _job_progress_from_log(repo_root, job)
+                    label = (
+                        f"Job {job.get('job_id')} · seed {job.get('seed')} · "
+                        f"{job.get('strata_composition')} / {job.get('train_selection')}"
+                    )
+                    st.markdown(f"**{label}** — about **{ratio * 100:.0f}%** complete")
+                    st.progress(min(1.0, max(0.0, ratio)))
+                    st.caption(detail)
             inspect_id = st.selectbox(
                 "Inspect job details",
                 options=[str(x) for x in active_df["job_id"].tolist()],
@@ -2571,6 +2783,9 @@ def main() -> None:
             "stratify_features": stratify_features,
             "train_selection": train_selection,
             "train_skew": train_skew,
+            "random_only": random_only,
+            "stratified_only": stratified_only,
+            "no_progress": no_progress,
             "history_imported": False,
             "state": "queued",
         }

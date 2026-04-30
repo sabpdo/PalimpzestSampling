@@ -343,55 +343,132 @@ class PDFPathsDataset(IterDataset):
 
 _TITLE_MAP_FIELDS = [
     {
-        "name": "primary_contribution",
+        "name": "reported_main_metric",
         "type": str,
-        "desc": "The single most important technical contribution of the paper in one sentence.",
+        "desc": (
+            "The primary numeric result the paper emphasizes for its main claim "
+            "(e.g. F1=0.62, AUROC=0.91, error 3.2%). If multiple metrics appear, give only the one "
+            "highlighted as main in the abstract or introduction. If none is clearly numeric, answer "
+            "exactly none_stated."
+        ),
     },
     {
-        "name": "methodology",
+        "name": "metric_evidence_quote",
         "type": str,
-        "desc": "The core method or approach used (e.g. algorithm name, experimental design, proof technique).",
+        "desc": (
+            "Verbatim at most 25 words copied from the paper that contains the number or token from "
+            "reported_main_metric (same sentence or immediately adjacent). If you cannot find a "
+            "supporting span, answer exactly not_found."
+        ),
     },
     {
-        "name": "domain",
+        "name": "primary_baseline_name",
         "type": str,
-        "desc": "The research domain: one of 'cs', 'biomedical', 'math', or 'physics'.",
-    },
-    {
-        "name": "uses_experiments",
-        "type": bool,
-        "desc": "True if the paper includes empirical experiments or evaluations, False if purely theoretical.",
+        "desc": (
+            "The single main baseline the authors compare against in the central experiments "
+            "(proper noun or method name). If unclear, answer exactly unclear."
+        ),
     },
 ]
 
+# Physical op class names whose outputs are scored by the Validator (LLM judge), as opposed to I/O ops
+# that receive an automatic 1.0 in ``record_set_quality._is_perfect_quality_op`` (scan, limit, ...).
+_JUDGED_PHYSICAL_OP_NAMES = frozenset(
+    {
+        "LLMConvert",
+        "LLMConvertBonded",
+        "CritiqueAndRefineConvert",
+        "RAGConvert",
+        "SplitConvert",
+        "MixtureOfAgentsConvert",
+        "LLMFilter",
+        "CritiqueAndRefineFilter",
+        "RAGFilter",
+        "SplitFilter",
+        "MixtureOfAgentsFilter",
+        "TopKOp",
+        "LLMJoin",
+        "EmbeddingJoin",
+        "RelationalJoin",
+        "NestedLoopsJoin",
+        "SemanticAggregate",
+    }
+)
 
-def mean_sentinel_record_quality(stats: ExecutionStats) -> float | None:
-    """Average ``RecordOpStats.quality`` across all sentinel operator stats (if any)."""
-    qualities: list[float] = []
+
+def _record_op_is_validator_judged(r) -> bool:
+    """True if this stat row is from an op that uses the validator, not a trivial 1.0 I/O op."""
+    name = getattr(r, "op_name", "") or ""
+    if name in _JUDGED_PHYSICAL_OP_NAMES:
+        return True
+    if name.endswith("Convert") and not name.startswith("NonLLM"):
+        return True
+    if name.endswith("Filter") and not name.startswith("NonLLM"):
+        return True
+    return False
+
+
+def _collect_sentinel_qualities(stats: ExecutionStats, *, judged_only: bool) -> list[float]:
+    out: list[float] = []
     for plan_stats in stats.sentinel_plan_stats.values():
         for phys_map in plan_stats.operator_stats.values():
             if not isinstance(phys_map, dict):
                 continue
             for op_stats in phys_map.values():
                 for r in op_stats.record_op_stats_lst:
-                    if r.quality is not None:
-                        qualities.append(float(r.quality))
-    if not qualities:
-        return None
-    return sum(qualities) / len(qualities)
+                    if r.quality is None:
+                        continue
+                    if judged_only and not _record_op_is_validator_judged(r):
+                        continue
+                    out.append(float(r.quality))
+    return out
 
 
-def mean_plan_record_quality(stats: ExecutionStats) -> float | None:
-    """Average ``RecordOpStats.quality`` across final plan operator stats (if any)."""
-    qualities: list[float] = []
+def _collect_plan_qualities(stats: ExecutionStats, *, judged_only: bool) -> list[float]:
+    out: list[float] = []
     for plan_stats in stats.plan_stats.values():
         for op_stats in plan_stats.operator_stats.values():
             for r in op_stats.record_op_stats_lst:
-                if r.quality is not None:
-                    qualities.append(float(r.quality))
-    if not qualities:
+                if r.quality is None:
+                    continue
+                if judged_only and not _record_op_is_validator_judged(r):
+                    continue
+                out.append(float(r.quality))
+    return out
+
+
+def _mean_or_none(values: list[float]) -> float | None:
+    if not values:
         return None
-    return sum(qualities) / len(qualities)
+    return sum(values) / len(values)
+
+
+def mean_sentinel_record_quality(
+    stats: ExecutionStats, *, judged_ops_only: bool = True
+) -> float | None:
+    """
+    Average ``RecordOpStats.quality`` over sentinel ops.
+
+    When ``judged_ops_only`` (default): use only validator-judged physical ops. If none of those
+    have a non-null quality (e.g. judge failed but scan still has automatic 1.0), fall back to
+    the mean over all scored ops so the column is not empty.
+    """
+    if not judged_ops_only:
+        return _mean_or_none(_collect_sentinel_qualities(stats, judged_only=False))
+    judged = _collect_sentinel_qualities(stats, judged_only=True)
+    if judged:
+        return _mean_or_none(judged)
+    return _mean_or_none(_collect_sentinel_qualities(stats, judged_only=False))
+
+
+def mean_plan_record_quality(stats: ExecutionStats, *, judged_ops_only: bool = True) -> float | None:
+    """Same policy as :func:`mean_sentinel_record_quality` for final-plan stats."""
+    if not judged_ops_only:
+        return _mean_or_none(_collect_plan_qualities(stats, judged_only=False))
+    judged = _collect_plan_qualities(stats, judged_only=True)
+    if judged:
+        return _mean_or_none(judged)
+    return _mean_or_none(_collect_plan_qualities(stats, judged_only=False))
 
 
 def _sentinel_record_op_stats(stats: ExecutionStats) -> list:
@@ -457,7 +534,9 @@ def _candidate_ops_metrics(stats: ExecutionStats) -> tuple[int, int]:
     return candidate_ops_explored, candidate_ops_pruned_estimate
 
 
-def resolved_plan_quality(stats: ExecutionStats) -> tuple[float | None, str]:
+def resolved_plan_quality(
+    stats: ExecutionStats, *, judged_ops_only: bool = True
+) -> tuple[float | None, str]:
     """
     Resolve plan quality with an explicit fallback.
 
@@ -465,18 +544,20 @@ def resolved_plan_quality(stats: ExecutionStats) -> tuple[float | None, str]:
     1) True final-plan quality from executed plan stats.
     2) Sentinel-stage quality fallback when final-plan quality is unavailable.
     """
-    plan_q = mean_plan_record_quality(stats)
+    plan_q = mean_plan_record_quality(stats, judged_ops_only=judged_ops_only)
     if plan_q is not None:
         return plan_q, "final_plan"
-    sentinel_q = mean_sentinel_record_quality(stats)
+    sentinel_q = mean_sentinel_record_quality(stats, judged_ops_only=judged_ops_only)
     if sentinel_q is not None:
         return sentinel_q, "sentinel_fallback"
     return None, "missing"
 
 
-def summarize_run(label: str, stats: ExecutionStats) -> dict:
-    mq = mean_sentinel_record_quality(stats)
-    plan_q, plan_q_source = resolved_plan_quality(stats)
+def summarize_run(label: str, stats: ExecutionStats, *, judged_ops_only: bool = True) -> dict:
+    mq = mean_sentinel_record_quality(stats, judged_ops_only=judged_ops_only)
+    plan_q, plan_q_source = resolved_plan_quality(stats, judged_ops_only=judged_ops_only)
+    mq_all = mean_sentinel_record_quality(stats, judged_ops_only=False)
+    plan_q_all = mean_plan_record_quality(stats, judged_ops_only=False)
     total_sampled_records, quality_scored_records = _sampled_record_counts(stats)
     candidate_ops_explored, candidate_ops_pruned_estimate = _candidate_ops_metrics(stats)
     return {
@@ -489,6 +570,8 @@ def summarize_run(label: str, stats: ExecutionStats) -> dict:
         "total_time_s": stats.total_execution_time,
         "mean_sentinel_quality": mq,
         "mean_plan_quality": plan_q,
+        "mean_sentinel_quality_all_ops": mq_all,
+        "mean_plan_quality_all_ops": plan_q_all,
         "plan_quality_source": plan_q_source,
         "total_sampled_records": total_sampled_records,
         "candidate_ops_explored": candidate_ops_explored,
@@ -613,6 +696,15 @@ def main() -> None:
         help=(
             "Disable final-plan quality scoring. "
             "By default, final-plan quality scoring is enabled so mean_plan_quality is populated."
+        ),
+    )
+    parser.add_argument(
+        "--quality-mean-all-ops",
+        action="store_true",
+        help=(
+            "Average quality over every scored op (scan/limit/... get automatic 1.0). "
+            "Default: mean_sentinel_quality / mean_plan_quality use only validator-judged ops "
+            "(LLM map/filter/join/top-k) so the metric reflects extraction quality, not I/O."
         ),
     )
     parser.add_argument(
@@ -836,6 +928,8 @@ def main() -> None:
             print(f"Invalid --fields-json: {exc}", file=sys.stderr)
             sys.exit(2)
 
+    quality_judged_only = not args.quality_mean_all_ops
+
     for budget in budgets:
         run_kwargs = dict(
             eval_paths=eval_paths,
@@ -862,7 +956,7 @@ def main() -> None:
                 flush=True,
             )
             stats_r = run_once(document_sampling_method="random", **run_kwargs)
-            row_r = summarize_run("random", stats_r)
+            row_r = summarize_run("random", stats_r, judged_ops_only=quality_judged_only)
             row_r["sample_budget"] = budget
             row_r["stratify_features"] = ",".join(selected_features)
             row_r["strata_composition"] = args.strata_composition
@@ -887,7 +981,7 @@ def main() -> None:
                     strat_single_feature=strat_single,
                     **run_kwargs,
                 )
-                row_s = summarize_run(mode_label, stats_s)
+                row_s = summarize_run(mode_label, stats_s, judged_ops_only=quality_judged_only)
                 row_s["sample_budget"] = budget
                 row_s["stratify_features"] = ",".join(selected_features)
                 row_s["strata_composition"] = args.strata_composition
@@ -918,12 +1012,13 @@ def main() -> None:
     _print_results_table(rows)
     print()
     print(
-        "mean_Q_sentinel = mean of non-null RecordOpStats.quality over sentinel ops "
-        "(default Validator uses an LLM judge when map_score_fn is not overridden)."
+        "mean_Q_sentinel / mean_Q_plan = mean over validator-judged ops when those have scores; "
+        "otherwise fall back to all scored ops (so the column is not empty if only scan has 1.0). "
+        "Pass --quality-mean-all-ops to always use the all-ops mean."
     )
     print(
-        "mean_Q_plan = final-plan quality when available; otherwise sentinel fallback "
-        "(see plan_quality_source column)."
+        "mean_*_all_ops columns (CSV) always include every scored op. "
+        "plan_quality_source: final_plan vs sentinel_fallback."
     )
 
     if args.output_csv is not None:
@@ -940,6 +1035,8 @@ def main() -> None:
             "total_time_s",
             "mean_sentinel_quality",
             "mean_plan_quality",
+            "mean_sentinel_quality_all_ops",
+            "mean_plan_quality_all_ops",
             "plan_quality_source",
             "total_sampled_records",
             "candidate_ops_explored",

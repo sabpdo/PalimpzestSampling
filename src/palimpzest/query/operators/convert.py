@@ -94,6 +94,8 @@ class ConvertOp(PhysicalOperator, ABC):
         generation_stats: GenerationStats,
         total_time: float,
         successful_convert: bool,
+        *,
+        op_input: DataRecord | None = None,
     ) -> DataRecordSet:
         """
         Construct list of RecordOpStats objects (one for each DataRecord).
@@ -135,8 +137,8 @@ class ConvertOp(PhysicalOperator, ABC):
             for dr in records
         ]
 
-        # create and return the DataRecordSet
-        return DataRecordSet(records, record_op_stats_lst)
+        # create and return the DataRecordSet (op_input enables validator scoring on final-plan execution)
+        return DataRecordSet(records, record_op_stats_lst, input=op_input)
 
     @abstractmethod
     def convert(self, candidate: DataRecord, fields: dict[str, FieldInfo]) -> tuple[dict[str, list], GenerationStats]:
@@ -190,6 +192,7 @@ class ConvertOp(PhysicalOperator, ABC):
             generation_stats=generation_stats,
             total_time=time.time() - start_time,
             successful_convert=successful_convert,
+            op_input=candidate,
         )
 
         return record_set

@@ -283,8 +283,9 @@ class RelationalJoin(JoinOp):
         if len(output_records) == 0:
             return DataRecordSet([], []), num_inputs_processed
 
-        return DataRecordSet(output_records, output_record_op_stats), num_inputs_processed
-
+        ds = DataRecordSet(output_records, output_record_op_stats)
+        ds.input = (left_candidates, right_candidates)
+        return ds, num_inputs_processed
 
 
 class LLMJoin(JoinOp):
@@ -486,7 +487,9 @@ class NestedLoopsJoin(LLMJoin):
         if len(output_records) == 0:
             return DataRecordSet([], []), num_inputs_processed
 
-        return DataRecordSet(output_records, output_record_op_stats), num_inputs_processed
+        ds = DataRecordSet(output_records, output_record_op_stats)
+        ds.input = (left_candidates, right_candidates)
+        return ds, num_inputs_processed
 
 
 class EmbeddingJoin(LLMJoin):
@@ -819,4 +822,6 @@ class EmbeddingJoin(LLMJoin):
             self.residual_embedding_cost = total_embedding_cost
             return DataRecordSet([], []), num_inputs_processed
 
-        return DataRecordSet(output_records, output_record_op_stats), num_inputs_processed
+        ds = DataRecordSet(output_records, output_record_op_stats)
+        ds.input = (left_candidates, right_candidates)
+        return ds, num_inputs_processed

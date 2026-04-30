@@ -229,6 +229,8 @@ class QueryProcessorFactory:
         # create the optimizer, execution strateg(ies), and processor
         optimizer = cls._create_optimizer(config)
         config.execution_strategy = cls._create_execution_strategy(dataset, config)
+        if validator is not None and hasattr(config.execution_strategy, "validator"):
+            config.execution_strategy.validator = validator
         config.sentinel_execution_strategy = cls._create_sentinel_execution_strategy(config)
         processor = QueryProcessor(dataset, optimizer, train_dataset=train_dataset, validator=validator, **config.to_dict())
 
