@@ -10,15 +10,20 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import re
 import shlex
 import sqlite3
 import subprocess
+import sys
+import time
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 
 STRAT_FEATURE_COLUMNS = [
@@ -29,6 +34,15 @@ STRAT_FEATURE_COLUMNS = [
     "table_count",
     "complexity_score",
     "domain",
+]
+
+TRAIN_SELECTION_OPTIONS = ["prefix", "random", "stratified"]
+TRAIN_SKEW_OPTIONS = [
+    "natural",
+    "balanced_domain",
+    "min_one_per_domain",
+    "focus_domain",
+    "custom_domain_ratios",
 ]
 
 
@@ -135,6 +149,7 @@ def _init_session_defaults() -> None:
         "stratified_only": False,
         "no_progress": False,
         "fields_json_raw": DEFAULT_FIELDS_JSON,
+        "queue_max_parallel": 1,
     }
     for k, v in defaults.items():
         st.session_state.setdefault(k, v)
@@ -180,9 +195,10 @@ def _render_and_download(fig: plt.Figure, label: str, filename: str) -> None:
     st.download_button(label, data=png, file_name=filename, mime="image/png")
 
 
-def _graph_heading(title: str, why_it_matters: str) -> None:
-    safe_help = why_it_matters.replace('"', "&quot;")
-    st.markdown(f'**{title}** <abbr title="{safe_help}">ⓘ</abbr>', unsafe_allow_html=True)
+def _graph_heading(title: str, chart_description: str) -> None:
+    # Keep chart guidance visible in-line; hover-only help was unreliable.
+    st.markdown(f"**{title}**")
+    st.caption(chart_description)
 
 
 def _plot_line_by_mode(df: pd.DataFrame, y_col: str, title: str, y_label: str) -> bytes:
@@ -307,7 +323,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     f"{quality_label} vs sample budget",
-                    "Shows sample efficiency: whether stratified sampling reaches equal or higher quality with smaller budgets than random baseline.",
+                    "What it shows: average output quality at each budget for random vs stratified sampling. How to use it: if the stratified line is higher earlier, it reaches good quality with fewer samples.",
                 )
                 p1 = _plot_line_by_mode(
                     qdf,
@@ -338,7 +354,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Quality estimation error vs sample budget",
-                    "Lower error means your sampled estimate is closer to high-budget behavior, which supports better optimizer decisions.",
+                    "What it shows: how far each budget is from that mode's highest-budget quality in this run. How to use it: lower values mean the estimate is stabilizing sooner.",
                 )
                 p2 = _plot_line_by_mode(
                     err_df,
@@ -360,7 +376,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Stratified quality lift vs random (by budget)",
-                    "Direct A/B delta plot: positive bars indicate stratified outperforms the random baseline at that budget.",
+                    "What it shows: stratified quality minus random quality at each budget. How to use it: bars above zero mean stratified performed better.",
                 )
                 fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
                 colors = ["#2ca02c" if v >= 0 else "#d62728" for v in ddf["delta"].tolist()]
@@ -389,7 +405,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Total cost vs sample budget (baseline comparison)",
-                    "Compares spend trajectories. A lower stratified line indicates cheaper optimization/execution than random.",
+                    "What it shows: total run cost (optimization plus execution) by budget for both methods. How to use it: the lower line is cheaper.",
                 )
                 p_cost = _plot_line_by_mode(
                     cst,
@@ -411,7 +427,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Cost delta vs random (by budget)",
-                    "Negative bars mean stratified is cheaper than random at the same sample budget.",
+                    "What it shows: stratified cost minus random cost for each budget. How to use it: bars below zero mean stratified saved money.",
                 )
                 fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
                 colors = ["#2ca02c" if v <= 0 else "#d62728" for v in cost_delta["delta"].tolist()]
@@ -440,7 +456,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Total runtime vs sample budget",
-                    "Compares end-to-end latency; lower stratified runtime supports practical efficiency gains.",
+                    "What it shows: total wall-clock runtime by budget for both methods. How to use it: the lower line is faster.",
                 )
                 p4 = _plot_line_by_mode(
                     tdf,
@@ -462,7 +478,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Stratified runtime speedup vs random (by budget)",
-                    "Percent speedup summary. Positive values mean stratified finishes faster than random baseline.",
+                    "What it shows: runtime percent difference versus random at each budget. How to use it: values above zero mean stratified was faster.",
                 )
                 fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
                 colors = ["#2ca02c" if v >= 0 else "#d62728" for v in time_delta["speedup_pct"].tolist()]
@@ -491,7 +507,7 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             with _next_col():
                 _graph_heading(
                     "Stratified win rate across budgets",
-                    "Aggregate view of how often stratified beats random across tested budgets for quality and runtime.",
+                    "What it shows: the percentage of tested budgets where stratified beats random (quality and runtime separately). How to use it: higher bars mean more consistent wins.",
                 )
                 fig, ax = plt.subplots(figsize=FIGSIZE_WIN)
                 labels = [f"{quality_label} win rate", "Runtime win rate"]
@@ -601,7 +617,77 @@ def _history_db_path(repo_root: Path) -> Path:
     return repo_root / "papers" / "experiment_history.sqlite3"
 
 
-def _init_history_db(repo_root: Path) -> Path:
+def _history_db_url() -> str | None:
+    url = os.getenv("PALIMPZEST_HISTORY_DB_URL", "").strip()
+    if not url:
+        return None
+    # Force SQLAlchemy to use psycopg (psycopg3), which is installed via psycopg[binary].
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
+
+
+def _current_run_by() -> str:
+    return (
+        os.getenv("PALIMPZEST_RUN_BY", "").strip()
+        or os.getenv("USER", "").strip()
+        or os.getenv("USERNAME", "").strip()
+        or "unknown"
+    )
+
+
+def _init_history_db(repo_root: Path) -> str:
+    db_url = _history_db_url()
+    if db_url:
+        engine = create_engine(db_url)
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS runs (
+                        run_id BIGSERIAL PRIMARY KEY,
+                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        command TEXT NOT NULL,
+                        output_csv TEXT,
+                        return_code INTEGER NOT NULL,
+                        budgets TEXT,
+                        train_n INTEGER,
+                        eval_n INTEGER,
+                        strata INTEGER,
+                        k INTEGER,
+                        j INTEGER,
+                        notes TEXT
+                    )
+                    """
+                )
+            )
+            for col_name, col_type in [
+                ("seed", "INTEGER"),
+                ("strata_composition", "TEXT"),
+                ("stratify_features", "TEXT"),
+                ("train_selection", "TEXT"),
+                ("train_skew", "TEXT"),
+                ("run_by", "TEXT"),
+            ]:
+                conn.execute(text(f"ALTER TABLE runs ADD COLUMN IF NOT EXISTS {col_name} {col_type}"))
+            conn.execute(
+                text(
+                    """
+                    CREATE TABLE IF NOT EXISTS run_rows (
+                        id BIGSERIAL PRIMARY KEY,
+                        run_id BIGINT NOT NULL,
+                        sample_budget INTEGER,
+                        mode TEXT,
+                        total_time_s DOUBLE PRECISION,
+                        total_cost DOUBLE PRECISION,
+                        mean_sentinel_quality DOUBLE PRECISION,
+                        mean_plan_quality DOUBLE PRECISION
+                    )
+                    """
+                )
+            )
+        return db_url
+
     db_path = _history_db_path(repo_root)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as conn:
@@ -623,6 +709,21 @@ def _init_history_db(repo_root: Path) -> Path:
             )
             """
         )
+        # Backward-compatible schema evolution for older local DB files.
+        existing_cols = {
+            row[1]
+            for row in conn.execute("PRAGMA table_info(runs)")
+        }
+        for col_name, col_type in [
+            ("seed", "INTEGER"),
+            ("strata_composition", "TEXT"),
+            ("stratify_features", "TEXT"),
+            ("train_selection", "TEXT"),
+            ("train_skew", "TEXT"),
+            ("run_by", "TEXT"),
+        ]:
+            if col_name not in existing_cols:
+                conn.execute(f"ALTER TABLE runs ADD COLUMN {col_name} {col_type}")
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS run_rows (
@@ -638,7 +739,7 @@ def _init_history_db(repo_root: Path) -> Path:
             )
             """
         )
-    return db_path
+    return str(db_path)
 
 
 def _save_run_history(
@@ -653,26 +754,82 @@ def _save_run_history(
     strata: int,
     k: int,
     j: int,
+    seed: int,
+    strata_composition: str,
+    stratify_features: list[str],
+    train_selection: str,
+    train_skew: str,
 ) -> int:
-    db_path = _init_history_db(repo_root)
+    db_ref = _init_history_db(repo_root)
     csv_df = _read_results_csv(repo_root, output_csv)
-    with sqlite3.connect(db_path) as conn:
+    vals = {
+        "command": command,
+        "output_csv": output_csv or "",
+        "return_code": int(return_code),
+        "budgets": " ".join(str(b) for b in budgets),
+        "train_n": int(train_n),
+        "eval_n": None if eval_n is None else int(eval_n),
+        "strata": int(strata),
+        "k": int(k),
+        "j": int(j),
+        "seed": int(seed),
+        "strata_composition": strata_composition,
+        "stratify_features": ",".join(stratify_features),
+        "train_selection": train_selection,
+        "train_skew": train_skew,
+        "run_by": _current_run_by(),
+    }
+    if db_ref.startswith("postgres"):
+        engine = create_engine(db_ref)
+        with engine.begin() as conn:
+            run_id = int(
+                conn.execute(
+                    text(
+                        """
+                        INSERT INTO runs(
+                            command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
+                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+                        )
+                        VALUES (
+                            :command, :output_csv, :return_code, :budgets, :train_n, :eval_n, :strata, :k, :j,
+                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by
+                        )
+                        RETURNING run_id
+                        """
+                    ),
+                    vals,
+                ).scalar_one()
+            )
+            if csv_df is not None and not csv_df.empty:
+                for _, row in csv_df.iterrows():
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO run_rows(run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality)
+                            VALUES (:run_id, :sample_budget, :mode, :total_time_s, :total_cost, :mean_sentinel_quality, :mean_plan_quality)
+                            """
+                        ),
+                        {
+                            "run_id": run_id,
+                            "sample_budget": int(row["sample_budget"]) if pd.notna(row.get("sample_budget")) else None,
+                            "mode": str(row.get("mode", "")),
+                            "total_time_s": float(row["total_time_s"]) if pd.notna(row.get("total_time_s")) else None,
+                            "total_cost": float(row["total_cost"]) if pd.notna(row.get("total_cost")) else None,
+                            "mean_sentinel_quality": float(row["mean_sentinel_quality"]) if pd.notna(row.get("mean_sentinel_quality")) else None,
+                            "mean_plan_quality": float(row["mean_plan_quality"]) if pd.notna(row.get("mean_plan_quality")) else None,
+                        },
+                    )
+        return run_id
+    with sqlite3.connect(db_ref) as conn:
         cur = conn.execute(
             """
-            INSERT INTO runs(command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO runs(
+                command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
+                seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (
-                command,
-                output_csv or "",
-                int(return_code),
-                " ".join(str(b) for b in budgets),
-                int(train_n),
-                None if eval_n is None else int(eval_n),
-                int(strata),
-                int(k),
-                int(j),
-            ),
+            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by"]),
         )
         run_id = int(cur.lastrowid)
         if csv_df is not None and not csv_df.empty:
@@ -699,33 +856,367 @@ def _save_run_history(
     return run_id
 
 
-def _load_history_runs(repo_root: Path) -> pd.DataFrame:
-    db_path = _init_history_db(repo_root)
-    with sqlite3.connect(db_path) as conn:
-        return pd.read_sql_query(
-            """
-            SELECT run_id, created_at, return_code, budgets, train_n, eval_n, strata, k, j, output_csv
-            FROM runs
-            ORDER BY run_id DESC
-            LIMIT 200
-            """,
-            conn,
+def _batch_manifest_path(repo_root: Path) -> Path:
+    return repo_root / "results" / "batch_logs" / "batch_manifest.json"
+
+
+def _load_batch_manifest(repo_root: Path) -> list[dict]:
+    manifest_path = _batch_manifest_path(repo_root)
+    if not manifest_path.is_file():
+        return []
+    try:
+        raw = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if isinstance(raw, list):
+            return [x for x in raw if isinstance(x, dict)]
+    except Exception:
+        return []
+    return []
+
+
+def _save_batch_manifest(repo_root: Path, rows: list[dict]) -> None:
+    manifest_path = _batch_manifest_path(repo_root)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+
+
+def _job_state(repo_root: Path, row: dict) -> str:
+    """Derive queue state with backward compatibility for older manifest rows."""
+    state = str(row.get("state", "") or "").strip().lower()
+    if state in {"queued", "running", "finished", "imported"}:
+        if state == "running":
+            status_file = str(row.get("status_file", "") or "").strip()
+            if status_file and (repo_root / status_file).is_file():
+                return "finished"
+        if state == "finished" and row.get("history_imported"):
+            return "imported"
+        return state
+    # Backward-compat for pre-state rows:
+    if row.get("history_imported"):
+        return "imported"
+    status_file = str(row.get("status_file", "") or "").strip()
+    if status_file and (repo_root / status_file).is_file():
+        return "finished"
+    return "running"
+
+
+def _new_job_id() -> str:
+    return str(int(time.time() * 1000))
+
+
+def _queue_state_counts(repo_root: Path, rows: list[dict]) -> tuple[int, int, int]:
+    queued = 0
+    running = 0
+    finished = 0
+    for r in rows:
+        s = _job_state(repo_root, r)
+        if s == "queued":
+            queued += 1
+        elif s == "running":
+            running += 1
+        else:
+            finished += 1
+    return queued, running, finished
+
+
+def _job_runtime_minutes(row: dict) -> float | None:
+    started = row.get("started_at_epoch_s")
+    if started is None:
+        return None
+    try:
+        return max(0.0, (time.time() - float(started)) / 60.0)
+    except Exception:
+        return None
+
+
+def _job_started_at_text(row: dict) -> str:
+    started = row.get("started_at_epoch_s")
+    if started is None:
+        return "unknown"
+    try:
+        ts = time.localtime(float(started))
+        return time.strftime("%Y-%m-%d %H:%M:%S", ts)
+    except Exception:
+        return "unknown"
+
+
+def _maybe_start_queued_jobs(repo_root: Path, max_parallel: int = 1) -> tuple[int, list[str]]:
+    """
+    Start queued jobs up to max_parallel active workers.
+    Returns (num_started, messages).
+    """
+    rows = _load_batch_manifest(repo_root)
+    if not rows:
+        return 0, []
+    max_parallel = max(1, int(max_parallel))
+    running_now = sum(1 for r in rows if _job_state(repo_root, r) == "running")
+    slots = max(0, max_parallel - running_now)
+    if slots <= 0:
+        return 0, []
+
+    queued_indices = [i for i, r in enumerate(rows) if _job_state(repo_root, r) == "queued"][:slots]
+    if not queued_indices:
+        return 0, []
+
+    logs_dir = repo_root / "results" / "batch_logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    env = dict(os.environ)
+    env["PYTHONWARNINGS"] = (
+        "ignore:Mean of empty slice:RuntimeWarning,"
+        "ignore:invalid value encountered in scalar divide:RuntimeWarning"
+    )
+    messages: list[str] = []
+    started = 0
+    for next_idx in queued_indices:
+        row = rows[next_idx]
+        cmd = str(row.get("command", "") or "").strip()
+        if not cmd:
+            row["state"] = "finished"
+            row["history_imported"] = True
+            continue
+        job_id = str(row.get("job_id", "") or _new_job_id())
+        row["job_id"] = job_id
+        suffix = f"{job_id}_seed{row.get('seed','na')}_{row.get('strata_composition','na')}_{row.get('train_selection','na')}_{row.get('train_skew','na')}"
+        log_path = logs_dir / f"queue_{suffix}.log"
+        status_path = logs_dir / f"queue_{suffix}.status"
+        # Ensure stale files from prior runs never short-circuit state detection.
+        if status_path.is_file():
+            status_path.unlink(missing_ok=True)
+        shell_cmd = f"{cmd} > {shlex.quote(str(log_path))} 2>&1; echo $? > {shlex.quote(str(status_path))}"
+        proc = subprocess.Popen(
+            ["/bin/bash", "-lc", shell_cmd],
+            cwd=str(repo_root),
+            text=True,
+            env=env,
         )
+        row["pid"] = int(proc.pid)
+        row["log_file"] = str(log_path.relative_to(repo_root))
+        row["status_file"] = str(status_path.relative_to(repo_root))
+        row["state"] = "running"
+        row["started_at_epoch_s"] = time.time()
+        started += 1
+        messages.append(
+            f"Started queued job pid={proc.pid} (seed={row.get('seed')}, comp={row.get('strata_composition')}, train={row.get('train_selection')}, skew={row.get('train_skew')})."
+        )
+    _save_batch_manifest(repo_root, rows)
+    return started, messages
+
+
+def _sync_completed_batch_runs(repo_root: Path) -> tuple[int, int]:
+    rows = _load_batch_manifest(repo_root)
+    if not rows:
+        return 0, 0
+    imported = 0
+    pending = 0
+    for row in rows:
+        state = _job_state(repo_root, row)
+        row["state"] = state
+        if state == "imported":
+            continue
+        if state == "queued":
+            pending += 1
+            continue
+        status_path = repo_root / str(row.get("status_file", ""))
+        if not status_path.is_file():
+            pending += 1
+            continue
+        try:
+            return_code = int(status_path.read_text(encoding="utf-8").strip())
+        except Exception:
+            pending += 1
+            continue
+        _save_run_history(
+            repo_root,
+            command=str(row.get("command", "")),
+            output_csv=str(row.get("output_csv", "")) or None,
+            return_code=return_code,
+            budgets=[int(x) for x in row.get("budgets", [])],
+            train_n=int(row.get("train_n", 0)),
+            eval_n=(None if row.get("eval_n") is None else int(row.get("eval_n"))),
+            strata=int(row.get("strata", 0)),
+            k=int(row.get("k", 0)),
+            j=int(row.get("j", 0)),
+            seed=int(row.get("seed", 0)),
+            strata_composition=str(row.get("strata_composition", "")),
+            stratify_features=[str(x) for x in row.get("stratify_features", [])],
+            train_selection=str(row.get("train_selection", "")),
+            train_skew=str(row.get("train_skew", "")),
+        )
+        row["history_imported"] = True
+        row["return_code"] = return_code
+        row["state"] = "imported"
+        imported += 1
+    _save_batch_manifest(repo_root, rows)
+    return imported, pending
+
+
+def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
+    """
+    One-time migration helper:
+    - If PALIMPZEST_HISTORY_DB_URL is set (remote mode)
+    - And remote runs table is empty
+    - And local sqlite has data
+    then copy local runs/run_rows to remote.
+    """
+    db_url = _history_db_url()
+    if not db_url:
+        return 0, 0
+    local_path = _history_db_path(repo_root)
+    if not local_path.is_file():
+        return 0, 0
+
+    # Ensure remote schema exists first.
+    _init_history_db(repo_root)
+    engine = create_engine(db_url)
+    with engine.begin() as rconn:
+        remote_runs_count = int(rconn.execute(text("SELECT COUNT(*) FROM runs")).scalar() or 0)
+        if remote_runs_count > 0:
+            return 0, 0
+
+    with sqlite3.connect(local_path) as lconn:
+        local_runs = pd.read_sql_query(
+            """
+            SELECT
+                run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
+                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+            FROM runs
+            ORDER BY run_id
+            """,
+            lconn,
+        )
+        local_rows = pd.read_sql_query(
+            """
+            SELECT
+                id, run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality
+            FROM run_rows
+            ORDER BY id
+            """,
+            lconn,
+        )
+
+    if local_runs.empty:
+        return 0, 0
+
+    with engine.begin() as rconn:
+        for rec in local_runs.to_dict(orient="records"):
+            rconn.execute(
+                text(
+                    """
+                    INSERT INTO runs(
+                        run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
+                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+                    )
+                    VALUES (
+                        :run_id, :created_at, :command, :output_csv, :return_code, :budgets, :train_n, :eval_n,
+                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by
+                    )
+                    """
+                ),
+                rec,
+            )
+        for rec in local_rows.to_dict(orient="records"):
+            rconn.execute(
+                text(
+                    """
+                    INSERT INTO run_rows(
+                        id, run_id, sample_budget, mode, total_time_s, total_cost, mean_sentinel_quality, mean_plan_quality
+                    )
+                    VALUES (
+                        :id, :run_id, :sample_budget, :mode, :total_time_s, :total_cost, :mean_sentinel_quality, :mean_plan_quality
+                    )
+                    """
+                ),
+                rec,
+            )
+        # Advance sequences so future inserts don't collide with migrated IDs.
+        rconn.execute(text("SELECT setval(pg_get_serial_sequence('runs', 'run_id'), COALESCE((SELECT MAX(run_id) FROM runs), 1), true)"))
+        rconn.execute(text("SELECT setval(pg_get_serial_sequence('run_rows', 'id'), COALESCE((SELECT MAX(id) FROM run_rows), 1), true)"))
+
+    return int(len(local_runs)), int(len(local_rows))
+
+
+def _load_history_runs(repo_root: Path) -> pd.DataFrame:
+    db_ref = _init_history_db(repo_root)
+    query = """
+        SELECT
+            run_id, created_at, return_code, budgets, train_n, eval_n, strata, k, j,
+            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv
+        FROM runs
+        ORDER BY run_id DESC
+        LIMIT 200
+    """
+    if db_ref.startswith("postgres"):
+        engine = create_engine(db_ref)
+        with engine.connect() as conn:
+            return pd.read_sql_query(text(query), conn)
+    with sqlite3.connect(db_ref) as conn:
+        return pd.read_sql_query(query, conn)
 
 
 def _load_history_rows(repo_root: Path, run_ids: list[int]) -> pd.DataFrame:
     if not run_ids:
         return pd.DataFrame()
-    db_path = _init_history_db(repo_root)
-    placeholders = ",".join("?" for _ in run_ids)
+    db_ref = _init_history_db(repo_root)
+    placeholders = ",".join(str(int(x)) for x in run_ids)
     query = f"""
         SELECT rr.run_id, rr.sample_budget, rr.mode, rr.total_time_s, rr.total_cost, rr.mean_sentinel_quality, rr.mean_plan_quality
         FROM run_rows rr
         WHERE rr.run_id IN ({placeholders})
         ORDER BY rr.run_id, rr.sample_budget, rr.mode
     """
-    with sqlite3.connect(db_path) as conn:
-        return pd.read_sql_query(query, conn, params=run_ids)
+    if db_ref.startswith("postgres"):
+        engine = create_engine(db_ref)
+        with engine.connect() as conn:
+            return pd.read_sql_query(text(query), conn)
+    with sqlite3.connect(db_ref) as conn:
+        return pd.read_sql_query(query, conn)
+
+
+def _load_history_rows_with_fallback(repo_root: Path, run_ids: list[int]) -> pd.DataFrame:
+    """Load per-budget rows from DB, falling back to run CSVs when rows are missing."""
+    rows_df = _load_history_rows(repo_root, run_ids)
+    have_ids = set(int(x) for x in rows_df["run_id"].dropna().tolist()) if not rows_df.empty else set()
+    missing_ids = [int(x) for x in run_ids if int(x) not in have_ids]
+    if not missing_ids:
+        return rows_df
+
+    db_ref = _init_history_db(repo_root)
+    placeholders = ",".join(str(int(x)) for x in missing_ids)
+    query = f"""
+        SELECT run_id, output_csv
+        FROM runs
+        WHERE run_id IN ({placeholders})
+    """
+    fallback_rows: list[pd.DataFrame] = []
+    if db_ref.startswith("postgres"):
+        engine = create_engine(db_ref)
+        with engine.connect() as conn:
+            run_meta = pd.read_sql_query(text(query), conn)
+    else:
+        with sqlite3.connect(db_ref) as conn:
+            run_meta = pd.read_sql_query(query, conn)
+    for _, meta in run_meta.iterrows():
+        run_id = int(meta["run_id"])
+        output_csv = str(meta.get("output_csv", "") or "").strip()
+        if not output_csv:
+            continue
+        csv_df = _read_results_csv(repo_root, output_csv)
+        if csv_df is None or csv_df.empty:
+            continue
+        needed_cols = ["sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"]
+        safe_cols = [c for c in needed_cols if c in csv_df.columns]
+        if "sample_budget" not in safe_cols or "mode" not in safe_cols:
+            continue
+        sub = csv_df.loc[:, safe_cols].copy()
+        sub["run_id"] = run_id
+        for col in needed_cols:
+            if col not in sub.columns:
+                sub[col] = pd.NA
+        fallback_rows.append(sub[["run_id", "sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"]])
+
+    if fallback_rows:
+        merged = pd.concat([rows_df] + fallback_rows, ignore_index=True) if not rows_df.empty else pd.concat(fallback_rows, ignore_index=True)
+        return merged.sort_values(["run_id", "sample_budget", "mode"])
+    return rows_df
 
 
 def _render_history_tab(repo_root: Path) -> None:
@@ -734,10 +1225,35 @@ def _render_history_tab(repo_root: Path) -> None:
     if runs_df.empty:
         st.info("No saved runs yet. Execute a run first; it will be stored automatically.")
         return
-    st.dataframe(runs_df, width="stretch", hide_index=True)
+    selected_run_from_table: int | None = None
+    table_event = st.dataframe(
+        runs_df,
+        width="stretch",
+        hide_index=True,
+        on_select="rerun",
+        selection_mode="single-row",
+        key="history_runs_table_select",
+    )
+    try:
+        sel_rows = table_event.get("selection", {}).get("rows", [])
+        if sel_rows:
+            row_idx = int(sel_rows[0])
+            if 0 <= row_idx < len(runs_df):
+                selected_run_from_table = int(runs_df.iloc[row_idx]["run_id"])
+                st.session_state["history_modal_run_id"] = selected_run_from_table
+    except Exception:
+        selected_run_from_table = None
     picked = st.multiselect("Select run IDs to compare", options=runs_df["run_id"].tolist(), default=runs_df["run_id"].head(2).tolist())
-    rows_df = _load_history_rows(repo_root, [int(x) for x in picked])
+    picked_ids = [int(x) for x in picked]
+    rows_df = _load_history_rows_with_fallback(repo_root, picked_ids)
     if rows_df.empty:
+        picked_meta = runs_df[runs_df["run_id"].isin(picked_ids)]
+        failed = int((picked_meta["return_code"] != 0).sum()) if not picked_meta.empty else 0
+        st.info(
+            "No per-budget rows found for selected runs. "
+            f"Failed runs in selection: {failed}. "
+            "Try selecting successful runs, or check output_csv paths."
+        )
         return
     st.markdown("**Selected run rows**")
     st.dataframe(rows_df, width="stretch", hide_index=True)
@@ -749,6 +1265,417 @@ def _render_history_tab(repo_root: Path) -> None:
         ax.set_title("Runtime comparison across saved runs")
         ax.set_xlabel("Sample budget")
         ax.set_ylabel("Total runtime (s)")
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=8)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+
+    st.markdown("---")
+    st.markdown("### Inspect Single Run")
+    inspect_run_id = st.selectbox(
+        "Run ID",
+        options=runs_df["run_id"].tolist(),
+        index=0,
+        help="Open a focused popup with this run's details and graphs.",
+        key="history_inspect_run_id",
+    )
+    if "history_modal_run_id" not in st.session_state:
+        st.session_state["history_modal_run_id"] = None
+    if st.button("Open run report popup"):
+        st.session_state["history_modal_run_id"] = int(inspect_run_id)
+
+    run_id_for_modal = st.session_state.get("history_modal_run_id")
+    if run_id_for_modal is not None:
+        run_match = runs_df[runs_df["run_id"] == int(run_id_for_modal)]
+        output_csv = None if run_match.empty else str(run_match.iloc[0].get("output_csv", "") or "").strip()
+        modal_title = f"Run {run_id_for_modal} report"
+        if hasattr(st, "dialog"):
+            @st.dialog(modal_title, width="large")
+            def _show_history_run_dialog() -> None:
+                if run_match.empty:
+                    st.warning("Run metadata not found.")
+                else:
+                    st.dataframe(run_match, width="stretch", hide_index=True)
+                    _render_results_analysis(repo_root, output_csv or None)
+                if st.button("Close popup"):
+                    st.session_state["history_modal_run_id"] = None
+                    st.rerun()
+
+            _show_history_run_dialog()
+        else:
+            # Fallback for Streamlit versions without dialog support.
+            st.info(f"{modal_title} (inline fallback)")
+            if run_match.empty:
+                st.warning("Run metadata not found.")
+            else:
+                st.dataframe(run_match, width="stretch", hide_index=True)
+                _render_results_analysis(repo_root, output_csv or None)
+            if st.button("Close run report"):
+                st.session_state["history_modal_run_id"] = None
+                st.rerun()
+
+
+def _render_analysis_tab(repo_root: Path) -> None:
+    st.subheader("Cross-Run Analysis")
+    runs_df = _load_history_runs(repo_root)
+    if runs_df.empty:
+        st.info("No saved runs yet. Run experiments first, then compare them here.")
+        return
+    ok_only = st.toggle("Only successful runs", value=True)
+    if ok_only:
+        runs_df = runs_df[runs_df["return_code"] == 0].copy()
+    if runs_df.empty:
+        st.info("No successful runs found.")
+        return
+
+    run_ids = runs_df["run_id"].tolist()
+    selected_run_ids = st.multiselect("Runs to include", options=run_ids, default=run_ids[: min(20, len(run_ids))])
+    if not selected_run_ids:
+        st.info("Select at least one run.")
+        return
+
+    selected_ids = [int(x) for x in selected_run_ids]
+    rows_df = _load_history_rows_with_fallback(repo_root, selected_ids)
+    if rows_df.empty:
+        selected_meta = runs_df[runs_df["run_id"].isin(selected_ids)]
+        failed = int((selected_meta["return_code"] != 0).sum()) if not selected_meta.empty else 0
+        st.info(
+            "No per-budget rows available for the selected runs. "
+            f"Failed runs in selection: {failed}. "
+            "Try selecting successful runs or rerun with explicit models."
+        )
+        return
+
+    meta_cols = [
+        "run_id",
+        "seed",
+        "strata_composition",
+        "stratify_features",
+        "train_selection",
+        "train_skew",
+        "run_by",
+    ]
+    meta = runs_df.loc[:, meta_cols].drop_duplicates(subset=["run_id"])
+    df = rows_df.merge(meta, on="run_id", how="left")
+    # Rich config label for clearer paper-facing comparisons.
+    df["setting_label"] = df.apply(
+        lambda r: (
+            f"comp={r.get('strata_composition', 'na')} | "
+            f"train={r.get('train_selection', 'na')} | "
+            f"skew={r.get('train_skew', 'na')} | "
+            f"seed={r.get('seed', 'na')} | "
+            f"by={r.get('run_by', 'na')}"
+        ),
+        axis=1,
+    )
+
+    # Quality metric selection: plan quality preferred if present.
+    has_plan = df["mean_plan_quality"].notna().any()
+    has_sentinel = df["mean_sentinel_quality"].notna().any()
+    quality_metric = st.selectbox(
+        "Quality metric",
+        options=(
+            ["mean_plan_quality", "mean_sentinel_quality"]
+            if has_plan and has_sentinel
+            else (["mean_plan_quality"] if has_plan else ["mean_sentinel_quality"])
+        ),
+        help="Select which quality proxy to analyze across runs.",
+    )
+
+    groupby_col = st.selectbox(
+        "Group runs by",
+        options=["setting_label", "strata_composition", "stratify_features", "train_selection", "train_skew", "seed", "run_by"],
+        help="Groups are compared using stratified-vs-random deltas within each run and budget.",
+    )
+
+    # Paired random/stratified table.
+    piv = df.pivot_table(
+        index=["run_id", "sample_budget", groupby_col, "seed"],
+        columns="mode",
+        values=["total_time_s", "total_cost", quality_metric],
+        aggfunc="mean",
+    )
+    needed = [("total_time_s", "random"), ("total_time_s", "stratified")]
+    if any(c not in piv.columns for c in needed):
+        st.info("Need both random and stratified rows for selected runs.")
+        return
+    piv = piv.dropna(subset=needed).copy()
+    piv.columns = [f"{a}__{b}" for a, b in piv.columns]
+    paired = piv.reset_index()
+
+    # Optional budget range filter.
+    budgets = sorted(int(x) for x in paired["sample_budget"].dropna().unique().tolist())
+    if budgets:
+        bmin, bmax = budgets[0], budgets[-1]
+        lo, hi = st.slider("Budget range", min_value=bmin, max_value=bmax, value=(bmin, bmax))
+        paired = paired[(paired["sample_budget"] >= lo) & (paired["sample_budget"] <= hi)].copy()
+    if paired.empty:
+        st.info("No paired rows after filtering.")
+        return
+
+    # Deltas and win flags.
+    paired["quality_delta"] = paired.get(f"{quality_metric}__stratified") - paired.get(f"{quality_metric}__random")
+    paired["runtime_delta_s"] = paired["total_time_s__stratified"] - paired["total_time_s__random"]
+    paired["cost_delta"] = paired.get("total_cost__stratified") - paired.get("total_cost__random")
+    paired["runtime_speedup_pct"] = (paired["total_time_s__random"] - paired["total_time_s__stratified"]) / paired["total_time_s__random"] * 100.0
+    paired["quality_win"] = paired["quality_delta"] > 0
+    paired["runtime_win"] = paired["runtime_delta_s"] < 0
+
+    # Early signal when selected runs are effectively flat/degenerate.
+    near_zero_quality = paired["quality_delta"].fillna(0.0).abs().max() < 1e-9
+    near_zero_cost = paired["cost_delta"].fillna(0.0).abs().max() < 1e-9
+    if near_zero_quality and near_zero_cost:
+        st.warning(
+            "Selected runs are mostly flat (quality/cost deltas ~0). "
+            "These are not strong evidence runs for your paper. "
+            "Try larger eval_n, multiple seeds, and explicit model list."
+        )
+
+    # --- Tables ---
+    st.markdown("---")
+    st.markdown("### Leaderboard (Aggregated by Setting)")
+    st.caption("What it shows: which settings most consistently beat random across budgets and runs.")
+    leaderboard = (
+        paired.groupby(groupby_col, dropna=False)
+        .agg(
+            mean_quality_delta=("quality_delta", "mean"),
+            mean_runtime_speedup_pct=("runtime_speedup_pct", "mean"),
+            mean_cost_delta=("cost_delta", "mean"),
+            quality_win_rate=("quality_win", "mean"),
+            runtime_win_rate=("runtime_win", "mean"),
+            n_points=("run_id", "count"),
+            n_runs=("run_id", "nunique"),
+        )
+        .reset_index()
+    )
+    leaderboard["quality_win_rate"] = leaderboard["quality_win_rate"] * 100.0
+    leaderboard["runtime_win_rate"] = leaderboard["runtime_win_rate"] * 100.0
+    leaderboard = leaderboard.sort_values(["quality_win_rate", "mean_runtime_speedup_pct"], ascending=False)
+    st.dataframe(leaderboard, width="stretch", hide_index=True)
+
+    st.markdown("### Per-Budget Comparison Table")
+    st.caption("What it shows: exact paired values (random vs stratified) and deltas at each budget.")
+    per_budget_cols = [
+        "run_id",
+        groupby_col,
+        "sample_budget",
+        f"{quality_metric}__random",
+        f"{quality_metric}__stratified",
+        "quality_delta",
+        "total_time_s__random",
+        "total_time_s__stratified",
+        "runtime_delta_s",
+        "runtime_speedup_pct",
+        "total_cost__random",
+        "total_cost__stratified",
+        "cost_delta",
+    ]
+    available_cols = [c for c in per_budget_cols if c in paired.columns]
+    st.dataframe(paired.loc[:, available_cols].sort_values(["run_id", "sample_budget"]), width="stretch", hide_index=True)
+
+    st.markdown("### Robustness Table (Across Seeds)")
+    st.caption("What it shows: variability across runs/seeds, not just average effect size.")
+    robust = (
+        paired.groupby(groupby_col, dropna=False)
+        .agg(
+            quality_delta_mean=("quality_delta", "mean"),
+            quality_delta_std=("quality_delta", "std"),
+            runtime_speedup_mean=("runtime_speedup_pct", "mean"),
+            runtime_speedup_std=("runtime_speedup_pct", "std"),
+            cost_delta_mean=("cost_delta", "mean"),
+            cost_delta_std=("cost_delta", "std"),
+            n_runs=("run_id", "nunique"),
+        )
+        .reset_index()
+        .sort_values("runtime_speedup_mean", ascending=False)
+    )
+    st.dataframe(robust, width="stretch", hide_index=True)
+
+    # --- Charts ---
+    st.markdown("---")
+    st.markdown("### Comparative Charts")
+    st.caption("Each chart compares stratified against random baseline across the selected runs.")
+    selected_groups = st.multiselect(
+        f"Groups to plot ({groupby_col})",
+        options=sorted(str(x) for x in paired[groupby_col].dropna().unique().tolist()),
+        default=sorted(str(x) for x in paired[groupby_col].dropna().unique().tolist())[:4],
+    )
+    plot_df = paired[paired[groupby_col].astype(str).isin(selected_groups)].copy() if selected_groups else paired.copy()
+    if plot_df.empty:
+        st.info("No rows for selected groups.")
+        return
+
+    # Complexity-focused sample-efficiency error view (Flesch-Kincaid proxy).
+    st.markdown("### Sample-Efficiency Error Curves (Flesch-Kincaid Complexity)")
+    complexity_df = df.copy()
+    if "stratify_features" in complexity_df.columns:
+        complexity_mask = complexity_df["stratify_features"].fillna("").str.contains("complexity_score", case=False, regex=False)
+        if complexity_mask.any():
+            complexity_df = complexity_df[complexity_mask].copy()
+    # Build a per-run reference at the maximum budget across both modes.
+    ref_cols = ["run_id", "sample_budget", "mode", quality_metric, "total_time_s"]
+    ref_source = complexity_df.loc[:, [c for c in ref_cols if c in complexity_df.columns]].copy()
+    if not ref_source.empty and {"run_id", "sample_budget", "mode", quality_metric, "total_time_s"}.issubset(ref_source.columns):
+        max_budget = ref_source.groupby("run_id", as_index=False)["sample_budget"].max().rename(columns={"sample_budget": "max_budget"})
+        ref_source = ref_source.merge(max_budget, on="run_id", how="left")
+        ref_at_max = ref_source[ref_source["sample_budget"] == ref_source["max_budget"]].copy()
+        ref_by_run = (
+            ref_at_max.groupby("run_id", as_index=False)
+            .agg(
+                true_quality_proxy=(quality_metric, "mean"),
+                true_runtime_proxy=("total_time_s", "mean"),
+            )
+        )
+        err_df = ref_source.merge(ref_by_run, on="run_id", how="left")
+        err_df["quality_error"] = (err_df[quality_metric] - err_df["true_quality_proxy"]).abs()
+        err_df["runtime_error_s"] = (err_df["total_time_s"] - err_df["true_runtime_proxy"]).abs()
+        err_df = err_df[err_df["mode"].astype(str).str.lower().isin(["random", "stratified"])].copy()
+        if not err_df.empty:
+            c_err1, c_err2 = st.columns(2)
+            with c_err1:
+                _graph_heading(
+                    "Quality Error vs Number of Samples",
+                    "What it shows: absolute quality error at each budget, using each run's highest-budget value as the true-quality proxy. How to use it: a line that drops faster is more sample-efficient.",
+                )
+                fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+                qagg = err_df.groupby(["mode", "sample_budget"], dropna=False)["quality_error"].mean().reset_index()
+                for mode, grp in qagg.groupby("mode", dropna=False):
+                    style = {"linestyle": "--", "marker": "o"} if str(mode).lower() == "random" else {"linestyle": "-", "marker": "s"}
+                    ax.plot(grp["sample_budget"], grp["quality_error"], linewidth=2, label=str(mode), **style)
+                ax.set_xlabel("Number of samples (budget)")
+                ax.set_ylabel("Quality error (absolute)")
+                ax.grid(True, alpha=0.3)
+                ax.legend(fontsize=8)
+                st.pyplot(fig, width="content")
+                plt.close(fig)
+            with c_err2:
+                _graph_heading(
+                    "Runtime Error vs Number of Samples",
+                    "What it shows: absolute runtime error at each budget, using each run's highest-budget runtime as the true-runtime proxy. How to use it: lower and faster-decreasing lines indicate better runtime estimation.",
+                )
+                fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+                tagg = err_df.groupby(["mode", "sample_budget"], dropna=False)["runtime_error_s"].mean().reset_index()
+                for mode, grp in tagg.groupby("mode", dropna=False):
+                    style = {"linestyle": "--", "marker": "o"} if str(mode).lower() == "random" else {"linestyle": "-", "marker": "s"}
+                    ax.plot(grp["sample_budget"], grp["runtime_error_s"], linewidth=2, label=str(mode), **style)
+                ax.set_xlabel("Number of samples (budget)")
+                ax.set_ylabel("Runtime error (seconds, absolute)")
+                ax.grid(True, alpha=0.3)
+                ax.legend(fontsize=8)
+                st.pyplot(fig, width="content")
+                plt.close(fig)
+
+    # 1) Delta vs Budget line (quality + runtime)
+    c1, c2 = st.columns(2)
+    with c1:
+        _graph_heading(
+            "Quality Delta vs Budget (line)",
+            "What it shows: average quality difference (stratified minus random) across selected runs, split by budget. How to use it: points above zero favor stratified quality.",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        agg_q = plot_df.groupby([groupby_col, "sample_budget"], dropna=False)["quality_delta"].mean().reset_index()
+        for g, grp in agg_q.groupby(groupby_col, dropna=False):
+            ax.plot(grp["sample_budget"], grp["quality_delta"], marker="o", linewidth=2, label=str(g))
+        ax.axhline(0.0, color="black", linewidth=1)
+        ax.set_xlabel("Sample budget")
+        ax.set_ylabel("Quality delta (stratified - random)")
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=8)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+    with c2:
+        _graph_heading(
+            "Runtime Delta vs Budget (line)",
+            "What it shows: average runtime difference in seconds (stratified minus random) across selected runs. How to use it: points below zero mean stratified is faster.",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        agg_t = plot_df.groupby([groupby_col, "sample_budget"], dropna=False)["runtime_delta_s"].mean().reset_index()
+        for g, grp in agg_t.groupby(groupby_col, dropna=False):
+            ax.plot(grp["sample_budget"], grp["runtime_delta_s"], marker="o", linewidth=2, label=str(g))
+        ax.axhline(0.0, color="black", linewidth=1)
+        ax.set_xlabel("Sample budget")
+        ax.set_ylabel("Runtime delta seconds")
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=8)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+
+    # 2) Speedup vs Budget
+    c3, c4 = st.columns(2)
+    with c3:
+        _graph_heading(
+            "Runtime Speedup vs Budget (line)",
+            "What it shows: average runtime percent improvement versus random across selected runs. How to use it: values above zero mean stratified saved time.",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        agg_s = plot_df.groupby([groupby_col, "sample_budget"], dropna=False)["runtime_speedup_pct"].mean().reset_index()
+        for g, grp in agg_s.groupby(groupby_col, dropna=False):
+            ax.plot(grp["sample_budget"], grp["runtime_speedup_pct"], marker="o", linewidth=2, label=str(g))
+        ax.axhline(0.0, color="black", linewidth=1)
+        ax.set_xlabel("Sample budget")
+        ax.set_ylabel("Speedup (%)")
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=8)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+    with c4:
+        _graph_heading(
+            "Win Rate by Setting (bar)",
+            "What it shows: for each setting group, the percent of comparisons where stratified wins. How to use it: taller bars indicate more reliable gains.",
+        )
+        wr = (
+            plot_df.groupby(groupby_col, dropna=False)
+            .agg(quality_win_rate=("quality_win", "mean"), runtime_win_rate=("runtime_win", "mean"))
+            .reset_index()
+        )
+        wr["quality_win_rate"] *= 100
+        wr["runtime_win_rate"] *= 100
+        fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
+        x = range(len(wr))
+        ax.bar([i - 0.2 for i in x], wr["quality_win_rate"], width=0.4, label="quality win rate")
+        ax.bar([i + 0.2 for i in x], wr["runtime_win_rate"], width=0.4, label="runtime win rate")
+        ax.set_xticks(list(x))
+        ax.set_xticklabels([str(v) for v in wr[groupby_col]], rotation=25, ha="right")
+        ax.set_ylim(0, 100)
+        ax.set_ylabel("Win rate (%)")
+        ax.grid(True, axis="y", alpha=0.3)
+        ax.legend(fontsize=8)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+
+    # 3) Effect size distribution + Pareto
+    c5, c6 = st.columns(2)
+    with c5:
+        _graph_heading(
+            "Effect Size Distribution (boxplot)",
+            "What it shows: spread of quality deltas for each setting group. How to use it: boxes mostly above zero indicate positive gains; tighter boxes indicate more stable results.",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
+        groups = []
+        labels = []
+        for g, grp in plot_df.groupby(groupby_col, dropna=False):
+            groups.append(grp["quality_delta"].dropna().values)
+            labels.append(str(g))
+        if groups:
+            ax.boxplot(groups, tick_labels=labels, showfliers=False)
+            ax.axhline(0.0, color="black", linewidth=1)
+            ax.set_ylabel("Quality delta")
+            ax.tick_params(axis="x", rotation=25)
+            ax.grid(True, axis="y", alpha=0.3)
+            st.pyplot(fig, width="content")
+        plt.close(fig)
+    with c6:
+        _graph_heading(
+            "Pareto View (quality delta vs runtime delta)",
+            "What it shows: each point is one comparison with runtime change on x and quality change on y. How to use it: upper-left area is best (better quality and faster runtime).",
+        )
+        fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
+        for g, grp in plot_df.groupby(groupby_col, dropna=False):
+            ax.scatter(grp["runtime_delta_s"], grp["quality_delta"], alpha=0.7, label=str(g))
+        ax.axhline(0.0, color="black", linewidth=1)
+        ax.axvline(0.0, color="black", linewidth=1)
+        ax.set_xlabel("Runtime delta (s)")
+        ax.set_ylabel("Quality delta")
         ax.grid(True, alpha=0.3)
         ax.legend(fontsize=8)
         st.pyplot(fig, width="content")
@@ -783,7 +1710,7 @@ def build_command(
     fields_json: str | None,
 ) -> list[str]:
     cmd = [
-        "python3",
+        sys.executable,
         "scripts/run_sentinel_sampling_ab.py",
         "--papers",
         papers,
@@ -839,10 +1766,31 @@ def build_command(
 
 def main() -> None:
     st.set_page_config(page_title="Palimpzest Experiment Runner", layout="wide")
-    _init_session_defaults()
     repo_root = Path(__file__).resolve().parents[1]
+    # Ensure .env variables (including PALIMPZEST_HISTORY_DB_URL) are loaded for UI sessions.
+    load_dotenv(repo_root / ".env", override=False)
+    _init_session_defaults()
+    migrated_runs = 0
+    migrated_rows = 0
+    try:
+        migrated_runs, migrated_rows = _maybe_migrate_local_sqlite_to_remote(repo_root)
+    except Exception as exc:
+        st.warning(f"History migration check failed: {exc}")
+    imported_batch_runs, pending_batch_runs = _sync_completed_batch_runs(repo_root)
+    queue_max_parallel = int(st.session_state.get("queue_max_parallel", 1))
+    started_jobs_n, started_msgs = _maybe_start_queued_jobs(repo_root, max_parallel=queue_max_parallel)
     st.title("Palimpzest Sentinel A/B Runner")
     st.caption("Run random vs stratified sampling experiments with configurable feature strata.")
+    backend = "remote" if _history_db_url() else "local sqlite"
+    st.caption(f"History backend: {backend}")
+    if migrated_runs:
+        st.success(f"Migrated {migrated_runs} local runs ({migrated_rows} rows) to shared history DB.")
+    if imported_batch_runs:
+        st.success(f"Imported {imported_batch_runs} completed batch run(s) into History.")
+    for msg in started_msgs:
+        st.info(msg)
+    if pending_batch_runs:
+        st.caption(f"{pending_batch_runs} batch run(s) still running.")
     if st.button("Use quick graph-test settings"):
         _apply_quick_graph_test_defaults()
         st.success("Applied quick graph-test settings (for plot testing only).")
@@ -850,15 +1798,18 @@ def main() -> None:
         _apply_worst_case_stress_defaults()
         st.success("Applied worst-case baseline stress settings (targeting low-budget heterogeneity).")
     st.caption("Quick graph-test settings are for smoke-testing plot generation only, not final experiments.")
-    view = st.segmented_control("View", options=["Run", "History"], default="Run")
+    view = st.segmented_control("View", options=["Run", "History", "Analysis"], default="Run")
     if view == "History":
         _render_history_tab(repo_root)
+        return
+    if view == "Analysis":
+        _render_analysis_tab(repo_root)
         return
 
     # Keep conditional controls outside the form so they live-rerender.
     train_selection = st.selectbox(
         "Train set selection",
-        options=["prefix", "random", "stratified"],
+        options=TRAIN_SELECTION_OPTIONS,
         key="train_selection",
         help=(
             "How train docs are chosen from eval docs: prefix (first N), "
@@ -885,13 +1836,7 @@ def main() -> None:
 
     train_skew = st.selectbox(
         "Train skew policy",
-        options=[
-            "natural",
-            "balanced_domain",
-            "min_one_per_domain",
-            "focus_domain",
-            "custom_domain_ratios",
-        ],
+        options=TRAIN_SKEW_OPTIONS,
         key="train_skew",
         help="Target domain mix in training set.",
     )
@@ -1030,9 +1975,117 @@ def main() -> None:
             key="fields_json_raw",
             help="JSON array of fields passed to sem_map. Edit to change what the LLM extracts.",
         )
-        submitted = st.form_submit_button("Run experiment")
+        st.markdown("---")
+        run_submitted = st.form_submit_button("Start experiment (enqueue)")
 
-    if not submitted:
+    jobs = _load_batch_manifest(repo_root)
+    st.markdown("### Jobs")
+    st.number_input(
+        "Max parallel queue workers",
+        min_value=1,
+        step=1,
+        key="queue_max_parallel",
+        help="How many queued jobs can run at the same time.",
+    )
+    if jobs:
+        queued_n, running_n, _ = _queue_state_counts(repo_root, jobs)
+        imported_n = sum(1 for j in jobs if _job_state(repo_root, j) == "imported")
+        finished_n = sum(1 for j in jobs if _job_state(repo_root, j) == "finished")
+        total_n = len(jobs)
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Total queued ever", str(total_n))
+        c2.metric("Completed/imported", str(imported_n))
+        c3.metric("Finished (pending import)", str(finished_n))
+        c4.metric("Active", str(queued_n + running_n))
+        if running_n > 0:
+            st.markdown("**Queue worker:** ⏳ running")
+        elif queued_n > 0:
+            st.markdown("**Queue worker:** ⏸ waiting to start next queued job")
+        else:
+            st.markdown("**Queue worker:** idle")
+        st.caption(f"Queue summary: {queued_n} queued, {running_n} running (max parallel={int(st.session_state.get('queue_max_parallel', 1))})")
+        active_rows = []
+        recent_rows = []
+        for job in jobs[-80:]:
+            status = _job_state(repo_root, job)
+            rec = {
+                "status": status,
+                "job_id": job.get("job_id"),
+                "pid": job.get("pid"),
+                "started_at": _job_started_at_text(job),
+                "runtime_min": round(_job_runtime_minutes(job) or 0.0, 2),
+                "seed": job.get("seed"),
+                "composition": job.get("strata_composition"),
+                "train_selection": job.get("train_selection"),
+                "train_skew": job.get("train_skew"),
+                "train_n": job.get("train_n"),
+                "eval_n": job.get("eval_n"),
+                "budgets": " ".join(str(x) for x in (job.get("budgets") or [])),
+                "output_csv": job.get("output_csv"),
+                "command": job.get("command"),
+                "log_file": job.get("log_file"),
+                "status_file": job.get("status_file"),
+            }
+            if status in {"queued", "running"}:
+                active_rows.append(rec)
+            else:
+                recent_rows.append(rec)
+        st.markdown("**Queued / Running**")
+        if active_rows:
+            active_df = pd.DataFrame(active_rows)
+            st.dataframe(
+                active_df[
+                    [
+                        "status",
+                        "job_id",
+                        "pid",
+                        "started_at",
+                        "runtime_min",
+                        "seed",
+                        "composition",
+                        "train_selection",
+                        "train_skew",
+                        "train_n",
+                        "eval_n",
+                        "budgets",
+                        "output_csv",
+                    ]
+                ],
+                width="stretch",
+                hide_index=True,
+            )
+            inspect_id = st.selectbox(
+                "Inspect job details",
+                options=[str(x) for x in active_df["job_id"].tolist()],
+                help="Choose a queued/running job to view full config details.",
+            )
+            sel = active_df[active_df["job_id"].astype(str) == str(inspect_id)].to_dict(orient="records")
+            if sel:
+                with st.expander("Selected job details", expanded=True):
+                    st.json(sel[0], expanded=False)
+        else:
+            st.caption("No queued or running jobs right now.")
+        with st.expander("Show recent completed jobs", expanded=True):
+            if recent_rows:
+                st.dataframe(pd.DataFrame(recent_rows[-20:]), width="stretch", hide_index=True)
+            else:
+                st.caption("No completed jobs yet.")
+    else:
+        st.caption("No jobs yet.")
+
+    if not run_submitted:
+        # Optional FIFO auto-polling while queue has pending/running jobs.
+        auto_poll = st.checkbox(
+            "Auto-refresh queue status (every 5s)",
+            value=True,
+            key="queue_auto_poll",
+            help="Keeps FIFO queue moving while this page is open.",
+        )
+        if auto_poll:
+            queued_n, running_n, _ = _queue_state_counts(repo_root, jobs)
+            if queued_n > 0 or running_n > 0:
+                time.sleep(5)
+                st.rerun()
         return
 
     try:
@@ -1072,7 +2125,7 @@ def main() -> None:
         st.error(f"Invalid numeric input: {exc}")
         return
 
-    cmd = build_command(
+    base_kwargs = dict(
         papers=papers,
         features_csv=features_csv,
         train_n=int(train_n),
@@ -1098,52 +2151,60 @@ def main() -> None:
         output_csv=output_csv.strip() or None,
         fields_json=fields_json,
     )
+    cmd = build_command(**base_kwargs)
 
     st.code(" ".join(shlex.quote(part) for part in cmd), language="bash")
 
-    with st.spinner("Running experiment..."):
-        proc = subprocess.run(
-            cmd,
-            cwd=str(repo_root),
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-
-    st.subheader("Exit status")
-    if proc.returncode == 0:
-        st.success("Completed successfully.")
+    manifest_rows = _load_batch_manifest(repo_root)
+    base_output = (output_csv.strip() or "results/manual_compare/queued_run.csv")
+    out_path = Path(base_output)
+    suffix = f"_seed{int(seed)}_{strata_composition}_{train_selection}_{train_skew}"
+    if out_path.suffix.lower() == ".csv":
+        out_csv = str(out_path.with_name(f"{out_path.stem}{suffix}.csv"))
     else:
-        st.error(f"Run failed with exit code {proc.returncode}")
-
-    st.subheader("Stdout")
-    cleaned_stdout, removed_stdout_noise = _clean_stdout(proc.stdout or "")
-    if removed_stdout_noise:
-        st.caption(f"Suppressed {removed_stdout_noise} noisy stdout lines (progress/LiteLLM helper spam).")
-    st.code(_summarize_stdout(cleaned_stdout or ""), language="text")
-    with st.expander("Show raw stdout"):
-        st.text(proc.stdout or "(empty)")
-    st.subheader("Stderr")
-    cleaned_stderr, removed_noise = _clean_stderr(proc.stderr or "")
-    if removed_noise:
-        st.caption(f"Suppressed {removed_noise} repeated LiteLLM helper lines in stderr.")
-    st.text(cleaned_stderr or "(empty)")
-    with st.expander("Show raw stderr"):
-        st.text(proc.stderr or "(empty)")
-    saved_run_id = _save_run_history(
-        repo_root,
-        command=" ".join(shlex.quote(part) for part in cmd),
-        output_csv=output_csv.strip() or None,
-        return_code=int(proc.returncode),
-        budgets=budgets,
-        train_n=int(train_n),
-        eval_n=eval_n,
-        strata=int(strata),
-        k=int(k),
-        j=int(j),
+        out_csv = f"{base_output}{suffix}.csv"
+    cfg = {
+        **base_kwargs,
+        "seed": int(seed),
+        "strata_composition": strata_composition,
+        "train_selection": train_selection,
+        "train_skew": train_skew,
+        "output_csv": out_csv,
+    }
+    run_cmd = build_command(**cfg)
+    run_cmd_str = " ".join(shlex.quote(part) for part in run_cmd)
+    manifest_rows.append(
+        {
+            "job_id": _new_job_id(),
+            "command": run_cmd_str,
+            "output_csv": out_csv,
+            "budgets": budgets,
+            "train_n": int(train_n),
+            "eval_n": eval_n,
+            "strata": int(strata),
+            "k": int(k),
+            "j": int(j),
+            "seed": int(seed),
+            "strata_composition": strata_composition,
+            "stratify_features": stratify_features,
+            "train_selection": train_selection,
+            "train_skew": train_skew,
+            "history_imported": False,
+            "state": "queued",
+        }
     )
-    st.caption(f"Saved run to history DB as run_id={saved_run_id}. Switch View -> History to compare.")
-    _render_results_analysis(repo_root, output_csv.strip() or None)
+    _save_batch_manifest(repo_root, manifest_rows)
+    started_n, started_msgs = _maybe_start_queued_jobs(
+        repo_root,
+        max_parallel=int(st.session_state.get("queue_max_parallel", 1)),
+    )
+    st.success("Queued experiment config.")
+    if started_n > 0:
+        for msg in started_msgs:
+            st.info(msg)
+    else:
+        st.info("Another job is active. This config will auto-start when current job finishes.")
+    return
 
 
 if __name__ == "__main__":
