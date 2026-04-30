@@ -130,13 +130,24 @@ def _eval_feature_frame(eval_paths: list[Path], features_csv: Path) -> pd.DataFr
     from palimpzest.query.execution.feature_stratified_sampling import read_feature_table
 
     feature_df = read_feature_table(features_csv)
-    feat_indexed = feature_df.set_index("path", drop=False)
+    # Normalize path keys so CSVs containing relative paths (e.g. "papers/foo.pdf")
+    # still match eval paths resolved to absolute filesystem paths.
+    feat_by_path: dict[str, pd.Series] = {}
+    for _, row in feature_df.iterrows():
+        raw = str(row["path"])
+        csv_path = Path(raw).expanduser()
+        if not csv_path.is_absolute():
+            csv_path = (_REPO_ROOT / csv_path).resolve(strict=False)
+        else:
+            csv_path = csv_path.resolve(strict=False)
+        feat_by_path.setdefault(str(csv_path), row)
+
     rows = []
     for p in eval_paths:
-        key = str(p)
-        if key not in feat_indexed.index:
+        key = str(Path(p).resolve(strict=False))
+        if key not in feat_by_path:
             raise ValueError(f"Path missing from features CSV: {key}")
-        rows.append(feat_indexed.loc[key])
+        rows.append(feat_by_path[key])
     return pd.DataFrame(rows).reset_index(drop=True)
 
 
