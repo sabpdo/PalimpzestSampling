@@ -459,18 +459,15 @@ def _candidate_ops_metrics(stats: ExecutionStats) -> tuple[int, int]:
 
 def resolved_plan_quality(stats: ExecutionStats) -> tuple[float | None, str]:
     """
-    Resolve plan quality with an explicit fallback.
+    Resolve strict final-plan quality.
 
     Priority:
     1) True final-plan quality from executed plan stats.
-    2) Sentinel-stage quality fallback when final-plan quality is unavailable.
+    2) Missing when final-plan quality is unavailable.
     """
     plan_q = mean_plan_record_quality(stats)
     if plan_q is not None:
         return plan_q, "final_plan"
-    sentinel_q = mean_sentinel_record_quality(stats)
-    if sentinel_q is not None:
-        return sentinel_q, "sentinel_fallback"
     return None, "missing"
 
 
@@ -922,7 +919,7 @@ def main() -> None:
         "(default Validator uses an LLM judge when map_score_fn is not overridden)."
     )
     print(
-        "mean_Q_plan = final-plan quality when available; otherwise sentinel fallback "
+        "mean_Q_plan = final-plan quality only; null when unavailable "
         "(see plan_quality_source column)."
     )
 

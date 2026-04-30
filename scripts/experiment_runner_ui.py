@@ -178,6 +178,14 @@ def _read_results_csv(repo_root: Path, output_csv: str | None) -> pd.DataFrame |
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
+    # Enforce strict semantics: mean_plan_quality is valid only when sourced from true final-plan scoring.
+    if "mean_plan_quality" in df.columns:
+        if "plan_quality_source" in df.columns:
+            valid_final = df["plan_quality_source"].astype(str).str.strip().str.lower() == "final_plan"
+            df.loc[~valid_final, "mean_plan_quality"] = pd.NA
+        else:
+            # Older CSVs without provenance are treated as unknown and excluded from final-plan quality analysis.
+            df["mean_plan_quality"] = pd.NA
     return df
 
 
@@ -515,7 +523,87 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
                 ax.grid(True, axis="y", alpha=0.3)
                 _render_and_download(fig, "Download runtime speedup plot (PNG)", "runtime_speedup_vs_random.png")
 
-    # Plot 8: head-to-head win rates as separate sentinel/final/runtime bars.
+    # Plot 8: optimization coverage metrics from sentinel phase.
+    st.markdown("---")
+    st.markdown("### Optimization Coverage Metrics")
+    metric_specs = [
+        (
+            "total_sampled_records",
+            "Total sampled records vs sample budget",
+            "Total sampled records",
+            "total_sampled_records",
+            "What it shows: number of unique sampled records used by sentinel optimization at each budget. How to use it: higher values mean broader sampling coverage.",
+        ),
+        (
+            "quality_scored_records",
+            "Quality-scored records vs sample budget",
+            "Quality-scored records",
+            "quality_scored_records",
+            "What it shows: number of unique sampled records that received a quality score. How to use it: larger counts mean stronger quality-estimation signal.",
+        ),
+        (
+            "candidate_ops_explored",
+            "Candidate operators explored vs sample budget",
+            "Candidate ops explored",
+            "candidate_ops_explored",
+            "What it shows: how many operator candidates got sampled evidence during optimization. How to use it: higher values indicate broader exploration.",
+        ),
+        (
+            "candidate_ops_pruned_estimate",
+            "Candidate operators pruned estimate vs sample budget",
+            "Candidate ops pruned (estimate)",
+            "candidate_ops_pruned_estimate",
+            "What it shows: estimated count of candidates not explored with sampled evidence. How to use it: higher values suggest stronger narrowing/focus of search.",
+        ),
+    ]
+    for metric_col, title, y_label, slug, description in metric_specs:
+        if not {"sample_budget", "mode", metric_col}.issubset(df.columns):
+            continue
+        mdf = df.dropna(subset=[metric_col]).copy()
+        if mdf.empty:
+            continue
+        c_metric_line, c_metric_delta = st.columns(2)
+        with c_metric_line:
+            _graph_heading(title, description)
+            metric_png = _plot_line_by_mode(
+                mdf,
+                metric_col,
+                title,
+                y_label,
+            )
+            st.download_button(
+                f"Download {slug} plot (PNG)",
+                data=metric_png,
+                file_name=f"{slug}_vs_budget.png",
+                mime="image/png",
+            )
+        with c_metric_delta:
+            delta_df = _paired_budget_deltas(mdf, metric_col)
+            if delta_df.empty:
+                st.caption("No paired random/stratified rows for delta view.")
+            else:
+                _graph_heading(
+                    f"{y_label} delta vs random (by budget)",
+                    "What it shows: stratified minus random for this metric at each budget. How to use it: positive means stratified is higher, negative means lower.",
+                )
+                fig, ax = plt.subplots(figsize=FIGSIZE_BAR)
+                vals = delta_df["delta"].tolist()
+                colors = ["#2ca02c" if v >= 0 else "#d62728" for v in vals]
+                ax.bar(
+                    delta_df["sample_budget"].astype(int).astype(str),
+                    vals,
+                    color=colors,
+                    alpha=0.55,
+                    edgecolor="#333333",
+                    linewidth=1.2,
+                )
+                ax.axhline(0.0, color="black", linewidth=1)
+                ax.set_xlabel("Sample budget")
+                ax.set_ylabel(f"Delta {y_label} (stratified - random)")
+                ax.grid(True, axis="y", alpha=0.3)
+                _render_and_download(fig, f"Download {slug} delta plot (PNG)", f"{slug}_delta_vs_random.png")
+
+    # Plot 9: head-to-head win rates as separate sentinel/final/runtime bars.
     td = _paired_budget_deltas(df.dropna(subset=["total_time_s"]), "total_time_s") if {"sample_budget", "mode", "total_time_s"}.issubset(df.columns) else pd.DataFrame()
     sentinel_qd = _paired_budget_deltas(df.dropna(subset=["mean_sentinel_quality"]), "mean_sentinel_quality") if {"sample_budget", "mode", "mean_sentinel_quality"}.issubset(df.columns) else pd.DataFrame()
     if {"sample_budget", "mode", "mean_plan_quality"}.issubset(df.columns):
@@ -768,6 +856,7 @@ def _init_history_db(repo_root: Path) -> str:
                 ("train_selection", "TEXT"),
                 ("train_skew", "TEXT"),
                 ("run_by", "TEXT"),
+                ("run_duration_s", "DOUBLE PRECISION"),
             ]:
                 conn.execute(text(f"ALTER TABLE runs ADD COLUMN IF NOT EXISTS {col_name} {col_type}"))
             conn.execute(
@@ -831,6 +920,7 @@ def _init_history_db(repo_root: Path) -> str:
             ("train_selection", "TEXT"),
             ("train_skew", "TEXT"),
             ("run_by", "TEXT"),
+            ("run_duration_s", "REAL"),
         ]:
             if col_name not in existing_cols:
                 conn.execute(f"ALTER TABLE runs ADD COLUMN {col_name} {col_type}")
@@ -883,6 +973,11 @@ def _save_run_history(
 ) -> int:
     db_ref = _init_history_db(repo_root)
     csv_df = _read_results_csv(repo_root, output_csv)
+    run_duration_s: float | None = None
+    if csv_df is not None and not csv_df.empty and "total_time_s" in csv_df.columns:
+        total_series = pd.to_numeric(csv_df["total_time_s"], errors="coerce").dropna()
+        if not total_series.empty:
+            run_duration_s = float(total_series.sum())
     vals = {
         "command": command,
         "output_csv": output_csv or "",
@@ -899,6 +994,7 @@ def _save_run_history(
         "train_selection": train_selection,
         "train_skew": train_skew,
         "run_by": _current_run_by(),
+        "run_duration_s": run_duration_s,
     }
     if db_ref.startswith("postgres"):
         engine = create_engine(db_ref)
@@ -909,11 +1005,11 @@ def _save_run_history(
                         """
                         INSERT INTO runs(
                             command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
-                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
                         )
                         VALUES (
                             :command, :output_csv, :return_code, :budgets, :train_n, :eval_n, :strata, :k, :j,
-                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by
+                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s
                         )
                         RETURNING run_id
                         """
@@ -957,11 +1053,11 @@ def _save_run_history(
             """
             INSERT INTO runs(
                 command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
-                seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+                seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by"]),
+            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by","run_duration_s"]),
         )
         run_id = int(cur.lastrowid)
         if csv_df is not None and not csv_df.empty:
@@ -1217,7 +1313,7 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
             """
             SELECT
                 run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
-                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
             FROM runs
             ORDER BY run_id
             """,
@@ -1244,11 +1340,11 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
                     """
                     INSERT INTO runs(
                         run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
-                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by
+                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
                     )
                     VALUES (
                         :run_id, :created_at, :command, :output_csv, :return_code, :budgets, :train_n, :eval_n,
-                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by
+                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s
                     )
                     """
                 ),
@@ -1282,7 +1378,7 @@ def _load_history_runs(repo_root: Path) -> pd.DataFrame:
     query = """
         SELECT
             run_id, created_at, return_code, budgets, train_n, eval_n, strata, k, j,
-            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv
+            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv, run_duration_s
         FROM runs
         ORDER BY run_id DESC
         LIMIT 200
