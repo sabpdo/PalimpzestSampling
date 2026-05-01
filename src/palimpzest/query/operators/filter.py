@@ -102,7 +102,7 @@ class FilterOp(PhysicalOperator, ABC):
             op_details={k: str(v) for k, v in self.get_id_params().items()},
         )
 
-        return DataRecordSet([dr], [record_op_stats])
+        return DataRecordSet([dr], [record_op_stats], input=candidate)
 
     def __call__(self, candidate: DataRecord) -> DataRecordSet:
         start_time = time.time()

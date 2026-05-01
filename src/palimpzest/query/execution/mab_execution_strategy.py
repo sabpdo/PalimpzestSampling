@@ -20,6 +20,7 @@ from palimpzest.query.operators.topk import TopKOp
 from palimpzest.query.optimizer.plan import SentinelPlan
 from palimpzest.utils.progress import create_progress_manager
 from palimpzest.validator.validator import Validator
+from palimpzest.utils.trace_env import palimpzest_trace_sentinel
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,15 @@ class OpFrontier:
         self.source_indices_to_inputs = {source_unique_logical_op_id: {} for source_unique_logical_op_id in source_unique_logical_op_ids}
         if self.is_scan_op:
             self.source_indices_to_inputs["source"] = {source_idx: [int(source_idx.split("-")[-1])] for source_idx in source_indices}
-        
+
+        if palimpzest_trace_sentinel() and self.is_llm_op:
+            logger.info(
+                "[sentinel-sampling] init_llm_frontier k=%s j=%s frontier=%s reservoir_head=%s",
+                self.k,
+                self.j,
+                [op.get_full_op_id() for op in self.frontier_ops],
+                [op.get_full_op_id() for op in self.reservoir_ops[: min(12, len(self.reservoir_ops))]],
+            )
 
     def get_frontier_ops(self) -> list[PhysicalOperator]:
         """
@@ -339,6 +348,15 @@ class OpFrontier:
             for op in self.frontier_ops:
                 if self.full_op_id_to_sources_processed[op.get_full_op_id()] == set() and op.get_full_op_id() != max_quality_op.get_full_op_id():
                     op_source_indices_pairs.append((op, source_indices))
+
+        if palimpzest_trace_sentinel():
+            logger.info(
+                "[sentinel-sampling] get_frontier_op_inputs frontier=%s pairs=%s unsampled_filled=%s max_quality_op=%s",
+                [op.get_full_op_id() for op in self.frontier_ops],
+                [(op.get_full_op_id(), source_indices) for op, source_indices in op_source_indices_pairs],
+                unsampled_source_indices,
+                max_quality_op.get_full_op_id(),
+            )
 
         # construct the op inputs
         op_inputs = []

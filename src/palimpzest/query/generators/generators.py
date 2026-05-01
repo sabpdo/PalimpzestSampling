@@ -22,6 +22,7 @@ from palimpzest.core.elements.records import DataRecord
 from palimpzest.core.models import GenerationStats
 from palimpzest.prompts import PromptFactory, PromptManager
 from palimpzest.utils.model_helpers import resolve_reasoning_effort
+from palimpzest.utils.trace_env import palimpzest_trace_llm
 
 # DEFINITIONS
 GenerationOutput = tuple[dict, str | None, GenerationStats, list[dict]]
@@ -30,6 +31,17 @@ InputType = TypeVar("InputType")
 
 
 logger = logging.getLogger(__name__)
+
+_LLM_TRACE_COMPLETION_MAX = 16000
+
+
+def _truncate_for_trace(text: str | None, max_len: int = _LLM_TRACE_COMPLETION_MAX) -> str:
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+    return text[:max_len] + f"\n... [truncated, total chars={len(text)}]"
+
 
 def get_json_from_answer(answer: str, model: Model, cardinality: Cardinality) -> dict[str, Any]:
     """
@@ -511,4 +523,15 @@ class Generator(Generic[ContextType, InputType]):
                 f.write(f"{str(e)}\n")
 
         logger.debug(f"Generated field answers: {field_answers}")
+
+        if palimpzest_trace_llm(self.verbose):
+            logger.info(
+                "[llm-trace] model=%s strategy=%s\nREASONING (parsed):\n%s\nPARSED_ANSWER:\n%s\nRAW_COMPLETION:\n%s",
+                self.model_name,
+                self.prompt_strategy,
+                _truncate_for_trace(reasoning, 8000),
+                field_answers,
+                _truncate_for_trace(completion_text),
+            )
+
         return field_answers, reasoning, generation_stats, messages

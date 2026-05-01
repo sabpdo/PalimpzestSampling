@@ -5,6 +5,7 @@ from palimpzest.constants import PARALLEL_EXECUTION_SLEEP_INTERVAL_SECS
 from palimpzest.core.elements.records import DataRecord
 from palimpzest.core.models import PlanStats
 from palimpzest.query.execution.execution_strategy import ExecutionStrategy
+from palimpzest.query.execution.record_set_quality import apply_validator_to_record_sets
 from palimpzest.query.operators.aggregate import AggregateOp
 from palimpzest.query.operators.distinct import DistinctOp
 from palimpzest.query.operators.join import JoinOp
@@ -23,6 +24,8 @@ class ParallelExecutionStrategy(ExecutionStrategy):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Set by QueryProcessorFactory when a Validator is present (final-plan quality scoring).
+        self.validator = None
 
     def _any_queue_not_empty(self, queues: dict[str, list] | dict[str, dict[str, list]]) -> bool:
         """Helper function to check if any queue is not empty."""
@@ -69,6 +72,7 @@ class ParallelExecutionStrategy(ExecutionStrategy):
 
         # add the finished futures to the input queue for this operator
         output_records, total_inputs_processed, total_cost = [], 0, 0.0
+        finished: list[tuple] = []
         for future in done_futures:
             output = future.result()
             record_set, num_inputs_processed = output if self.is_join_op[unique_full_op_id] else (output, 1)
@@ -77,7 +81,17 @@ class ParallelExecutionStrategy(ExecutionStrategy):
             if len(record_set) == 0:
                 continue
 
-            # otherwise, process records and their stats
+            finished.append((record_set, num_inputs_processed))
+
+        op = self.unique_full_op_id_to_operator[unique_full_op_id]
+        apply_validator_to_record_sets(
+            getattr(self, "validator", None),
+            self.max_workers,
+            op,
+            [rs for rs, _ in finished],
+        )
+
+        for record_set, num_inputs_processed in finished:
             records = record_set.data_records
             record_op_stats = record_set.record_op_stats
 
