@@ -538,18 +538,15 @@ def resolved_plan_quality(
     stats: ExecutionStats, *, judged_ops_only: bool = True
 ) -> tuple[float | None, str]:
     """
-    Resolve plan quality with an explicit fallback.
+    Resolve strict final-plan quality.
 
     Priority:
     1) True final-plan quality from executed plan stats.
-    2) Sentinel-stage quality fallback when final-plan quality is unavailable.
+    2) Missing when final-plan quality is unavailable.
     """
     plan_q = mean_plan_record_quality(stats, judged_ops_only=judged_ops_only)
     if plan_q is not None:
         return plan_q, "final_plan"
-    sentinel_q = mean_sentinel_record_quality(stats, judged_ops_only=judged_ops_only)
-    if sentinel_q is not None:
-        return sentinel_q, "sentinel_fallback"
     return None, "missing"
 
 
@@ -1017,8 +1014,9 @@ def main() -> None:
         "Pass --quality-mean-all-ops to always use the all-ops mean."
     )
     print(
-        "mean_*_all_ops columns (CSV) always include every scored op. "
-        "plan_quality_source: final_plan vs sentinel_fallback."
+        "mean_*_all_ops columns (CSV) include every scored op. "
+        "mean_Q_plan is final-plan quality only; null when unavailable "
+        "(plan_quality_source: final_plan or missing)."
     )
 
     if args.output_csv is not None:
