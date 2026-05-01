@@ -1011,6 +1011,7 @@ def _init_history_db(repo_root: Path) -> str:
                 ("train_skew", "TEXT"),
                 ("run_by", "TEXT"),
                 ("run_duration_s", "DOUBLE PRECISION"),
+                ("features_csv", "TEXT"),
             ]:
                 conn.execute(text(f"ALTER TABLE runs ADD COLUMN IF NOT EXISTS {col_name} {col_type}"))
             conn.execute(
@@ -1075,6 +1076,7 @@ def _init_history_db(repo_root: Path) -> str:
             ("train_skew", "TEXT"),
             ("run_by", "TEXT"),
             ("run_duration_s", "REAL"),
+            ("features_csv", "TEXT"),
         ]:
             if col_name not in existing_cols:
                 conn.execute(f"ALTER TABLE runs ADD COLUMN {col_name} {col_type}")
@@ -1124,6 +1126,7 @@ def _save_run_history(
     stratify_features: list[str],
     train_selection: str,
     train_skew: str,
+    features_csv: str = "",
 ) -> int:
     db_ref = _init_history_db(repo_root)
     csv_df = _read_results_csv(repo_root, output_csv)
@@ -1149,6 +1152,7 @@ def _save_run_history(
         "train_skew": train_skew,
         "run_by": _current_run_by(),
         "run_duration_s": run_duration_s,
+        "features_csv": features_csv,
     }
     if db_ref.startswith("postgres"):
         engine = create_engine(db_ref)
@@ -1159,11 +1163,11 @@ def _save_run_history(
                         """
                         INSERT INTO runs(
                             command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
-                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
+                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
                         )
                         VALUES (
                             :command, :output_csv, :return_code, :budgets, :train_n, :eval_n, :strata, :k, :j,
-                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s
+                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s, :features_csv
                         )
                         RETURNING run_id
                         """
@@ -1207,11 +1211,11 @@ def _save_run_history(
             """
             INSERT INTO runs(
                 command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
-                seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
+                seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by","run_duration_s"]),
+            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by","run_duration_s","features_csv"]),
         )
         run_id = int(cur.lastrowid)
         if csv_df is not None and not csv_df.empty:
@@ -1590,6 +1594,7 @@ def _sync_completed_batch_runs(repo_root: Path) -> tuple[int, int]:
             stratify_features=[str(x) for x in row.get("stratify_features", [])],
             train_selection=str(row.get("train_selection", "")),
             train_skew=str(row.get("train_skew", "")),
+            features_csv=str(row.get("features_csv", "")),
         )
         row["history_imported"] = True
         row["return_code"] = return_code
@@ -1627,7 +1632,7 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
             """
             SELECT
                 run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
-                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
+                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
             FROM runs
             ORDER BY run_id
             """,
@@ -1654,11 +1659,11 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
                     """
                     INSERT INTO runs(
                         run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
-                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s
+                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
                     )
                     VALUES (
                         :run_id, :created_at, :command, :output_csv, :return_code, :budgets, :train_n, :eval_n,
-                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s
+                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s, :features_csv
                     )
                     """
                 ),
@@ -1692,7 +1697,7 @@ def _load_history_runs(repo_root: Path) -> pd.DataFrame:
     query = """
         SELECT
             run_id, created_at, return_code, budgets, train_n, eval_n, strata, k, j,
-            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv, run_duration_s
+            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv, run_duration_s, features_csv
         FROM runs
         ORDER BY run_id DESC
         LIMIT 200
@@ -1921,6 +1926,7 @@ def _render_analysis_tab(repo_root: Path) -> None:
         "train_selection",
         "train_skew",
         "run_by",
+        "features_csv",
     ]
     meta = runs_df.loc[:, meta_cols].drop_duplicates(subset=["run_id"])
     df = rows_df.merge(meta, on="run_id", how="left")
@@ -1978,7 +1984,7 @@ def _render_analysis_tab(repo_root: Path) -> None:
 
     groupby_col = st.selectbox(
         "Group runs by",
-        options=["setting_label", "strata_composition", "stratify_features", "train_selection", "train_skew", "seed", "run_by"],
+        options=["setting_label", "strata_composition", "stratify_features", "train_selection", "train_skew", "seed", "run_by", "features_csv"],
         help="Groups are compared using stratified-vs-random deltas within each run and budget.",
     )
 
@@ -2370,22 +2376,52 @@ def _render_stress_dataset_builder(repo_root: Path, *, widget_key_prefix: str) -
     preset_opts = list(mod.AVAILABLE_PRESETS)
     preset_idx = preset_opts.index("rare_numeric_tail") if "rare_numeric_tail" in preset_opts else 0
 
+    preset = st.selectbox(
+        "Preset (recipe)",
+        options=preset_opts,
+        index=preset_idx,
+        format_func=lambda p: SYNTHESIS_PRESET_LABELS.get(str(p), str(p)),
+        key=f"{widget_key_prefix}_preset",
+        help=(
+            "Pick **which fiction** synthetic rows embody: tails on word-count, categorical domain rarity, "
+            "or splits on section-count. Sliders mutate only the highlighted recipe."
+        ),
+    )
+    st.caption(mod.PRESET_DESCRIPTIONS[preset])
+
+    base = StressDatasetParams.defaults()
+
+    def _default_out_dir() -> str:
+        wkp = widget_key_prefix
+        seed = int(st.session_state.get(f"{wkp}_sb_seed", 42))
+        if preset == "rare_numeric_tail":
+            tf = st.session_state.get(f"{wkp}_tf", base.tail_fraction)
+            dom = st.session_state.get(f"{wkp}_taildom", base.tail_domain)
+            return f"papers/stratifier_stress_{preset}_tail{int(tf * 100)}pct_{dom}_seed{seed}"
+        if preset == "domain_heavy_skew":
+            mf = st.session_state.get(f"{wkp}_mf", base.majority_fraction)
+            maj = st.session_state.get(f"{wkp}_maj", base.majority_domain)
+            mino = st.session_state.get(f"{wkp}_mino", base.minority_domain)
+            return f"papers/stratifier_stress_{preset}_{maj}{int(mf * 100)}pct_{mino}_seed{seed}"
+        if preset == "bimodal_sections":
+            sf = st.session_state.get(f"{wkp}_sf", base.short_section_fraction)
+            return f"papers/stratifier_stress_{preset}_short{int(sf * 100)}pct_seed{seed}"
+        if preset == "ultra_rare_domain_tail":
+            urf = st.session_state.get(f"{wkp}_urf", base.ultra_rare_fraction)
+            dom = st.session_state.get(f"{wkp}_urdom", base.ultra_rare_domain)
+            return f"papers/stratifier_stress_{preset}_{dom}{int(urf * 100)}pct_seed{seed}"
+        if preset == "adversarial_feature_conflict":
+            cf = st.session_state.get(f"{wkp}_cf", base.conflict_fraction)
+            da = st.session_state.get(f"{wkp}_cda", base.conflict_domain_a)
+            db = st.session_state.get(f"{wkp}_cdb", base.conflict_domain_b)
+            return f"papers/stratifier_stress_{preset}_{da}_{db}_{int(cf * 100)}pct_seed{seed}"
+        return f"papers/stratifier_stress_{preset}_seed{seed}"
+
     with st.form(f"stress_ds_builder_{widget_key_prefix}"):
-        preset = st.selectbox(
-            "Preset (recipe)",
-            options=preset_opts,
-            index=preset_idx,
-            format_func=lambda p: SYNTHESIS_PRESET_LABELS.get(str(p), str(p)),
-            help=(
-                "Pick **which fiction** synthetic rows embody: tails on word-count, categorical domain rarity, "
-                "or splits on section-count. Sliders mutate only the highlighted recipe."
-            ),
-        )
-        st.caption(mod.PRESET_DESCRIPTIONS[preset])
 
         out_dir = st.text_input(
             "Output folder (inside repo)",
-            value="papers/stratifier_stress_seed42",
+            value=_default_out_dir(),
             help="Creates this directory (relative to repo root), drops `paper_features.csv` plus `doc_*.pdf`; "
             "old `doc_*.pdf` in that folder disappear on regenerate.",
         )
@@ -2394,6 +2430,7 @@ def _render_stress_dataset_builder(repo_root: Path, *, widget_key_prefix: str) -
             min_value=0,
             value=42,
             step=1,
+            key=f"{widget_key_prefix}_sb_seed",
             help=(
                 "Controls stochastic sampling **while fabricating rows**—which corpus PDF gets copied and which "
                 "random numbers populate synthetic features. Separate from Experiment **Seed**, which configures "
@@ -2430,7 +2467,6 @@ def _render_stress_dataset_builder(repo_root: Path, *, widget_key_prefix: str) -
             help="When checked, sets Run-form Eval N equal to Pool size so sentinel never scans beyond synthesized rows.",
         )
 
-        base = StressDatasetParams.defaults()
         params = base
         dom_opts = _stress_dataset_domain_options()
 
@@ -3386,6 +3422,7 @@ def main() -> None:
             "stratify_features": stratify_features,
             "train_selection": train_selection,
             "train_skew": train_skew,
+            "features_csv": features_csv,
             "random_only": random_only,
             "stratified_only": stratified_only,
             "no_progress": no_progress,
