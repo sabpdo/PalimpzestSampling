@@ -1012,6 +1012,7 @@ def _init_history_db(repo_root: Path) -> str:
                 ("run_by", "TEXT"),
                 ("run_duration_s", "DOUBLE PRECISION"),
                 ("features_csv", "TEXT"),
+                ("fields_json", "TEXT"),
             ]:
                 conn.execute(text(f"ALTER TABLE runs ADD COLUMN IF NOT EXISTS {col_name} {col_type}"))
             conn.execute(
@@ -1077,6 +1078,7 @@ def _init_history_db(repo_root: Path) -> str:
             ("run_by", "TEXT"),
             ("run_duration_s", "REAL"),
             ("features_csv", "TEXT"),
+            ("fields_json", "TEXT"),
         ]:
             if col_name not in existing_cols:
                 conn.execute(f"ALTER TABLE runs ADD COLUMN {col_name} {col_type}")
@@ -1127,6 +1129,7 @@ def _save_run_history(
     train_selection: str,
     train_skew: str,
     features_csv: str = "",
+    fields_json: str = "",
 ) -> int:
     db_ref = _init_history_db(repo_root)
     csv_df = _read_results_csv(repo_root, output_csv)
@@ -1153,6 +1156,7 @@ def _save_run_history(
         "run_by": _current_run_by(),
         "run_duration_s": run_duration_s,
         "features_csv": features_csv,
+        "fields_json": fields_json,
     }
     if db_ref.startswith("postgres"):
         engine = create_engine(db_ref)
@@ -1163,11 +1167,11 @@ def _save_run_history(
                         """
                         INSERT INTO runs(
                             command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
-                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
+                            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv, fields_json
                         )
                         VALUES (
                             :command, :output_csv, :return_code, :budgets, :train_n, :eval_n, :strata, :k, :j,
-                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s, :features_csv
+                            :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s, :features_csv, :fields_json
                         )
                         RETURNING run_id
                         """
@@ -1211,11 +1215,11 @@ def _save_run_history(
             """
             INSERT INTO runs(
                 command, output_csv, return_code, budgets, train_n, eval_n, strata, k, j,
-                seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
+                seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv, fields_json
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by","run_duration_s","features_csv"]),
+            tuple(vals[k] for k in ["command","output_csv","return_code","budgets","train_n","eval_n","strata","k","j","seed","strata_composition","stratify_features","train_selection","train_skew","run_by","run_duration_s","features_csv","fields_json"]),
         )
         run_id = int(cur.lastrowid)
         if csv_df is not None and not csv_df.empty:
@@ -1595,6 +1599,7 @@ def _sync_completed_batch_runs(repo_root: Path) -> tuple[int, int]:
             train_selection=str(row.get("train_selection", "")),
             train_skew=str(row.get("train_skew", "")),
             features_csv=str(row.get("features_csv", "")),
+            fields_json=str(row.get("fields_json", "")),
         )
         row["history_imported"] = True
         row["return_code"] = return_code
@@ -1632,7 +1637,7 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
             """
             SELECT
                 run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
-                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
+                strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv, fields_json
             FROM runs
             ORDER BY run_id
             """,
@@ -1659,11 +1664,11 @@ def _maybe_migrate_local_sqlite_to_remote(repo_root: Path) -> tuple[int, int]:
                     """
                     INSERT INTO runs(
                         run_id, created_at, command, output_csv, return_code, budgets, train_n, eval_n,
-                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv
+                        strata, k, j, notes, seed, strata_composition, stratify_features, train_selection, train_skew, run_by, run_duration_s, features_csv, fields_json
                     )
                     VALUES (
                         :run_id, :created_at, :command, :output_csv, :return_code, :budgets, :train_n, :eval_n,
-                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s, :features_csv
+                        :strata, :k, :j, :notes, :seed, :strata_composition, :stratify_features, :train_selection, :train_skew, :run_by, :run_duration_s, :features_csv, :fields_json
                     )
                     """
                 ),
@@ -1697,7 +1702,7 @@ def _load_history_runs(repo_root: Path) -> pd.DataFrame:
     query = """
         SELECT
             run_id, created_at, return_code, budgets, train_n, eval_n, strata, k, j,
-            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv, run_duration_s, features_csv
+            seed, strata_composition, stratify_features, train_selection, train_skew, run_by, output_csv, run_duration_s, features_csv, fields_json
         FROM runs
         ORDER BY run_id DESC
         LIMIT 200
@@ -1927,6 +1932,7 @@ def _render_analysis_tab(repo_root: Path) -> None:
         "train_skew",
         "run_by",
         "features_csv",
+        "fields_json",
     ]
     meta = runs_df.loc[:, meta_cols].drop_duplicates(subset=["run_id"])
     df = rows_df.merge(meta, on="run_id", how="left")
@@ -2893,9 +2899,9 @@ def build_command(
         sys.executable,
         "scripts/run_sentinel_sampling_ab.py",
         "--papers",
-        papers,
+        papers.strip(),
         "--features-csv",
-        features_csv,
+        features_csv.strip(),
         "--train-n",
         str(train_n),
         "--budgets",
@@ -3359,8 +3365,8 @@ def main() -> None:
         return
 
     base_kwargs = dict(
-        papers=papers,
-        features_csv=features_csv,
+        papers=papers.strip(),
+        features_csv=features_csv.strip(),
         train_n=int(train_n),
         eval_n=eval_n,
         budgets=budgets,
@@ -3423,6 +3429,7 @@ def main() -> None:
             "train_selection": train_selection,
             "train_skew": train_skew,
             "features_csv": features_csv,
+            "fields_json": fields_json or "",
             "random_only": random_only,
             "stratified_only": stratified_only,
             "no_progress": no_progress,
