@@ -259,5 +259,7 @@ def feature_strata_per_index(
         chosen_feature = single_feature if single_feature is not None else feature_columns[0]
         vals = _column_to_numeric(df.loc[:, chosen_feature])
         return single_feature_strata(vals, num_strata)
+    if mode == _MODE_CARTESIAN:
+        return cartesian_strata(df, feature_columns, num_strata)
     mat = _feature_matrix(df, feature_columns)
     return composite_strata(mat, num_strata)

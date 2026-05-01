@@ -8,6 +8,8 @@ Run:
 
 from __future__ import annotations
 
+import functools
+import importlib.util
 import io
 import json
 import os
@@ -17,6 +19,7 @@ import sqlite3
 import subprocess
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -103,6 +106,126 @@ QUICK_GRAPH_FIELDS_JSON = json.dumps(
 FIGSIZE_LINE = (4.8, 2.8)
 FIGSIZE_BAR = (4.8, 2.8)
 FIGSIZE_WIN = (4.8, 2.8)
+
+# Top segmented-control label (was "Stratifier bench"): curate synthetic stratification tables.
+SYNTHETIC_POOLS_TAB = "Synthetic pools"
+
+SYNTHESIS_PRESET_LABELS = {
+    "rare_numeric_tail": "Rare “long paper” tail (word_count)—most docs look alike, few are extremes",
+    "domain_heavy_skew": "One common research domain vs a scarce second domain",
+    "bimodal_sections": "Mostly low section-count papers, minority with huge section counts",
+    "ultra_rare_domain_tail": "Needle-in-haystack rare tail (<5%) with extreme outliers",
+    "adversarial_feature_conflict": "Adversarial conflicting feature signals across two regimes",
+}
+
+EVAL_CORPUS_INTRO_MARKDOWN = """
+**Papers directory** (below in the experiment form)
+
+Folder the job scans recursively for `.pdf` files. Every PDF matched here is eligible for optimization and scoring.
+
+**Features CSV**
+
+A table with columns like `path`, `word_count`, `domain`, etc.—one row per PDF. The **stratified** sampler sorts and buckets documents **using this file only**. For real workloads you usually build it with `extract_features.py`. For deliberate stress tests you can instead use a synthetic table that does **not** match PDF text—only filenames must line up.
+
+**Synthetic pool builder** (button)
+
+Samples PDFs from a tree you trust (typically your real corpus), duplicates or symlink-copies them into a dedicated folder, and writes fresh **skewed** feature rows (`paper_features.csv`) so minority slices of the corpus are scientifically rare but still reachable at low sample budgets. After **Generate**, the form’s **Papers directory** + **Features CSV** point at that synthetic pool automatically.
+
+Tip: finish tuning on the dedicated **Synthetic pools** tab when the popup feels cramped.
+
+For the full meaning of sliders and JSON knobs, open **What each synthetic parameter means** inside the builder.
+"""
+
+STRESS_POOL_PARAM_GUIDE = """
+**Preset (recipe)** — Chooses how fake feature rows differ from each other. Each recipe only uses its own sliders; switch preset to reshape a different dimension of imbalance.
+
+---
+
+**Rare “long paper” tail** (`rare_numeric_tail`)
+
+- **Tail fraction** — Share of docs that belong to the *minority* regime (normally very high `word_count` and different layout stats). Larger values make the imbalance less extreme numerically but still two separate clouds.
+- **Tail domain** — Reported label for minority rows only (the stratifier may treat categorical `domain` as its own strata).
+- **Bulk domains** — Labels rotated among typical “bulk” docs; widen variety in the dense cloud.
+- **Bulk word low / high** — Synthetic word-count interval for bulk papers only.
+- **Tail word low / high** — Interval for minority papers—keep this **much higher** than bulk to widen the quantitative gap stratification can latch onto.
+
+---
+
+**Domain-heavy skew** (`domain_heavy_skew`)
+
+- **Majority fraction** — Probability a row uses the dominant domain slice and its tighter numeric spreads; small remainder goes to minority slice.
+- **Majority domain / Minority domain** — Which categorical labels dominate vs appear rarely (rarer minority usually makes stratified coverage matter more).
+
+---
+
+**Bimodal sections** (`bimodal_sections`)
+
+- **Short-section fraction** — Majority of PDFs synthesized with modest `section_count`; remainder use the large-count band.
+- **Short section low / high** — `section_count` span for bulk “short-structure” synthetic papers.
+- **Long section low / high** — Span for minority “many-section” outliers.
+- **Domains** — Allowed labels spun through both modes (mixes categorical variety without changing preset kind).
+
+---
+
+**Ultra rare domain tail** (`ultra_rare_domain_tail`)
+
+- **Ultra-rare fraction** — Tiny minority share (default ~3%) used for extreme outlier rows.
+- **Ultra-rare domain** — Categorical label attached to those extreme minority rows.
+- **Ultra bulk domains** — Labels used across the dominant majority rows.
+- **Ultra bulk/rare word ranges** — Numeric separation between normal and extreme rows.
+- **Ultra-rare section range** — Extra structural exaggeration for minority outliers.
+
+---
+
+**Adversarial feature conflict** (`adversarial_feature_conflict`)
+
+- **Conflict cohort-A fraction** — Share of rows in cohort A; rest are cohort B.
+- **Cohort A/B domains** — Distinct labels per cohort.
+- **Cohort A/B word ranges** — Opposing word-length regimes to make mixed feature signals harder.
+
+---
+
+**Output directory**
+
+Where under the repo the tool writes `doc_0000.pdf`… and `paper_features.csv`. Regenerating wipes previous `doc_*.pdf` in that folder only.
+
+---
+
+**Random seed (pool)**
+
+RNG for *which PDFs get sampled from the corpus* and *exact synthetic numbers/draw*, not the sentinel MAB experiment seed (`Seed` farther down the form—that one runs the A/B harness).
+
+---
+
+**Number of PDFs**
+
+How many files end up in the synthetic pool (= rows in CSV). Larger pools diversify rare strata but lengthen runs.
+
+---
+
+**Source PDF tree**
+
+Existing folder of real PDFs to sample from (`papers` recommended). Copies or symlinks are created; originals stay untouched.
+
+---
+
+**PDF storage mode**
+
+`copy`: duplicate bytes (portable folders).  
+`symlink`: instant, points back to originals (fast; moving originals later breaks paths).
+
+---
+
+**Set Eval N to pool size**
+
+When checked, the Run form “Eval N” becomes the synthetic pool length so sentinel never asks for PDFs absent from `paper_features.csv`.
+
+---
+
+**Optional JSON overrides**
+
+Valid keys match `StressDatasetParams` inside `scripts/generate_stratifier_stress_dataset.py`; merged over slider values—for example `{\"tail_fraction\": 0.2}` adjusts tail share without redoing sliders.
+"""
 
 
 def _apply_quick_graph_test_defaults() -> None:
@@ -329,14 +452,12 @@ def _render_results_analysis(repo_root: Path, output_csv: str | None) -> None:
             mime="text/csv",
         )
 
-    # Show both quality types separately and explicitly (no mixed fallback labeling).
     quality_metrics: list[tuple[str, str, str]] = []
     if "mean_plan_quality" in df.columns and df["mean_plan_quality"].notna().any():
         quality_metrics.append(("mean_plan_quality", "Mean final-plan quality", "final_plan"))
     if "mean_sentinel_quality" in df.columns and df["mean_sentinel_quality"].notna().any():
         quality_metrics.append(("mean_sentinel_quality", "Mean sentinel quality", "sentinel"))
     time_delta = _paired_budget_deltas(df.dropna(subset=["total_time_s"]), "total_time_s") if {"sample_budget", "mode", "total_time_s"}.issubset(df.columns) else pd.DataFrame()
-    # For "final-plan quality", only use rows explicitly marked as true final plan quality.
     final_source_available = "plan_quality_source" in df.columns
     if any(q[0] == "mean_plan_quality" for q in quality_metrics) and not final_source_available:
         st.warning("Final-plan quality source labels are unavailable in this CSV; strict final-only filtering cannot be enforced.")
@@ -2187,167 +2308,522 @@ def _render_analysis_tab(repo_root: Path) -> None:
         plt.close(fig)
 
 
-def _render_misc_tab(repo_root: Path) -> None:
-    st.subheader("Miscellaneous CSV Analytics")
-    st.caption("Loads all experiment CSVs in papers/results and builds combined quality/runtime summaries.")
+@functools.lru_cache(maxsize=1)
+def _load_stratifier_stress_module():
+    path = Path(__file__).resolve().parent / "generate_stratifier_stress_dataset.py"
+    name = "_pz_stratifier_stress_ds"
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Cannot load stratifier stress generator from {path}")
+    mod = importlib.util.module_from_spec(spec)
+    # Required before exec_module: @dataclass looks up cls.__module__ in sys.modules.
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
 
-    csv_paths = sorted((repo_root / "results").rglob("*.csv"))
-    csv_paths.extend(sorted((repo_root / "papers").glob("ab_results*.csv")))
-    if not csv_paths:
-        st.info("No CSV files found under results/ or papers/")
+
+def _stress_dataset_domain_options() -> list[str]:
+    return ["bio_medical", "cs", "math", "physics"]
+
+
+def _render_stress_feature_preview(df_feat: pd.DataFrame) -> None:
+    st.markdown("#### Latest feature preview")
+    st.dataframe(df_feat.head(16), width="stretch", hide_index=True)
+    h1, h2 = st.columns(2)
+    with h1:
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        bins_n = min(24, max(8, len(df_feat) // 3))
+        df_feat["word_count"].plot.hist(ax=ax, bins=bins_n, color="#1f77b4", alpha=0.75)
+        ax.set_xlabel("word_count (synthetic)")
+        ax.set_ylabel("count")
+        ax.grid(True, axis="y", alpha=0.3)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+    with h2:
+        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
+        vc = df_feat["domain"].astype(str).value_counts()
+        vc.plot(kind="bar", ax=ax, color="#ff7f0e", alpha=0.8)
+        ax.set_xlabel("domain")
+        ax.set_ylabel("count")
+        ax.grid(True, axis="y", alpha=0.3)
+        ax.tick_params(axis="x", labelrotation=35)
+        st.pyplot(fig, width="content")
+        plt.close(fig)
+
+
+def _render_stress_dataset_builder(repo_root: Path, *, widget_key_prefix: str) -> None:
+    try:
+        mod = _load_stratifier_stress_module()
+    except Exception as exc:
+        st.error(f"Could not load generator module: {exc}")
         return
 
-    rows: list[pd.DataFrame] = []
-    loaded_files: list[str] = []
-    for p in csv_paths:
+    StressDatasetParams = mod.StressDatasetParams
+    merge_sp = mod.merge_stress_params
+
+    if "strat_bench_last_summary" not in st.session_state:
+        st.session_state["strat_bench_last_summary"] = None
+
+    with st.expander("What each synthetic parameter means", expanded=False):
+        st.markdown(STRESS_POOL_PARAM_GUIDE)
+
+    preset_opts = list(mod.AVAILABLE_PRESETS)
+    preset_idx = preset_opts.index("rare_numeric_tail") if "rare_numeric_tail" in preset_opts else 0
+
+    with st.form(f"stress_ds_builder_{widget_key_prefix}"):
+        preset = st.selectbox(
+            "Preset (recipe)",
+            options=preset_opts,
+            index=preset_idx,
+            format_func=lambda p: SYNTHESIS_PRESET_LABELS.get(str(p), str(p)),
+            help=(
+                "Pick **which fiction** synthetic rows embody: tails on word-count, categorical domain rarity, "
+                "or splits on section-count. Sliders mutate only the highlighted recipe."
+            ),
+        )
+        st.caption(mod.PRESET_DESCRIPTIONS[preset])
+
+        out_dir = st.text_input(
+            "Output folder (inside repo)",
+            value="papers/stratifier_stress_seed42",
+            help="Creates this directory (relative to repo root), drops `paper_features.csv` plus `doc_*.pdf`; "
+            "old `doc_*.pdf` in that folder disappear on regenerate.",
+        )
+        sb_seed = st.number_input(
+            "Pool random seed",
+            min_value=0,
+            value=42,
+            step=1,
+            help=(
+                "Controls stochastic sampling **while fabricating rows**—which corpus PDF gets copied and which "
+                "random numbers populate synthetic features. Separate from Experiment **Seed**, which configures "
+                "the sentinel A/B sampler once you enqueue a job."
+            ),
+        )
+        n_docs = st.number_input(
+            "Pool size (# PDFs)",
+            min_value=4,
+            value=48,
+            step=1,
+            help=(
+                "Number of duplicated/symlinked PDFs (= rows written to `paper_features.csv`). Larger pools give "
+                "the stratifier more bins to balance but lengthen each experiment."
+            ),
+        )
+        source_papers = st.text_input(
+            "PDF donor folder",
+            value="papers",
+            help="Recursive search root for `.pdf` files to recycle into the synthetic folder; originals untouched.",
+        )
+        link_mode = st.selectbox(
+            "How to attach PDF bytes",
+            options=["copy", "symlink"],
+            index=0,
+            format_func=lambda m: {"copy": "Copy files (standalone folder)", "symlink": "Symlink originals (fast)"}.get(
+                str(m), str(m)
+            ),
+            help="Copy duplicates disk but relocatable; symlink is instant yet depends on originals staying put.",
+        )
+        sync_eval_n = st.checkbox(
+            "Match Eval N to pool size afterward",
+            value=True,
+            help="When checked, sets Run-form Eval N equal to Pool size so sentinel never scans beyond synthesized rows.",
+        )
+
+        base = StressDatasetParams.defaults()
+        params = base
+        dom_opts = _stress_dataset_domain_options()
+
+        if preset == "rare_numeric_tail":
+            st.markdown("**Rare numeric tail controls**")
+            tf = st.slider(
+                "Tail fraction",
+                0.02,
+                0.50,
+                float(base.tail_fraction),
+                step=0.01,
+                key=f"{widget_key_prefix}_tf",
+                help=(
+                    "Fraction of synthesized rows pretending to belong to an extreme-length regime. Higher values "
+                    "make outliers less rare statistically (gentler imbalance)."
+                ),
+            )
+            tail_dom = st.selectbox(
+                "`domain` tag for minority tail rows",
+                options=dom_opts,
+                index=dom_opts.index(base.tail_domain) if base.tail_domain in dom_opts else 0,
+                key=f"{widget_key_prefix}_taildom",
+                help="Synthetic label applied only inside the minority slice; categorical stratifiers can pick it up.",
+            )
+            bulk_pick = st.multiselect(
+                "`domain` tags rotating through bulk regime",
+                options=dom_opts,
+                default=list(base.bulk_domains),
+                key=f"{widget_key_prefix}_bulkdom",
+                help="Each bulk row draws uniformly from chosen labels.",
+            )
+            c1, c2 = st.columns(2)
+            with c1:
+                bwl = st.number_input(
+                    "Bulk synthetic word_min",
+                    value=int(base.bulk_word_low),
+                    step=100,
+                    key=f"{widget_key_prefix}_bwl",
+                    help="Minimum `word_count` for majority rows.",
+                )
+                bwh = st.number_input(
+                    "Bulk synthetic word_max",
+                    value=int(base.bulk_word_high),
+                    step=100,
+                    key=f"{widget_key_prefix}_bwh",
+                    help="Maximum `word_count` for majority rows.",
+                )
+            with c2:
+                twl = st.number_input(
+                    "Tail synthetic word_min",
+                    value=int(base.tail_word_low),
+                    step=500,
+                    key=f"{widget_key_prefix}_twl",
+                    help="Lower bound for unusually long synthetic papers.",
+                )
+                twh = st.number_input(
+                    "Tail synthetic word_max",
+                    value=int(base.tail_word_high),
+                    step=500,
+                    key=f"{widget_key_prefix}_twh",
+                    help="Upper bound for unusually long synthetic papers.",
+                )
+            bd = tuple(bulk_pick) if bulk_pick else base.bulk_domains
+            params = replace(
+                base,
+                tail_fraction=tf,
+                tail_domain=tail_dom,
+                bulk_domains=bd,
+                bulk_word_low=bwl,
+                bulk_word_high=bwh,
+                tail_word_low=twl,
+                tail_word_high=twh,
+            )
+
+        elif preset == "domain_heavy_skew":
+            st.markdown("**Domain-heavy skew controls**")
+            mf = st.slider(
+                "Dominant-domain share",
+                0.50,
+                0.98,
+                float(base.majority_fraction),
+                step=0.01,
+                key=f"{widget_key_prefix}_mf",
+                help=(
+                    "Share of synthesized rows pretending to hail from Majority domain—the rest fall into Minority."
+                ),
+            )
+            maj = st.selectbox(
+                "Majority-domain label",
+                options=dom_opts,
+                index=dom_opts.index(base.majority_domain) if base.majority_domain in dom_opts else 0,
+                key=f"{widget_key_prefix}_maj",
+                help="Synthetic categorical value that appears most frequently.",
+            )
+            mino_idx = dom_opts.index(base.minority_domain) if base.minority_domain in dom_opts else min(2, len(dom_opts) - 1)
+            mino = st.selectbox(
+                "Rare-domain label",
+                options=dom_opts,
+                index=mino_idx,
+                key=f"{widget_key_prefix}_mino",
+                help="Synthetic label that should stay scarce under the Majority share slider.",
+            )
+            params = replace(base, majority_fraction=mf, majority_domain=maj, minority_domain=mino)
+
+        elif preset == "bimodal_sections":
+            st.markdown("**Bimodal sections controls**")
+            sf = st.slider(
+                "Bulk “short-structure” fraction",
+                0.50,
+                0.98,
+                float(base.short_section_fraction),
+                step=0.01,
+                key=f"{widget_key_prefix}_sf",
+                help="Share of synthesized rows occupying the low `section_count` band versus the elongated band.",
+            )
+            c1, c2 = st.columns(2)
+            with c1:
+                ssl = st.number_input(
+                    "Short regime section_min",
+                    value=int(base.short_section_low),
+                    key=f"{widget_key_prefix}_ssl",
+                    help="Minimum `section_count` for dominant rows.",
+                )
+                ssh = st.number_input(
+                    "Short regime section_max",
+                    value=int(base.short_section_high),
+                    key=f"{widget_key_prefix}_ssh",
+                    help="Maximum `section_count` for dominant rows.",
+                )
+            with c2:
+                lsl = st.number_input(
+                    "Stretch regime section_min",
+                    value=int(base.long_section_low),
+                    key=f"{widget_key_prefix}_lsl",
+                    help="Minimum `section_count` for minority long-structure outliers.",
+                )
+                lsh = st.number_input(
+                    "Stretch regime section_max",
+                    value=int(base.long_section_high),
+                    key=f"{widget_key_prefix}_lsh",
+                    help="Maximum `section_count` for minority long outliers.",
+                )
+            bdom_pick = st.multiselect(
+                "Domain picks for sampling",
+                options=dom_opts,
+                default=list(base.bimodal_domains),
+                key=f"{widget_key_prefix}_bidom",
+                help="Synthetic `domain` label choices applied across both regimes.",
+            )
+            domt = tuple(bdom_pick) if bdom_pick else base.bimodal_domains
+            params = replace(
+                base,
+                short_section_fraction=sf,
+                short_section_low=ssl,
+                short_section_high=ssh,
+                long_section_low=lsl,
+                long_section_high=lsh,
+                bimodal_domains=domt,
+            )
+
+        elif preset == "ultra_rare_domain_tail":
+            st.markdown("**Ultra-rare tail controls (worst-case)**")
+            rf = st.slider(
+                "Ultra-rare fraction",
+                0.01,
+                0.12,
+                float(base.ultra_rare_fraction),
+                step=0.005,
+                key=f"{widget_key_prefix}_urf",
+                help="How tiny the outlier minority is; lower values are harsher low-budget stress tests.",
+            )
+            ur_dom = st.selectbox(
+                "Ultra-rare domain",
+                options=dom_opts,
+                index=dom_opts.index(base.ultra_rare_domain) if base.ultra_rare_domain in dom_opts else 0,
+                key=f"{widget_key_prefix}_urdom",
+            )
+            ubulk_pick = st.multiselect(
+                "Ultra bulk domains",
+                options=dom_opts,
+                default=list(base.ultra_bulk_domains),
+                key=f"{widget_key_prefix}_ubdom",
+            )
+            c1, c2 = st.columns(2)
+            with c1:
+                ubw_l = st.number_input(
+                    "Ultra bulk word_min",
+                    value=int(base.ultra_bulk_word_low),
+                    step=200,
+                    key=f"{widget_key_prefix}_ubw_l",
+                )
+                ubw_h = st.number_input(
+                    "Ultra bulk word_max",
+                    value=int(base.ultra_bulk_word_high),
+                    step=200,
+                    key=f"{widget_key_prefix}_ubw_h",
+                )
+                urs_l = st.number_input(
+                    "Ultra-rare section_min",
+                    value=int(base.ultra_rare_section_low),
+                    step=5,
+                    key=f"{widget_key_prefix}_urs_l",
+                )
+                urs_h = st.number_input(
+                    "Ultra-rare section_max",
+                    value=int(base.ultra_rare_section_high),
+                    step=5,
+                    key=f"{widget_key_prefix}_urs_h",
+                )
+            with c2:
+                urw_l = st.number_input(
+                    "Ultra-rare word_min",
+                    value=int(base.ultra_rare_word_low),
+                    step=500,
+                    key=f"{widget_key_prefix}_urw_l",
+                )
+                urw_h = st.number_input(
+                    "Ultra-rare word_max",
+                    value=int(base.ultra_rare_word_high),
+                    step=500,
+                    key=f"{widget_key_prefix}_urw_h",
+                )
+            ubd = tuple(ubulk_pick) if ubulk_pick else base.ultra_bulk_domains
+            params = replace(
+                base,
+                ultra_rare_fraction=rf,
+                ultra_rare_domain=ur_dom,
+                ultra_bulk_domains=ubd,
+                ultra_bulk_word_low=ubw_l,
+                ultra_bulk_word_high=ubw_h,
+                ultra_rare_word_low=urw_l,
+                ultra_rare_word_high=urw_h,
+                ultra_rare_section_low=urs_l,
+                ultra_rare_section_high=urs_h,
+            )
+
+        else:
+            st.markdown("**Adversarial conflict controls (worst-case)**")
+            cf = st.slider(
+                "Conflict cohort-A fraction",
+                0.10,
+                0.90,
+                float(base.conflict_fraction),
+                step=0.01,
+                key=f"{widget_key_prefix}_cf",
+                help="Balance between two opposing synthetic regimes.",
+            )
+            cdom_a = st.selectbox(
+                "Cohort-A domain",
+                options=dom_opts,
+                index=dom_opts.index(base.conflict_domain_a) if base.conflict_domain_a in dom_opts else 0,
+                key=f"{widget_key_prefix}_cda",
+            )
+            cdom_b = st.selectbox(
+                "Cohort-B domain",
+                options=dom_opts,
+                index=dom_opts.index(base.conflict_domain_b) if base.conflict_domain_b in dom_opts else 0,
+                key=f"{widget_key_prefix}_cdb",
+            )
+            c1, c2 = st.columns(2)
+            with c1:
+                caw_l = st.number_input(
+                    "Cohort-A word_min",
+                    value=int(base.conflict_a_word_low),
+                    step=200,
+                    key=f"{widget_key_prefix}_caw_l",
+                )
+                caw_h = st.number_input(
+                    "Cohort-A word_max",
+                    value=int(base.conflict_a_word_high),
+                    step=200,
+                    key=f"{widget_key_prefix}_caw_h",
+                )
+            with c2:
+                cbw_l = st.number_input(
+                    "Cohort-B word_min",
+                    value=int(base.conflict_b_word_low),
+                    step=500,
+                    key=f"{widget_key_prefix}_cbw_l",
+                )
+                cbw_h = st.number_input(
+                    "Cohort-B word_max",
+                    value=int(base.conflict_b_word_high),
+                    step=500,
+                    key=f"{widget_key_prefix}_cbw_h",
+                )
+            params = replace(
+                base,
+                conflict_fraction=cf,
+                conflict_domain_a=cdom_a,
+                conflict_domain_b=cdom_b,
+                conflict_a_word_low=caw_l,
+                conflict_a_word_high=caw_h,
+                conflict_b_word_low=cbw_l,
+                conflict_b_word_high=cbw_h,
+            )
+
+        adv_json = st.text_area(
+            "Advanced JSON knobs (merged on top)",
+            value="",
+            height=110,
+            placeholder='{\"tail_fraction\": 0.18}',
+            help="Optional JSON overlay on `StressDatasetParams` declared in scripts/generate_stratifier_stress_dataset.py.",
+        )
+
+        st.caption(
+            "**Generate & apply to Run** rewrites Papers directory / Features CSV (and optionally Eval N) beneath this page. "
+            "Then enqueue **Start experiment (enqueue)** to run sentinel A/B plots."
+        )
+        gen_go = st.form_submit_button("Generate & apply to Run")
+
+    if gen_go:
+        params_final = params
         try:
-            df = pd.read_csv(p)
-        except Exception:
-            continue
-        if "sample_budget" not in df.columns or "mode" not in df.columns:
-            continue
-        use_cols = [c for c in ["sample_budget", "mode", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"] if c in df.columns]
-        if len(use_cols) < 2:
-            continue
-        sub = df[use_cols].copy()
-        sub["source_file"] = str(p.relative_to(repo_root))
-        rows.append(sub)
-        loaded_files.append(str(p.relative_to(repo_root)))
-
-    if not rows:
-        st.info("Found CSV files, but none match experiment schema (sample_budget + mode).")
-        return
-
-    all_df = pd.concat(rows, ignore_index=True)
-    for col in ["sample_budget", "total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"]:
-        if col in all_df.columns:
-            all_df[col] = pd.to_numeric(all_df[col], errors="coerce")
-    all_df["mode"] = all_df["mode"].astype(str).str.lower()
-    all_df = all_df[all_df["mode"].isin(["random", "stratified"])].copy()
-    if all_df.empty:
-        st.info("No random/stratified rows available in loaded CSVs.")
-        return
-
-    c1, c2, c3 = st.columns(3)
-    c1.metric("CSV files loaded", str(len(set(loaded_files))))
-    c2.metric("Rows loaded", str(len(all_df)))
-    c3.metric("Budgets found", str(all_df["sample_budget"].dropna().nunique()))
-
-    with st.expander("Loaded CSV files", expanded=False):
-        st.dataframe(pd.DataFrame({"file": sorted(set(loaded_files))}), width="stretch", hide_index=True)
-
-    st.markdown("### Combined Quality Curves")
-    q1, q2 = st.columns(2)
-    with q1:
-        _graph_heading(
-            "Sentinel Quality vs Samples",
-            "Shows average sentinel-stage quality at each budget for random vs stratified across all loaded CSVs.",
-        )
-        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
-        if "mean_sentinel_quality" in all_df.columns and all_df["mean_sentinel_quality"].notna().any():
-            agg = all_df.groupby(["mode", "sample_budget"], dropna=False)["mean_sentinel_quality"].mean().reset_index()
-            for mode, grp in agg.groupby("mode", dropna=False):
-                style = {"linestyle": "--", "marker": "o"} if mode == "random" else {"linestyle": "-", "marker": "s"}
-                ax.plot(grp["sample_budget"], grp["mean_sentinel_quality"], label=mode, linewidth=2, **style)
-            ax.set_xlabel("Samples (budget)")
-            ax.set_ylabel("Mean sentinel quality")
-            ax.grid(True, alpha=0.3)
-            ax.legend(fontsize=8)
-            st.pyplot(fig, width="content")
+            if adv_json.strip():
+                overrides = json.loads(adv_json)
+                if not isinstance(overrides, dict):
+                    raise ValueError("JSON overrides must be an object")
+                params_final = merge_sp(params, overrides)
+        except json.JSONDecodeError as exc:
+            st.error(f"Invalid JSON: {exc}")
+        except ValueError as exc:
+            st.error(str(exc))
         else:
-            st.caption("No sentinel quality values found.")
-        plt.close(fig)
-    with q2:
-        _graph_heading(
-            "Final Plan Quality vs Samples",
-            "Shows average final executed-plan quality at each budget for random vs stratified across all loaded CSVs.",
-        )
-        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
-        if "mean_plan_quality" in all_df.columns and all_df["mean_plan_quality"].notna().any():
-            agg = all_df.groupby(["mode", "sample_budget"], dropna=False)["mean_plan_quality"].mean().reset_index()
-            for mode, grp in agg.groupby("mode", dropna=False):
-                style = {"linestyle": "--", "marker": "o"} if mode == "random" else {"linestyle": "-", "marker": "s"}
-                ax.plot(grp["sample_budget"], grp["mean_plan_quality"], label=mode, linewidth=2, **style)
-            ax.set_xlabel("Samples (budget)")
-            ax.set_ylabel("Mean plan quality")
-            ax.grid(True, alpha=0.3)
-            ax.legend(fontsize=8)
-            st.pyplot(fig, width="content")
-        else:
-            st.caption("No final-plan quality values found (scoring likely failed in those runs).")
-        plt.close(fig)
+            try:
+                summary = mod.generate_stratifier_stress_dataset(
+                    repo_root,
+                    output_dir=out_dir.strip(),
+                    seed=int(sb_seed),
+                    n_docs=int(n_docs),
+                    preset=str(preset),
+                    source_papers=source_papers.strip(),
+                    link_mode=str(link_mode),
+                    stress_params=params_final,
+                )
+            except Exception as exc:
+                st.error(str(exc))
+            else:
+                st.session_state["strat_bench_last_summary"] = summary
+                st.session_state["stress_eval_last_summary"] = summary
+                st.session_state["papers"] = summary["papers_dir_rel"]
+                st.session_state["features_csv"] = summary["features_csv_rel"]
+                st.session_state["output_csv"] = "papers/ab_results_strat_bench.csv"
+                if sync_eval_n:
+                    st.session_state["eval_n_raw"] = str(int(n_docs))
+                st.success(
+                    f"Wrote `{summary['papers_dir_rel']}` + `{summary['features_csv_rel']}`. "
+                    f"Paths now appear in **Papers directory** / **Features CSV** below. "
+                    "Queue **Start experiment**, then inspect plots beneath or under **Analysis** / **Synthetic pools**."
+                )
 
-    st.markdown("### Paired Delta Analytics (Stratified - Random)")
-    piv = all_df.pivot_table(
-        index=["source_file", "sample_budget"],
-        columns="mode",
-        values=["total_time_s", "total_cost", "mean_sentinel_quality", "mean_plan_quality"],
-        aggfunc="mean",
-    )
-    need = [("total_time_s", "random"), ("total_time_s", "stratified")]
-    if any(col not in piv.columns for col in need):
-        st.info("Need both random and stratified rows in the same CSV budget to compute deltas.")
-        return
-    piv = piv.dropna(subset=need).copy()
-    piv.columns = [f"{a}__{b}" for a, b in piv.columns]
-    paired = piv.reset_index()
-    paired["runtime_delta_s"] = paired["total_time_s__stratified"] - paired["total_time_s__random"]
-    if "mean_sentinel_quality__stratified" in paired.columns and "mean_sentinel_quality__random" in paired.columns:
-        paired["sentinel_quality_delta"] = paired["mean_sentinel_quality__stratified"] - paired["mean_sentinel_quality__random"]
-    if "mean_plan_quality__stratified" in paired.columns and "mean_plan_quality__random" in paired.columns:
-        paired["plan_quality_delta"] = paired["mean_plan_quality__stratified"] - paired["mean_plan_quality__random"]
+    summ = st.session_state.get("strat_bench_last_summary")
+    if isinstance(summ, dict):
+        feat_path = repo_root / summ["features_csv_rel"]
+        if feat_path.is_file():
+            df_feat = pd.read_csv(feat_path)
+            _render_stress_feature_preview(df_feat)
+            st.download_button(
+                "Download paper_features.csv",
+                data=feat_path.read_bytes(),
+                file_name="paper_features.csv",
+                mime="text/csv",
+                key=f"{widget_key_prefix}_dl_feat",
+            )
 
-    d1, d2 = st.columns(2)
-    with d1:
-        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
-        ragg = paired.groupby("sample_budget", dropna=False)["runtime_delta_s"].mean().reset_index()
-        ax.plot(ragg["sample_budget"], ragg["runtime_delta_s"], marker="o", linewidth=2, color="#9467bd")
-        ax.axhline(0.0, color="black", linewidth=1)
-        ax.set_xlabel("Samples (budget)")
-        ax.set_ylabel("Runtime delta (s)")
-        ax.grid(True, alpha=0.3)
-        st.pyplot(fig, width="content")
-        plt.close(fig)
-    with d2:
-        fig, ax = plt.subplots(figsize=FIGSIZE_LINE)
-        if "sentinel_quality_delta" in paired.columns:
-            qagg = paired.groupby("sample_budget", dropna=False)["sentinel_quality_delta"].mean().reset_index()
-            ax.plot(qagg["sample_budget"], qagg["sentinel_quality_delta"], marker="o", linewidth=2, label="sentinel delta")
-        if "plan_quality_delta" in paired.columns:
-            pagg = paired.groupby("sample_budget", dropna=False)["plan_quality_delta"].mean().reset_index()
-            ax.plot(pagg["sample_budget"], pagg["plan_quality_delta"], marker="s", linewidth=2, label="plan delta")
-        ax.axhline(0.0, color="black", linewidth=1)
-        ax.set_xlabel("Samples (budget)")
-        ax.set_ylabel("Quality delta")
-        ax.grid(True, alpha=0.3)
-        ax.legend(fontsize=8)
-        st.pyplot(fig, width="content")
-        plt.close(fig)
 
-    st.markdown("### CSV-Level Summary")
-    summary = (
-        paired.groupby("source_file", dropna=False)
-        .agg(
-            n_budgets=("sample_budget", "count"),
-            mean_runtime_delta_s=("runtime_delta_s", "mean"),
-        )
-        .reset_index()
+@st.dialog("Synthetic pool builder")
+def _stress_eval_dialog(repo_root: Path) -> None:
+    st.caption(
+        "Skew edits only ``paper_features.csv``. PDF paths are reused from your corpus via copy or symlink."
     )
-    if "sentinel_quality_delta" in paired.columns:
-        s_mean = paired.groupby("source_file", dropna=False)["sentinel_quality_delta"].mean().rename("mean_sentinel_quality_delta")
-        summary = summary.merge(s_mean, on="source_file", how="left")
-    else:
-        summary["mean_sentinel_quality_delta"] = float("nan")
-    if "plan_quality_delta" in paired.columns:
-        p_mean = paired.groupby("source_file", dropna=False)["plan_quality_delta"].mean().rename("mean_plan_quality_delta")
-        summary = summary.merge(p_mean, on="source_file", how="left")
-    else:
-        summary["mean_plan_quality_delta"] = float("nan")
-    st.dataframe(
-        summary.sort_values(["mean_plan_quality_delta", "mean_sentinel_quality_delta"], ascending=False),
-        width="stretch",
-        hide_index=True,
+    _render_stress_dataset_builder(repo_root, widget_key_prefix="dlg")
+
+
+def _render_stratifier_bench_tab(repo_root: Path) -> None:
+    st.subheader(SYNTHETIC_POOLS_TAB)
+    st.caption(
+        "Full-page synthetic pool workspace—identical knobs to Run → Eval corpus → **Open synthetic pool builder**. "
+        "Use small sample budgets afterward to amplify random vs stratified differences."
     )
+    with st.expander("Preset descriptions", expanded=False):
+        try:
+            mod = _load_stratifier_stress_module()
+            for name in mod.AVAILABLE_PRESETS:
+                st.markdown(f"**{name}** — {mod.PRESET_DESCRIPTIONS[name]}")
+        except Exception as exc:
+            st.warning(str(exc))
+    st.code(
+        "python scripts/generate_stratifier_stress_dataset.py --output-dir papers/stratifier_stress_s42 "
+        "--seed 42 --n-docs 60 --preset rare_numeric_tail --stress-params-json params.json",
+        language="bash",
+    )
+    _render_stress_dataset_builder(repo_root, widget_key_prefix="bench")
 
 
 def build_command(
@@ -2466,15 +2942,19 @@ def main() -> None:
         _apply_worst_case_stress_defaults()
         st.success("Applied worst-case baseline stress settings (targeting low-budget heterogeneity).")
     st.caption("Quick graph-test settings are for smoke-testing plot generation only, not final experiments.")
-    view = st.segmented_control("View", options=["Run", "History", "Analysis", "Misc"], default="Run")
+    view = st.segmented_control(
+        "View",
+        options=["Run", "History", "Analysis", SYNTHETIC_POOLS_TAB],
+        default="Run",
+    )
     if view == "History":
         _render_history_tab(repo_root)
         return
     if view == "Analysis":
         _render_analysis_tab(repo_root)
         return
-    if view == "Misc":
-        _render_misc_tab(repo_root)
+    if view == SYNTHETIC_POOLS_TAB:
+        _render_stratifier_bench_tab(repo_root)
         return
 
     # Keep conditional controls outside the form so they live-rerender.
@@ -2528,18 +3008,45 @@ def main() -> None:
     else:
         train_skew_domain_ratios = ""
 
+    st.markdown("#### Eval corpus")
+    st.markdown(EVAL_CORPUS_INTRO_MARKDOWN)
+    ls_ev = st.session_state.get("stress_eval_last_summary")
+    if isinstance(ls_ev, dict):
+        st.success(
+            f"**Last synthetic pool loaded into the form:** `{ls_ev.get('papers_dir_rel')}` — "
+            f"preset `{ls_ev.get('preset')}`, **n**={ls_ev.get('n_docs')}, generation seed `{ls_ev.get('seed')}`. "
+            "Open **Synthetic pools** tab or the builder button to regenerate."
+        )
+        sp_ev = ls_ev.get("stress_params")
+        if isinstance(sp_ev, dict) and sp_ev:
+            with st.expander("Last synthetic pool knobs (JSON)", expanded=False):
+                st.json(sp_ev)
+
+    open_builder = st.button(
+        "Open synthetic pool builder",
+        key="open_stress_builder_dialog",
+        type="primary",
+        use_container_width=True,
+        help=(
+            "Build a deliberate skew-only feature table plus copied PDFs; "
+            "after Generate, Papers directory and Features CSV are filled automatically."
+        ),
+    )
+    if open_builder:
+        _stress_eval_dialog(repo_root)
+
     with st.form("runner"):
         c1, c2, c3 = st.columns(3)
         with c1:
             papers = st.text_input(
                 "Papers directory",
                 key="papers",
-                help="Directory containing PDFs used for training/evaluation.",
+                help="PDF root for experiments. Paste a corpus path—or let **Open synthetic pool builder** populate it.",
             )
             features_csv = st.text_input(
                 "Features CSV",
                 key="features_csv",
-                help="Precomputed feature table from extract_features.py --scan.",
+                help="Stratifier input; usually from extract_features.py. Synthetic skew tables land here automatically after Generate.",
             )
             output_csv = st.text_input(
                 "Output CSV (optional)",
