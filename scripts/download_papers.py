@@ -25,19 +25,19 @@ from typing import Optional
 
 DOMAIN_CONFIG = {
     "cs": {
-        "fraction": 0.30,
+        "fraction": 0.25,
         "s2_field": "Computer Science",
     },
     "bio_medical": {
-        "fraction": 0.30,
+        "fraction": 0.25,
         "s2_field": "Biology",
     },
     "physics": {
-        "fraction": 0.20,
+        "fraction": 0.25,
         "s2_field": "Physics",
     },
     "math": {
-        "fraction": 0.20,
+        "fraction": 0.25,
         "s2_field": "Mathematics",
     },
 }

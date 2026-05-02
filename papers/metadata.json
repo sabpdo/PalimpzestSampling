@@ -1,282 +1,282 @@
 [
   {
     "domain": "cs",
-    "page_count": 20,
-    "citations": 8,
-    "year": 2021,
+    "page_count": 10,
+    "citations": 9,
+    "year": 2024,
     "filename": "cs/cs_000.pdf",
-    "id": "003caedfa295ca70bc3d37773ef552cf5b7be320",
-    "title": "An Empirical Study of a Trustworthy Cloud Common Data Model Using Decentralized Identifiers"
+    "id": "0058bc64face11bf54657ea70c33b1b37dcb85b2",
+    "title": "Enabling uncertainty estimation in neural networks through weight perturbation for improved Alzheimer's disease classification"
   },
   {
     "domain": "cs",
-    "page_count": 24,
-    "citations": 20,
-    "year": 2022,
+    "page_count": 10,
+    "citations": 50,
+    "year": 2021,
     "filename": "cs/cs_001.pdf",
-    "id": "006adb12fdd6d8c51685796d5f335eee7128cd8b",
-    "title": "Clustering compositional data using Dirichlet mixture model"
+    "id": "003c12db7253987db0e1f07c0591c4d1757b86f5",
+    "title": "Enhancing Taxonomy Completion with Concept Generation via Fusing Relational Representations"
+  },
+  {
+    "domain": "cs",
+    "page_count": 22,
+    "citations": 5,
+    "year": 2023,
+    "filename": "cs/cs_002.pdf",
+    "id": "00667acc8b7fbc807655961ba7bdc656ba4a45b8",
+    "title": "A conservative fourth-order real space method for the (2+1)D Dirac equation"
+  },
+  {
+    "domain": "cs",
+    "page_count": 11,
+    "citations": 8,
+    "year": 2023,
+    "filename": "cs/cs_003.pdf",
+    "id": "0068ec1168f2912ead843f3624a6a39e608b2d13",
+    "title": "A Novel Dual Attention Convolutional Neural Network Based on Multisensory Frequency Features for Unmanned Aerial Vehicle Rotor Fault Diagnosis"
   },
   {
     "domain": "cs",
     "page_count": 21,
     "citations": 5,
     "year": 2022,
-    "filename": "cs/cs_002.pdf",
+    "filename": "cs/cs_004.pdf",
     "id": "00038365f12a7fd41ff3d905416555c6b1c2c798",
     "title": "Research on UAV access deployment algorithm based on improved virtual force model"
   },
   {
     "domain": "cs",
-    "page_count": 6,
-    "citations": 9,
-    "year": 2021,
-    "filename": "cs/cs_003.pdf",
-    "id": "0038325e780de52214c23640e15aeecd805e1446",
-    "title": "Model-Agnostic Defense for Lane Detection against Adversarial Attack"
-  },
-  {
-    "domain": "cs",
-    "page_count": 11,
-    "citations": 36,
-    "year": 2021,
-    "filename": "cs/cs_004.pdf",
-    "id": "0056d7900756c20194511e9c61cdedacf8d13084",
-    "title": "Crowdsourced privacy-preserved feature tagging of short home videos for machine learning ASD detection"
-  },
-  {
-    "domain": "cs",
-    "page_count": 21,
-    "citations": 7,
-    "year": 2023,
+    "page_count": 47,
+    "citations": 48,
+    "year": 2022,
     "filename": "cs/cs_005.pdf",
-    "id": "002823f57cb8f56434a876d9c1ac3cacc00824d1",
-    "title": "An Analysis into Physical and Virtual Power Draw Characteristics of Embedded Wireless Sensor Network Devices under DoS and RPL-Based Attacks"
+    "id": "0037b7d8b18dee09c0811e86eb8da63acd107ad1",
+    "title": "A genetic algorithm inspired optimized cluster head selection method in wireless sensor networks"
   },
   {
     "domain": "cs",
-    "page_count": 6,
-    "citations": 23,
+    "page_count": 17,
+    "citations": 6,
     "year": 2022,
     "filename": "cs/cs_006.pdf",
-    "id": "003e6cd897a6427edf780edf53a1245a1f026586",
-    "title": "Deep Contextual Bandits for Orchestrating Multi-User MISO Systems with Multiple RISs"
+    "id": "00563bb9c48a7e5b8328f45eb0c8bf63edc66276",
+    "title": "IoT-Based System for Improving Vehicular Safety by Continuous Traffic Violation Monitoring"
   },
   {
     "domain": "cs",
-    "page_count": 25,
-    "citations": 49,
-    "year": 2021,
+    "page_count": 19,
+    "citations": 8,
+    "year": 2022,
     "filename": "cs/cs_007.pdf",
-    "id": "005deba43f7e7c44365c46637fcc72f7a93991e9",
-    "title": "Towards Quantum Advantage in Financial Market Risk using Quantum Gradient Algorithms"
+    "id": "0027ebe30bc18a8cb345c1d3e363bdf89adee7aa",
+    "title": "Non-Interactive Decision Trees and Applications with Multi-Bit TFHE"
+  },
+  {
+    "domain": "cs",
+    "page_count": 31,
+    "citations": 13,
+    "year": 2023,
+    "filename": "cs/cs_008.pdf",
+    "id": "0014d58ca1179e31485d64b0bcdad8c4ceb17ce7",
+    "title": "Unaware, Unfunded and Uneducated: A Systematic Review of SME Cybersecurity"
   },
   {
     "domain": "cs",
     "page_count": 16,
-    "citations": 18,
-    "year": 2024,
-    "filename": "cs/cs_008.pdf",
-    "id": "00302cebbd425fd8e0b925e084e6ed133e9c4ffa",
-    "title": "Carrier Aggregation Enabled MIMO-OFDM Integrated Sensing and Communication"
+    "citations": 10,
+    "year": 2021,
+    "filename": "cs/cs_009.pdf",
+    "id": "005cf56d2ce73d9c5c9d200f215cc01ce6f87362",
+    "title": "Airborne Radar Super-Resolution Imaging Based on Fast Total Variation Method"
   },
   {
     "domain": "cs",
-    "page_count": 21,
-    "citations": 8,
-    "year": 2022,
-    "filename": "cs/cs_009.pdf",
-    "id": "004825544dbf5cadb20842f9c561ed94a9724cd6",
-    "title": "Sparsity-Based Two-Dimensional DOA Estimation for Co-Prime Planar Array via Enhanced Matrix Completion"
+    "page_count": 14,
+    "citations": 7,
+    "year": 2023,
+    "filename": "cs/cs_010.pdf",
+    "id": "00300a61d5cb3e7dd4ee68599a3ae5da9bc670fc",
+    "title": "Quantification of Construction Materials Quality via Frequency Response Measurements: A Mobile Testing Station"
+  },
+  {
+    "domain": "cs",
+    "page_count": 20,
+    "citations": 5,
+    "year": 2024,
+    "filename": "cs/cs_011.pdf",
+    "id": "004f14a775759eb138f6a95e080029c23e8851b7",
+    "title": "Counting Polyominoes, Revisited"
   },
   {
     "domain": "cs",
     "page_count": 22,
-    "citations": 124,
+    "citations": 25,
     "year": 2022,
-    "filename": "cs/cs_010.pdf",
-    "id": "003c08471fe579d98e82cf5c0cac03897403fb55",
-    "title": "FP8 Quantization: The Power of the Exponent"
+    "filename": "cs/cs_012.pdf",
+    "id": "003b6d57f02286ac9f9ee37fc90400488e76acb2",
+    "title": "Improved Traffic Sign Detection Algorithm Based on Faster R-CNN"
   },
   {
     "domain": "cs",
-    "page_count": 11,
-    "citations": 74,
+    "page_count": 13,
+    "citations": 44,
     "year": 2021,
-    "filename": "cs/cs_011.pdf",
-    "id": "0057d8a412cdce6705f0c0a757767e6dc9936818",
-    "title": "Weakly supervised annotation\u2010free cancer detection and prediction of genotype in routine histopathology"
+    "filename": "cs/cs_013.pdf",
+    "id": "005765a820be2675be45d75a2087a4f034917c70",
+    "title": "Digitize-PID: Automatic Digitization of Piping and Instrumentation Diagrams"
   },
   {
     "domain": "cs",
     "page_count": 34,
     "citations": 13,
     "year": 2022,
-    "filename": "cs/cs_012.pdf",
+    "filename": "cs/cs_014.pdf",
     "id": "00060b8e4e818604dcdba8166cbadf2402fd6aab",
     "title": "JAX-DIPS: Neural bootstrapping of finite discretization methods and application to elliptic problems with discontinuities"
   },
   {
     "domain": "cs",
-    "page_count": 46,
-    "citations": 42,
+    "page_count": 5,
+    "citations": 15,
     "year": 2023,
-    "filename": "cs/cs_013.pdf",
-    "id": "005525bae9c3070974771e0c4eca61864d494bd5",
-    "title": "Generative AIBIM: An automatic and intelligent structural design pipeline integrating BIM and generative AI"
+    "filename": "cs/cs_015.pdf",
+    "id": "0054c18f5a5e97fe82fe3338ecb4881571cf36a3",
+    "title": "Deep Probabilistic Model for Lossless Scalable Point Cloud Attribute Compression"
+  },
+  {
+    "domain": "cs",
+    "page_count": 19,
+    "citations": 25,
+    "year": 2023,
+    "filename": "cs/cs_016.pdf",
+    "id": "00337d7d7fc679cb4959aead3204b0fb9c6a5ef2",
+    "title": "ScoNe: Benchmarking Negation Reasoning in Language Models With Fine-Tuning and In-Context Learning"
+  },
+  {
+    "domain": "cs",
+    "page_count": 23,
+    "citations": 5,
+    "year": 2021,
+    "filename": "cs/cs_017.pdf",
+    "id": "005a3fa429ec99219e6c6948c7deb822d675f7e2",
+    "title": "Message Passing and Metabolism"
+  },
+  {
+    "domain": "cs",
+    "page_count": 29,
+    "citations": 12,
+    "year": 2023,
+    "filename": "cs/cs_018.pdf",
+    "id": "002788669c1548cedeeae6a0d6fd1e0d5eb40e43",
+    "title": "Hate Speech Patterns in Social Media: A Methodological Framework and Fat Stigma Investigation Incorporating Sentiment Analysis, Topic Modelling and Discourse Analysis"
+  },
+  {
+    "domain": "cs",
+    "page_count": 7,
+    "citations": 5,
+    "year": 2022,
+    "filename": "cs/cs_019.pdf",
+    "id": "003520d98d8dd611a884d0c967ad8be9593da9d5",
+    "title": "Intelligent Blockage Recognition using Cellular mmWave Beamforming Data: Feasibility Study"
+  },
+  {
+    "domain": "cs",
+    "page_count": 23,
+    "citations": 172,
+    "year": 2022,
+    "filename": "cs/cs_020.pdf",
+    "id": "004847141139c57bbe59956dfd03dea772d9579a",
+    "title": "3DALL-E: Integrating Text-to-Image AI in 3D Design Workflows"
+  },
+  {
+    "domain": "cs",
+    "page_count": 13,
+    "citations": 36,
+    "year": 2021,
+    "filename": "cs/cs_021.pdf",
+    "id": "0047e2af5afad6f59331ccbdabbb6af4686585a7",
+    "title": "The Role of Accounting Information System and Knowledge Management to Enhancing Organizational Performance in Iraqi SMEs"
+  },
+  {
+    "domain": "cs",
+    "page_count": 3,
+    "citations": 11,
+    "year": 2021,
+    "filename": "cs/cs_022.pdf",
+    "id": "0040e02f0e23f3f9f63f501c8db76413236a27b9",
+    "title": "Challenges and New Trends in Power Electronic Devices Reliability"
+  },
+  {
+    "domain": "cs",
+    "page_count": 8,
+    "citations": 10,
+    "year": 2022,
+    "filename": "cs/cs_023.pdf",
+    "id": "00587f58f446d8fc69e77c53e0b56a3c180cb946",
+    "title": "AI Film Creation Oriented Transformation in the Era of Artificial Intelligence"
+  },
+  {
+    "domain": "cs",
+    "page_count": 22,
+    "citations": 5,
+    "year": 2022,
+    "filename": "cs/cs_024.pdf",
+    "id": "0049b0d0ffaf6d720610547bcfaadd216345bac8",
+    "title": "Multimodal Spatio-Temporal Prediction with Stochastic Adversarial Networks"
   },
   {
     "domain": "cs",
     "page_count": 20,
-    "citations": 20,
-    "year": 2024,
-    "filename": "cs/cs_014.pdf",
-    "id": "002677a54cc86d4d666d1d17065a47ebf0e92eb4",
-    "title": "FNeXter: A Multi-Scale Feature Fusion Network Based on ConvNeXt and Transformer for Retinal OCT Fluid Segmentation"
-  },
-  {
-    "domain": "cs",
-    "page_count": 12,
-    "citations": 11,
-    "year": 2021,
-    "filename": "cs/cs_015.pdf",
-    "id": "003398246996ec442237f103c8fdf139df561cd0",
-    "title": "Diabetes self-management in online health communities: an information exchange perspective"
+    "citations": 12,
+    "year": 2023,
+    "filename": "cs/cs_025.pdf",
+    "id": "006bca16e8952bae10086ff724ea769ef68a2f66",
+    "title": "Research on Variable Universe Fuzzy Multi-Parameter Self-Tuning PID Control of Bridge Crane"
   },
   {
     "domain": "cs",
     "page_count": 13,
     "citations": 67,
     "year": 2022,
-    "filename": "cs/cs_016.pdf",
+    "filename": "cs/cs_026.pdf",
     "id": "005b16e1c8e30c08254bda86cc9c1fa851c42885",
     "title": "Topological approach to generate new rough set models"
   },
   {
     "domain": "cs",
-    "page_count": 12,
-    "citations": 5,
+    "page_count": 37,
+    "citations": 8,
     "year": 2022,
-    "filename": "cs/cs_017.pdf",
-    "id": "0027e5fb2c5463ce1497f04303c90a57cdd1a22b",
-    "title": "Adoption of a deep learning-based neural network model in the psychological behavior analysis of resident tourism consumption"
+    "filename": "cs/cs_027.pdf",
+    "id": "00693059c249c3d1ff59d5d6a65c940d7019c155",
+    "title": "Distributed asynchronous column generation"
   },
   {
     "domain": "cs",
-    "page_count": 21,
-    "citations": 16,
-    "year": 2024,
-    "filename": "cs/cs_018.pdf",
-    "id": "00357b3c5895dd62aab7e820a9e89ef490468a49",
-    "title": "Cognitive manufacturing: definition and current trends"
-  },
-  {
-    "domain": "cs",
-    "page_count": 13,
-    "citations": 11,
-    "year": 2023,
-    "filename": "cs/cs_019.pdf",
-    "id": "0048fd764a8415850cdb22927a2a9e111c5768c1",
-    "title": "A Distributed Framework for Intense Ramping Management in Distribution Networks"
-  },
-  {
-    "domain": "cs",
-    "page_count": 4,
+    "page_count": 23,
     "citations": 6,
-    "year": 2021,
-    "filename": "cs/cs_020.pdf",
-    "id": "00373b3b967fc8c0465320b6447f8743fd0b777a",
-    "title": "MatMat: Matrix Factorization by Matrix Fitting"
-  },
-  {
-    "domain": "cs",
-    "page_count": 16,
-    "citations": 27,
-    "year": 2022,
-    "filename": "cs/cs_021.pdf",
-    "id": "004820297b6a95b9caa7aee5cdc455ebc0c70c1f",
-    "title": "Deep-Learning-Based Algorithm for the Removal of Electromagnetic Interference Noise in Photoacoustic Endoscopic Image Processing"
-  },
-  {
-    "domain": "cs",
-    "page_count": 21,
-    "citations": 74,
-    "year": 2022,
-    "filename": "cs/cs_022.pdf",
-    "id": "004149bf36ae931f5af717f388ea6753cf5ba4c2",
-    "title": "BlindFL: Vertical Federated Machine Learning without Peeking into Your Data"
+    "year": 2023,
+    "filename": "cs/cs_028.pdf",
+    "id": "002902340bb037a728979cc3fe825c2a14e84f74",
+    "title": "Entanglement-based Mutual Quantum Distance Bounding"
   },
   {
     "domain": "cs",
     "page_count": 10,
-    "citations": 9,
+    "citations": 10,
     "year": 2024,
-    "filename": "cs/cs_023.pdf",
-    "id": "0058bc64face11bf54657ea70c33b1b37dcb85b2",
-    "title": "Enabling uncertainty estimation in neural networks through weight perturbation for improved Alzheimer's disease classification"
+    "filename": "cs/cs_029.pdf",
+    "id": "0045efd9d9c69a49a9edd43bf8a79c04ee051db8",
+    "title": "Memristor-Based CNNs for Detecting Stress Using Brain Imaging Signals"
   },
   {
     "domain": "cs",
-    "page_count": 4,
-    "citations": 58,
-    "year": 2023,
-    "filename": "cs/cs_024.pdf",
-    "id": "0049f5770d3d32744095f2b2517385fcc26444ef",
-    "title": "Artificial Hallucinations by Google Bard: Think Before You Leap"
-  },
-  {
-    "domain": "cs",
-    "page_count": 21,
-    "citations": 11,
-    "year": 2021,
-    "filename": "cs/cs_025.pdf",
-    "id": "006cc3e7befafaa0b1726565c3ca84129f9b5801",
-    "title": "THE FLIPPED CLASSROOM: MEDIA HYPE OR EMPIRICALLY BASED EFFECTIVENESS?"
-  },
-  {
-    "domain": "cs",
-    "page_count": 15,
-    "citations": 5,
-    "year": 2023,
-    "filename": "cs/cs_026.pdf",
-    "id": "003b3f7fed26a750155083fbb76ea95f18b605ce",
-    "title": "A Novel Attack Identification Mechanism in IoT-Based Converter-Composed DC Grids"
-  },
-  {
-    "domain": "cs",
-    "page_count": 7,
+    "page_count": 12,
     "citations": 6,
     "year": 2022,
-    "filename": "cs/cs_027.pdf",
-    "id": "006afdbfe8973e4c1c54f47587e2e63eed42b5f5",
-    "title": "Improved Resistive Switching Observed in Ti/Zr3N2/p-Si Capacitor via Hydrogen Passivation"
-  },
-  {
-    "domain": "cs",
-    "page_count": 1,
-    "citations": 11,
-    "year": 2021,
-    "filename": "cs/cs_028.pdf",
-    "id": "00292a28e2e47c04a8290c8b981195bc05dbc6f3",
-    "title": "To review or not to review"
-  },
-  {
-    "domain": "cs",
-    "page_count": 22,
-    "citations": 11,
-    "year": 2023,
-    "filename": "cs/cs_029.pdf",
-    "id": "00465f4345fc213554d080fb297a5a815f784b86",
-    "title": "Fractional-Order Periodic Maps: Stability Analysis and Application to the Periodic-2 Limit Cycles in the Nonlinear Systems"
-  },
-  {
-    "domain": "cs",
-    "page_count": 16,
-    "citations": 30,
-    "year": 2022,
     "filename": "cs/cs_030.pdf",
-    "id": "005463dd34b6075ae446cd812b5efc04175fc592",
-    "title": "Matrix Completion via Non-Convex Relaxation and Adaptive Correlation Learning"
+    "id": "00538cfea3550302fa40b5265d689f96c0169c90",
+    "title": "TopWORDS-Seg: Simultaneous Text Segmentation and Word Discovery for Open-Domain Chinese Texts via Bayesian Inference"
   },
   {
     "domain": "cs",
@@ -289,17 +289,17 @@
   },
   {
     "domain": "cs",
-    "page_count": 63,
-    "citations": 34,
-    "year": 2021,
+    "page_count": 13,
+    "citations": 7,
+    "year": 2022,
     "filename": "cs/cs_032.pdf",
-    "id": "0030f0e07b770de3f3c270c62f4b76cea8e40c18",
-    "title": "DEPP: Deep Learning Enables Extending Species Trees using Single Genes"
+    "id": "0030a756eac38220ae74a65dcecf767452309148",
+    "title": "Clustered Scheduling and Communication Pipelining for Efficient Resource Management of Wireless Federated Learning"
   },
   {
     "domain": "cs",
     "page_count": 7,
-    "citations": 10,
+    "citations": 11,
     "year": 2021,
     "filename": "cs/cs_033.pdf",
     "id": "0006c00b57451adc55bf90570027d60fe292c234",
@@ -307,165 +307,165 @@
   },
   {
     "domain": "cs",
-    "page_count": 12,
-    "citations": 35,
-    "year": 2023,
+    "page_count": 24,
+    "citations": 16,
+    "year": 2021,
     "filename": "cs/cs_034.pdf",
-    "id": "0058d94522afbaea84d69d489e9b86e94a5f767f",
-    "title": "Drone Stations-Aided Beyond-Battery-Lifetime Flight Planning for Parcel Delivery"
+    "id": "0058af1038fe75d00f44f01218a611cf4a30eee1",
+    "title": "Kuramoto Model-Based Analysis Reveals Oxytocin Effects on Brain Network Dynamics"
   },
   {
     "domain": "cs",
-    "page_count": 19,
-    "citations": 31,
+    "page_count": 12,
+    "citations": 26,
     "year": 2022,
     "filename": "cs/cs_035.pdf",
-    "id": "0014e8aeb2550d7cefe4291a6ac1f462b04fa74e",
-    "title": "A framework for identifying and analysing industry 4.0 scenarios"
+    "id": "00351d81f990895f5c983e0b043008cfab08f713",
+    "title": "Learning Agent-Aware Affordances for Closed-Loop Interaction with Articulated Objects"
   },
   {
     "domain": "cs",
-    "page_count": 30,
-    "citations": 10,
-    "year": 2021,
+    "page_count": 7,
+    "citations": 32,
+    "year": 2022,
     "filename": "cs/cs_036.pdf",
-    "id": "003553715cefdaca697c80fc33370be25dde9dd3",
-    "title": "Approximation of fractional harmonic maps"
+    "id": "005a3848009e2dade62e22460945a15643532de7",
+    "title": "Neural Contact Fields: Tracking Extrinsic Contact with Tactile Sensing"
   },
   {
     "domain": "cs",
-    "page_count": 11,
-    "citations": 35,
+    "page_count": 18,
+    "citations": 22,
     "year": 2021,
     "filename": "cs/cs_037.pdf",
-    "id": "005ae5107d792d9964bf8bf38e2a48e1e769d7af",
-    "title": "Characterization of Time Delay in Power Hardware in the Loop Setups"
+    "id": "00139e516cc8a20694f5ecf700cb364b2bb284fb",
+    "title": "Mining Textual and Imagery Instagram Data during the COVID-19 Pandemic"
   },
   {
     "domain": "cs",
-    "page_count": 11,
-    "citations": 18,
-    "year": 2021,
+    "page_count": 6,
+    "citations": 6,
+    "year": 2022,
     "filename": "cs/cs_038.pdf",
-    "id": "0013a0f730b2a81abd6d694cd95be93d322e1df3",
-    "title": "Assessing the Performance of Deep Learning Algorithms for Short-Term Surface Water Quality Prediction"
+    "id": "0010963f374d625ad7fb42b64eb30de2244863d5",
+    "title": "Semi-Supervised Learning Based on Reference Model for Low-resource TTS"
+  },
+  {
+    "domain": "cs",
+    "page_count": 9,
+    "citations": 9,
+    "year": 2022,
+    "filename": "cs/cs_039.pdf",
+    "id": "005577fabc42dbd6f0b63bb26a3a545892a9775f",
+    "title": "Data-Driven Derivation of Sheet Metal Properties Gained from Punching Forces Using an Artificial Neural Network"
   },
   {
     "domain": "cs",
     "page_count": 13,
-    "citations": 10,
-    "year": 2023,
-    "filename": "cs/cs_039.pdf",
-    "id": "0010a251cb4bfe8736395090d13f3cf593604dd8",
-    "title": "Semi-Supervised Semantic Segmentation of Remote Sensing Images Based on Dual Cross-Entropy Consistency"
-  },
-  {
-    "domain": "cs",
-    "page_count": 19,
-    "citations": 6,
-    "year": 2022,
+    "citations": 5,
+    "year": 2024,
     "filename": "cs/cs_040.pdf",
-    "id": "00310765be713a6440ec8dca5a936f0256f31c26",
-    "title": "Hands-on AIOps: Best Practices Guide to Implementing AIOps"
-  },
-  {
-    "domain": "cs",
-    "page_count": 12,
-    "citations": 53,
-    "year": 2025,
-    "filename": "cs/cs_041.pdf",
-    "id": "007069ba85bce4d8e6d91067bd8b6dcb4948bbbd",
-    "title": "Logan: Planetary-Scale Genome Assembly Surveys Life\u2019s Diversity"
+    "id": "006ec6e16afcb8c1e49b6f1da05ae22434ac4aed",
+    "title": "Investigating the Impact of Regional Digital Finance Development on Short-run IPO Performance: Empirical Evidence from China"
   },
   {
     "domain": "cs",
     "page_count": 8,
     "citations": 6,
     "year": 2023,
-    "filename": "cs/cs_042.pdf",
+    "filename": "cs/cs_041.pdf",
     "id": "0001a448619454c8099b5b2df947bff0e0104631",
     "title": "Disturbance Observer-Based Repetitive Control System With Nonminimal State-Space Realization and Experimental Evaluation"
   },
   {
     "domain": "cs",
-    "page_count": 31,
-    "citations": 13,
-    "year": 2023,
-    "filename": "cs/cs_043.pdf",
-    "id": "004d5fe0d07396623daedc963dc32ebf4cb055a8",
-    "title": "Risk-Based Cybersecurity Compliance Assessment System (RC2AS)"
-  },
-  {
-    "domain": "cs",
-    "page_count": 16,
-    "citations": 9,
-    "year": 2021,
-    "filename": "cs/cs_044.pdf",
-    "id": "0057faee3ecb0d46b4cb67cfeac574f3785e9c02",
-    "title": "Decomposition and shortest path problem formulation for solving the hydro unit commitment and scheduling in a hydro valley"
+    "page_count": 13,
+    "citations": 21,
+    "year": 2022,
+    "filename": "cs/cs_042.pdf",
+    "id": "00151593e1b7c1ca0d34e667663f83655f8ae552",
+    "title": "Multimodal Image Reconstruction of Electrical Impedance Tomography Using Kernel Method"
   },
   {
     "domain": "cs",
     "page_count": 9,
-    "citations": 19,
-    "year": 2022,
-    "filename": "cs/cs_045.pdf",
-    "id": "00452c827ff035c17408019b2ef523836dc821f5",
-    "title": "A D-Band Multichannel TX System-in-Package Achieving 84.48 Gb/s With 64-QAM Based on 45-nm CMOS and Low-Cost PCB Technology"
+    "citations": 23,
+    "year": 2021,
+    "filename": "cs/cs_043.pdf",
+    "id": "002f63751919becff75057a90c6f26eae5e1e077",
+    "title": "Tracing CAPEC Attack Patterns from CVE Vulnerability Information using Natural Language Processing Technique"
+  },
+  {
+    "domain": "cs",
+    "page_count": 5,
+    "citations": 9,
+    "year": 2024,
+    "filename": "cs/cs_044.pdf",
+    "id": "00452b05a4d5d3569e5939508dc90caff56337e1",
+    "title": "Highly stable power control for chip-based continuous-variable quantum key distribution system."
   },
   {
     "domain": "cs",
     "page_count": 8,
     "citations": 14,
-    "year": 2023,
-    "filename": "cs/cs_046.pdf",
-    "id": "0044d1a9f3141ebf0abc2058f7c4caf50040adf2",
-    "title": "Influence of Camera-LiDAR Configuration on 3D Object Detection for Autonomous Driving"
-  },
-  {
-    "domain": "cs",
-    "page_count": 21,
-    "citations": 7,
-    "year": 2022,
-    "filename": "cs/cs_047.pdf",
-    "id": "0022a7ed218cf1eeebe866f3b30befdecf5820d6",
-    "title": "ANALISIS TINGKAT PEMAHAMAN DAN KESIAPAN PELAKU UMKM TERHADAP IMPLEMENTASI LAPORAN KEUANGAN BERBASIS SAK EMKM"
-  },
-  {
-    "domain": "cs",
-    "page_count": 12,
-    "citations": 10,
-    "year": 2023,
-    "filename": "cs/cs_048.pdf",
-    "id": "004abdbefd8b89f866728802f9c659ab2bdd3b63",
-    "title": "M3ICRO: Machine Learning-Enabled Compact Photonic Tensor Core based on PRogrammable Multi-Operand Multimode Interference"
-  },
-  {
-    "domain": "cs",
-    "page_count": 7,
-    "citations": 20,
-    "year": 2023,
-    "filename": "cs/cs_049.pdf",
-    "id": "002b4873bd937bebbcf7301c93b02a5460fc7d7e",
-    "title": "Softmax Bias Correction for Quantized Generative Models"
-  },
-  {
-    "domain": "cs",
-    "page_count": 10,
-    "citations": 19,
-    "year": 2024,
-    "filename": "cs/cs_050.pdf",
-    "id": "0028cc3d7b1bcabe9d46afa1bd858003edd958ed",
-    "title": "CRASH: Crash Recognition and Anticipation System Harnessing with Context-Aware and Temporal Focus Attentions"
+    "year": 2021,
+    "filename": "cs/cs_045.pdf",
+    "id": "004cc813dfe5281dc6a5efd3a4e43966a1ccf16c",
+    "title": "A computer algebra system for the study of commutativity up-to-coherent homotopies"
   },
   {
     "domain": "cs",
     "page_count": 16,
-    "citations": 40,
+    "citations": 5,
+    "year": 2023,
+    "filename": "cs/cs_046.pdf",
+    "id": "0044d668ab616e1960ebef98b16eab173921c603",
+    "title": "Minimizing Total Tardiness in a Two-Machine Flowshop Scheduling Problem with Availability Constraints"
+  },
+  {
+    "domain": "cs",
+    "page_count": 16,
+    "citations": 12,
     "year": 2022,
+    "filename": "cs/cs_047.pdf",
+    "id": "004477fd9e6854d9c226bcf09ed4d6687b49ae43",
+    "title": "The Mechanism of Digital Environment Influencing Organizational Performance: An Empirical Analysis Based on Construction Data"
+  },
+  {
+    "domain": "cs",
+    "page_count": 14,
+    "citations": 20,
+    "year": 2022,
+    "filename": "cs/cs_048.pdf",
+    "id": "004a731ce7b4de6bad6d411ca7ed4d3b2bdb6ec1",
+    "title": "A Miniaturized Triple-Band Antenna Based on Square Split Ring for IoT Applications"
+  },
+  {
+    "domain": "cs",
+    "page_count": 12,
+    "citations": 7,
+    "year": 2023,
+    "filename": "cs/cs_049.pdf",
+    "id": "0028a595d2a9cfdd693befc5939764d4d087da6d",
+    "title": "Paediatric Medicinal Formulation Development: Utilising Human Taste Panels and Incorporating Their Data into Machine Learning Training"
+  },
+  {
+    "domain": "cs",
+    "page_count": 11,
+    "citations": 15,
+    "year": 2022,
+    "filename": "cs/cs_050.pdf",
+    "id": "0064e5dd5036c4577ac19a99b5b5d1256fcd1f6c",
+    "title": "A deep learning based system for accurate diagnosis of brain tumors using T1-w MRI"
+  },
+  {
+    "domain": "cs",
+    "page_count": 16,
+    "citations": 7,
+    "year": 2023,
     "filename": "cs/cs_051.pdf",
-    "id": "006608047e5d5329a289546c438023296f44d212",
-    "title": "Research on Pedestrian Detection and DeepSort Tracking in Front of Intelligent Vehicle Based on Deep Learning"
+    "id": "0025ddfafcfee82c51ec437d9c0318952fc06d4a",
+    "title": "DELICIOUS: Deadline-Aware Approximate Computing in Cache-Conscious Multicore"
   },
   {
     "domain": "cs",
@@ -478,80 +478,80 @@
   },
   {
     "domain": "cs",
-    "page_count": 13,
-    "citations": 6,
-    "year": 2022,
-    "filename": "cs/cs_053.pdf",
-    "id": "0017c3aef2187349ec68aa63c70c64c988b4cc84",
-    "title": "Asymmetric versus Symmetric Binary Regresion: A New Proposal with Applications"
-  },
-  {
-    "domain": "cs",
     "page_count": 20,
     "citations": 15,
     "year": 2024,
-    "filename": "cs/cs_054.pdf",
+    "filename": "cs/cs_053.pdf",
     "id": "00000c33779acab142af6c7a6dae8b36fac0805d",
     "title": "Insights into Household Electric Vehicle Charging Behavior: Analysis and Predictive Modeling"
   },
   {
     "domain": "cs",
     "page_count": 49,
-    "citations": 177,
+    "citations": 180,
     "year": 2023,
-    "filename": "cs/cs_055.pdf",
+    "filename": "cs/cs_054.pdf",
     "id": "00044a527a0642b08f385cda845331f0fc8cbbfd",
     "title": "At the Confluence of Artificial Intelligence and Edge Computing in IoT-Based Applications: A Review and New Perspectives"
   },
   {
     "domain": "cs",
-    "page_count": 16,
-    "citations": 148,
-    "year": 2021,
-    "filename": "cs/cs_056.pdf",
-    "id": "00213d44e03dae916860c0512025b5f96c3ee231",
-    "title": "Data augmentation in natural language processing: a novel text generation approach for long and short text classifiers"
-  },
-  {
-    "domain": "cs",
-    "page_count": 13,
-    "citations": 19,
-    "year": 2024,
-    "filename": "cs/cs_057.pdf",
-    "id": "0039e3bd674e4cf954655ae0098075cf26748d5f",
-    "title": "Decoupling General and Personalized Knowledge in Federated Learning via Additive and Low-rank Decomposition"
-  },
-  {
-    "domain": "cs",
-    "page_count": 7,
-    "citations": 414,
+    "page_count": 17,
+    "citations": 17,
     "year": 2023,
-    "filename": "cs/cs_058.pdf",
-    "id": "003ca99a387b03dacd154b23a0b7f55800bf3aa8",
-    "title": "Utility of ChatGPT in Clinical Practice"
+    "filename": "cs/cs_055.pdf",
+    "id": "0021242eee6ead1bb4846ee5e5a40dd3bce08507",
+    "title": "IHVFL: a privacy-enhanced intention-hiding vertical federated learning framework for medical data"
   },
   {
     "domain": "cs",
-    "page_count": 12,
-    "citations": 21,
+    "page_count": 11,
+    "citations": 8,
+    "year": 2023,
+    "filename": "cs/cs_056.pdf",
+    "id": "0038d9831a3444ced56d13e9949357adc292dc11",
+    "title": "Parenting in the Digital Age: How is the Digital Awareness of Mothers?"
+  },
+  {
+    "domain": "cs",
+    "page_count": 14,
+    "citations": 9,
+    "year": 2023,
+    "filename": "cs/cs_057.pdf",
+    "id": "001d08a718abcacda7ba107ddb79ed9ce847e14b",
+    "title": "Digital Marketing Business Strategy to MSME Performance in the Industrial Revolution 4.0 Era"
+  },
+  {
+    "domain": "cs",
+    "page_count": 15,
+    "citations": 47,
     "year": 2021,
-    "filename": "cs/cs_059.pdf",
-    "id": "00675fcf842d2fcf23413875b2a43ff75824fe69",
-    "title": "An Innovative Approach for Online Neuroanatomy and Neurorrehabilitation Teaching Based on 3D Virtual Anatomical Models Using Leap Motion Controller During COVID-19 Pandemic"
+    "filename": "cs/cs_058.pdf",
+    "id": "003c1005c719d8f5691fd963f4ed8a0b2d50f4f7",
+    "title": "Retrieval-Free Knowledge-Grounded Dialogue Response Generation with Adapters"
   },
   {
     "domain": "cs",
-    "page_count": 8,
-    "citations": 22,
+    "page_count": 6,
+    "citations": 8,
+    "year": 2022,
+    "filename": "cs/cs_059.pdf",
+    "id": "005274f8e21999ed0602f14a5a4883fa272d84f6",
+    "title": "Penerapan Sistem Pakar Untuk Diagnosa Penyakit Kucing Pada Aplikasi Berbasis Android Dengan Metode Forward Cahining"
+  },
+  {
+    "domain": "cs",
+    "page_count": 9,
+    "citations": 23,
     "year": 2023,
     "filename": "cs/cs_060.pdf",
-    "id": "00670e1e999611ad02dc6268a323830b4a2dfbd7",
-    "title": "Improving Synthetically Generated Image Detection in Cross-Concept Settings"
+    "id": "00661ab418a4abd3ed58696ac839125a58e919f9",
+    "title": "Prediction of small molecule drug-miRNA associations based on GNNs and CNNs"
   },
   {
     "domain": "cs",
     "page_count": 21,
-    "citations": 13,
+    "citations": 14,
     "year": 2023,
     "filename": "cs/cs_061.pdf",
     "id": "00095a725acbdc0ac44e536a03ad0483b2965bf2",
@@ -559,1837 +559,2377 @@
   },
   {
     "domain": "cs",
-    "page_count": 14,
-    "citations": 15,
+    "page_count": 8,
+    "citations": 8,
     "year": 2022,
     "filename": "cs/cs_062.pdf",
-    "id": "005b8c675c6d8dd294c3800e0a6cb0dd80c13558",
-    "title": "Automated Classification of Mild Cognitive Impairment by Machine Learning With Hippocampus-Related White Matter Network"
+    "id": "00681f01899a92db4c8852cea38162e32c656828",
+    "title": "An Attention-based Multi-Scale Feature Learning Network for Multimodal Medical Image Fusion"
   },
   {
     "domain": "cs",
-    "page_count": 38,
-    "citations": 24,
-    "year": 2022,
+    "page_count": 15,
+    "citations": 10,
+    "year": 2021,
     "filename": "cs/cs_063.pdf",
-    "id": "00141e0d02279341bff1ce615a887dad83f4232d",
-    "title": "Forecasting solar photosynthetic photon flux density under cloud cover effects: novel predictive model using convolutional neural network integrated with long short-term memory network"
+    "id": "005a9404ee8875db11b33d0e99fbab85cbe4022b",
+    "title": "A Model for Enhancing Algorithmic Thinking in Programming Education using PAAM"
+  },
+  {
+    "domain": "cs",
+    "page_count": 17,
+    "citations": 14,
+    "year": 2022,
+    "filename": "cs/cs_064.pdf",
+    "id": "003c242250a189095d66d916ed0ae1759c700a0e",
+    "title": "Few-shot Image Generation Using Discrete Content Representation"
+  },
+  {
+    "domain": "cs",
+    "page_count": 10,
+    "citations": 14,
+    "year": 2022,
+    "filename": "cs/cs_065.pdf",
+    "id": "00604535b29dbb2ea2af9e3d49abb0d26b0a8c27",
+    "title": "Dynamic Multi-Scale Network for Dual-Pixel Images Defocus Deblurring with Transformer"
+  },
+  {
+    "domain": "cs",
+    "page_count": 10,
+    "citations": 22,
+    "year": 2023,
+    "filename": "cs/cs_066.pdf",
+    "id": "0017a5128423392dc930992a05027c69f9fea189",
+    "title": "Validation of data mining models by comparing with conventional methods for dental age estimation in Korean juveniles and young adults"
   },
   {
     "domain": "cs",
     "page_count": 14,
-    "citations": 39,
+    "citations": 17,
     "year": 2022,
-    "filename": "cs/cs_064.pdf",
-    "id": "00622d2594af8e033a2bafbd53354e03b2c30ad5",
-    "title": "Improving Monocular Visual Odometry Using Learned Depth"
+    "filename": "cs/cs_067.pdf",
+    "id": "0057d56a6ee135ddc53e3d8cb897ed1405e00396",
+    "title": "Agnostic Explanation of Model Change based on Feature Importance"
+  },
+  {
+    "domain": "cs",
+    "page_count": 18,
+    "citations": 9,
+    "year": 2024,
+    "filename": "cs/cs_068.pdf",
+    "id": "00680b4854def6f164922571581790681352196f",
+    "title": "Knowledge-Guided Heterogeneous Graph Convolutional Network for Aspect-Based Sentiment Analysis"
+  },
+  {
+    "domain": "cs",
+    "page_count": 11,
+    "citations": 53,
+    "year": 2021,
+    "filename": "cs/cs_069.pdf",
+    "id": "0021b3beb2ee0906b425eef7c0f453623c1c6a03",
+    "title": "Certified Robustness to Word Substitution Attack with Differential Privacy"
+  },
+  {
+    "domain": "cs",
+    "page_count": 9,
+    "citations": 23,
+    "year": 2021,
+    "filename": "cs/cs_070.pdf",
+    "id": "003f4b9652fe60366f9e69662487e855cd08abdc",
+    "title": "Apprentice for Event Generator Tuning"
+  },
+  {
+    "domain": "cs",
+    "page_count": 8,
+    "citations": 37,
+    "year": 2021,
+    "filename": "cs/cs_071.pdf",
+    "id": "0001d8aa78fe5890cd3643fbc7182056d092929c",
+    "title": "A framework for pandemic compliant higher education national system"
+  },
+  {
+    "domain": "cs",
+    "page_count": 24,
+    "citations": 45,
+    "year": 2021,
+    "filename": "cs/cs_072.pdf",
+    "id": "0018ce3db8f9957b520d6b7e0cec84abfa230e1c",
+    "title": "Kubernetes Cluster for Automating Software Production Environment"
+  },
+  {
+    "domain": "cs",
+    "page_count": 12,
+    "citations": 11,
+    "year": 2024,
+    "filename": "cs/cs_073.pdf",
+    "id": "000387b0694abca1e95522a10e6c527f56f1536e",
+    "title": "Acoustic Imaging With Circular Microphone Array: A New Approach for Sound Field Analysis"
+  },
+  {
+    "domain": "cs",
+    "page_count": 3,
+    "citations": 8,
+    "year": 2021,
+    "filename": "cs/cs_074.pdf",
+    "id": "006a4d3a680f805eb3faee5392b78493b82fa490",
+    "title": "Experimental Study of Deep Neural Network Equalizers Performance in Optical Links"
+  },
+  {
+    "domain": "cs",
+    "page_count": 10,
+    "citations": 8,
+    "year": 2022,
+    "filename": "cs/cs_075.pdf",
+    "id": "002c87d4d47aa408dbbb7d06bcb947aee7c0a1cc",
+    "title": "Modelling Information for the Burnishing Process in a Cyber\u2013Physical Production System"
+  },
+  {
+    "domain": "cs",
+    "page_count": 17,
+    "citations": 5,
+    "year": 2022,
+    "filename": "cs/cs_076.pdf",
+    "id": "00226a487d5be0739175f33e359f8c42681de5c0",
+    "title": "The Value of Context-Based Interface Prototyping for the Autonomous Vehicle Domain: A Method Overview"
+  },
+  {
+    "domain": "cs",
+    "page_count": 39,
+    "citations": 8,
+    "year": 2022,
+    "filename": "cs/cs_077.pdf",
+    "id": "0061eade4b91908ee3e0e97cac5a39097fea468f",
+    "title": "Algorithms with More Granular Differential Privacy Guarantees"
+  },
+  {
+    "domain": "cs",
+    "page_count": 10,
+    "citations": 82,
+    "year": 2022,
+    "filename": "cs/cs_078.pdf",
+    "id": "004cff7d3c58f189db9a76fc39de150a2ed5c16a",
+    "title": "Rethinking Graph Convolutional Networks in Knowledge Graph Completion"
+  },
+  {
+    "domain": "cs",
+    "page_count": 34,
+    "citations": 14,
+    "year": 2024,
+    "filename": "cs/cs_079.pdf",
+    "id": "006b3b0078e20ec52db556467f1fb909d7271098",
+    "title": "An academic recommender system on large citation data based on clustering, graph modeling and deep learning"
+  },
+  {
+    "domain": "cs",
+    "page_count": 10,
+    "citations": 5,
+    "year": 2022,
+    "filename": "cs/cs_080.pdf",
+    "id": "006c2a898e0e1522481d29c8101fc98d1c06b678",
+    "title": "Automatic Artifact Detection Algorithm in Fetal MRI"
+  },
+  {
+    "domain": "cs",
+    "page_count": 16,
+    "citations": 15,
+    "year": 2021,
+    "filename": "cs/cs_081.pdf",
+    "id": "006e22e380553becb3fdeb95cbbc96380407aeec",
+    "title": "Model of Price Optimization as a Part of Hotel Revenue Management\u2014Stochastic Approach"
+  },
+  {
+    "domain": "cs",
+    "page_count": 41,
+    "citations": 94,
+    "year": 2022,
+    "filename": "cs/cs_082.pdf",
+    "id": "006b0712143c55ada6ef5ec5f384af4c32eac27b",
+    "title": "Data-driven science and machine learning methods in laser\u2013plasma physics"
+  },
+  {
+    "domain": "cs",
+    "page_count": 20,
+    "citations": 151,
+    "year": 2021,
+    "filename": "cs/cs_083.pdf",
+    "id": "0054baba895f36cedab702d36c99dc4a3b7d3363",
+    "title": "A Survey on the Integration of Blockchain With IoT to Enhance Performance and Eliminate Challenges"
+  },
+  {
+    "domain": "cs",
+    "page_count": 28,
+    "citations": 6,
+    "year": 2021,
+    "filename": "cs/cs_084.pdf",
+    "id": "0020c76cc02a2619b104aaed4dc8863d9caa5aee",
+    "title": "Referential Communication Between Friends and Strangers in the Wild"
+  },
+  {
+    "domain": "cs",
+    "page_count": 6,
+    "citations": 23,
+    "year": 2022,
+    "filename": "cs/cs_085.pdf",
+    "id": "003e6cd897a6427edf780edf53a1245a1f026586",
+    "title": "Deep Contextual Bandits for Orchestrating Multi-User MISO Systems with Multiple RISs"
+  },
+  {
+    "domain": "cs",
+    "page_count": 13,
+    "citations": 10,
+    "year": 2022,
+    "filename": "cs/cs_086.pdf",
+    "id": "0002ae1c2f2e7499ef7306eacfc3bd2269770612",
+    "title": "Smart Shopping Cart for Visually Impaired Individuals"
+  },
+  {
+    "domain": "cs",
+    "page_count": 19,
+    "citations": 22,
+    "year": 2022,
+    "filename": "cs/cs_087.pdf",
+    "id": "002973c44f946a629f7b74fee486b61cb3d0724c",
+    "title": "MedalCare-XL: 16,900 healthy and pathological synthetic 12 lead ECGs from electrophysiological simulations"
+  },
+  {
+    "domain": "cs",
+    "page_count": 11,
+    "citations": 14,
+    "year": 2022,
+    "filename": "cs/cs_088.pdf",
+    "id": "00240612ed2f7322df0deb90dba75966e98b5c2e",
+    "title": "In-Plane Thermal Diffusivity Measurements of Polyethersulfone Woven Textiles by Infrared Thermography"
+  },
+  {
+    "domain": "cs",
+    "page_count": 10,
+    "citations": 7,
+    "year": 2022,
+    "filename": "cs/cs_089.pdf",
+    "id": "0041d9bf101cde8aa4cb9a87a6984c3ae8afcf05",
+    "title": "Needs Analysis of Electronic Student Worksheets to Practice 4C Skills"
+  },
+  {
+    "domain": "cs",
+    "page_count": 13,
+    "citations": 7,
+    "year": 2023,
+    "filename": "cs/cs_090.pdf",
+    "id": "00107a0132da4822cd2dc0f350fb56f191657f6e",
+    "title": "Homeomorphic Image Registration via Conformal-Invariant Hyperelastic Regularisation"
+  },
+  {
+    "domain": "cs",
+    "page_count": 20,
+    "citations": 6,
+    "year": 2022,
+    "filename": "cs/cs_091.pdf",
+    "id": "003d2429da6b6f1c65585e981c19eee707958bc0",
+    "title": "Cloud-Edge-Terminal-Based Synchronized Decision-Making and Control System for Municipal Solid Waste Collection and Transportation"
+  },
+  {
+    "domain": "cs",
+    "page_count": 29,
+    "citations": 5,
+    "year": 2021,
+    "filename": "cs/cs_092.pdf",
+    "id": "002fefd5055535f9e4b05b548c5d76a767db0cd1",
+    "title": "Modeling and Designing of a Compact Single Band PIFA Antenna for Wireless Application Using Artificial Neural Network"
+  },
+  {
+    "domain": "cs",
+    "page_count": 15,
+    "citations": 8,
+    "year": 2022,
+    "filename": "cs/cs_093.pdf",
+    "id": "004c17e0662dbc2d3dd7eb01987ad1382c92e793",
+    "title": "Multi-view 3D human pose reconstruction based on spatial confidence point group for jump analysis in figure skating"
+  },
+  {
+    "domain": "cs",
+    "page_count": 8,
+    "citations": 15,
+    "year": 2023,
+    "filename": "cs/cs_094.pdf",
+    "id": "0044d1a9f3141ebf0abc2058f7c4caf50040adf2",
+    "title": "Influence of Camera-LiDAR Configuration on 3D Object Detection for Autonomous Driving"
+  },
+  {
+    "domain": "cs",
+    "page_count": 11,
+    "citations": 10,
+    "year": 2023,
+    "filename": "cs/cs_095.pdf",
+    "id": "002527c27fd5915f0de519ed79e22da3e2b0945f",
+    "title": "Rocking Up Digital Educational Methodology in Higher Education \u2013 Is Education 4.0 Here?"
+  },
+  {
+    "domain": "cs",
+    "page_count": 55,
+    "citations": 14,
+    "year": 2021,
+    "filename": "cs/cs_096.pdf",
+    "id": "005f0dd16dfae7f8800199b380593de6cae20a98",
+    "title": "A framework for randomized time-splitting in linear-quadratic optimal control"
   },
   {
     "domain": "cs",
     "page_count": 25,
     "citations": 33,
     "year": 2023,
-    "filename": "cs/cs_065.pdf",
-    "id": "005880e5ec9d3077b03d63d4d8a1ea0e8f3d1476",
-    "title": "Machine Learning Techniques for Estimating Soil Moisture from Smartphone Captured Images"
+    "filename": "cs/cs_097.pdf",
+    "id": "00518fef7ecf09bde5377098a8e4f3f031f278b0",
+    "title": "Applications of Natural Language Processing to Geoscience Text Data and Prospectivity Modeling"
   },
   {
     "domain": "cs",
-    "page_count": 13,
-    "citations": 28,
-    "year": 2022,
-    "filename": "cs/cs_066.pdf",
-    "id": "0021de2fa8dbdaa5558ea70408db8f06f8f2720c",
-    "title": "The Impact of Achievement Goal Orientation, Learning Strategies, and Digital Skill on Engineering Skill Self-Efficacy in Thailand"
-  },
-  {
-    "domain": "cs",
-    "page_count": 5,
+    "page_count": 21,
     "citations": 11,
+    "year": 2021,
+    "filename": "cs/cs_098.pdf",
+    "id": "006cc3e7befafaa0b1726565c3ca84129f9b5801",
+    "title": "THE FLIPPED CLASSROOM: MEDIA HYPE OR EMPIRICALLY BASED EFFECTIVENESS?"
+  },
+  {
+    "domain": "cs",
+    "page_count": 11,
+    "citations": 57,
     "year": 2023,
-    "filename": "cs/cs_067.pdf",
-    "id": "003f95fc0d2a950049e356cc4bbcc9ac6e413cad",
-    "title": "Reduced-Precision Floating-Point Arithmetic in Systolic Arrays with Skewed Pipelines"
-  },
-  {
-    "domain": "cs",
-    "page_count": 8,
-    "citations": 37,
-    "year": 2021,
-    "filename": "cs/cs_068.pdf",
-    "id": "0001d8aa78fe5890cd3643fbc7182056d092929c",
-    "title": "A framework for pandemic compliant higher education national system"
-  },
-  {
-    "domain": "cs",
-    "page_count": 10,
-    "citations": 7,
-    "year": 2021,
-    "filename": "cs/cs_069.pdf",
-    "id": "00511d03df3b1943f807c8b0d1215b0d2e2aeba2",
-    "title": "The Role of Facebook in Enhancement of Undergraduates\u2019 Receptive Skills at a Saudi University"
-  },
-  {
-    "domain": "cs",
-    "page_count": 13,
-    "citations": 6,
-    "year": 2022,
-    "filename": "cs/cs_070.pdf",
-    "id": "0030a756eac38220ae74a65dcecf767452309148",
-    "title": "Clustered Scheduling and Communication Pipelining for Efficient Resource Management of Wireless Federated Learning"
-  },
-  {
-    "domain": "cs",
-    "page_count": 7,
-    "citations": 66,
-    "year": 2021,
-    "filename": "cs/cs_071.pdf",
-    "id": "003ec8272f3e766ac2ddc8b4ef839570036520a7",
-    "title": "Unsupervised Path Representation Learning with Curriculum Negative Sampling"
-  },
-  {
-    "domain": "cs",
-    "page_count": 12,
-    "citations": 10,
-    "year": 2024,
-    "filename": "cs/cs_072.pdf",
-    "id": "000387b0694abca1e95522a10e6c527f56f1536e",
-    "title": "Acoustic Imaging With Circular Microphone Array: A New Approach for Sound Field Analysis"
-  },
-  {
-    "domain": "cs",
-    "page_count": 20,
-    "citations": 38,
-    "year": 2022,
-    "filename": "cs/cs_073.pdf",
-    "id": "006b2d6afb2c3b73bf785a48b84173957e22b387",
-    "title": "Can Digital Transformation Promote Innovation Performance in Manufacturing Enterprises? The Mediating Role of R&D Capability"
-  },
-  {
-    "domain": "cs",
-    "page_count": 13,
-    "citations": 44,
-    "year": 2023,
-    "filename": "cs/cs_074.pdf",
-    "id": "002d3d7e23fee2e6336e927ef71b6646453f6c03",
-    "title": "The effects of digitalisation on health and social care work: a qualitative descriptive study of the perceptions of professionals and managers"
-  },
-  {
-    "domain": "cs",
-    "page_count": 21,
-    "citations": 6,
-    "year": 2024,
-    "filename": "cs/cs_075.pdf",
-    "id": "0022a40a4d02ea7e70f949008f3bdb8e3ede8f68",
-    "title": "Twitter\u2019s pulse on hydrogen energy in 280 characters: a data perspective"
-  },
-  {
-    "domain": "cs",
-    "page_count": 36,
-    "citations": 122,
-    "year": 2021,
-    "filename": "cs/cs_076.pdf",
-    "id": "0062cb11eee2b58936393dd3fd49201e725aa0ed",
-    "title": "Explicit asymptotic secret key rate of continuous-variable quantum key distribution with an arbitrary modulation"
-  },
-  {
-    "domain": "cs",
-    "page_count": 21,
-    "citations": 15,
-    "year": 2021,
-    "filename": "cs/cs_077.pdf",
-    "id": "004d77b1b516430627dc32591ba5e62e91c61531",
-    "title": "The Discovery and Interpretation of Evidence Accumulation Stages"
-  },
-  {
-    "domain": "cs",
-    "page_count": 18,
-    "citations": 7,
-    "year": 2023,
-    "filename": "cs/cs_078.pdf",
-    "id": "006caf95650559d05688a8017f93a451ab262fa3",
-    "title": "Stackelberg Game Approach for Service Selection in UAV Networks"
-  },
-  {
-    "domain": "cs",
-    "page_count": 7,
-    "citations": 67,
-    "year": 2021,
-    "filename": "cs/cs_079.pdf",
-    "id": "006d4bc6201270757edd1e018c873d0b66d95948",
-    "title": "Personal carbon allowances revisited"
-  },
-  {
-    "domain": "cs",
-    "page_count": 19,
-    "citations": 5,
-    "year": 2021,
-    "filename": "cs/cs_080.pdf",
-    "id": "00478924b67cdce3b5c2398a99cafb6979fe8117",
-    "title": "CFD Analysis of the Performance of a Double Decker Turbine for Wave Energy Conversion"
-  },
-  {
-    "domain": "cs",
-    "page_count": 13,
-    "citations": 22,
-    "year": 2024,
-    "filename": "cs/cs_081.pdf",
-    "id": "006f9bbf23dc942f23ddda14525b521a1abcdfeb",
-    "title": "An Intelligent-IoT-Based Data Analytics for Freshwater Recirculating Aquaculture System"
-  },
-  {
-    "domain": "cs",
-    "page_count": 9,
-    "citations": 37,
-    "year": 2021,
-    "filename": "cs/cs_082.pdf",
-    "id": "00551c2d53f565bcf025ce596fab3a413dd17c3d",
-    "title": "Deep Embedded K-Means Clustering"
-  },
-  {
-    "domain": "cs",
-    "page_count": 19,
-    "citations": 16,
-    "year": 2021,
-    "filename": "cs/cs_083.pdf",
-    "id": "003ec445f0f59b75ebcb827825f4ff9e1bea86c3",
-    "title": "Artificial Intelligence Factory, Data Risk, and VCs\u2019 Mediation: The Case of ByteDance, an AI-Powered Startup"
-  },
-  {
-    "domain": "cs",
-    "page_count": 14,
-    "citations": 8,
-    "year": 2022,
-    "filename": "cs/cs_084.pdf",
-    "id": "005d69e6abfee6c45767864ccf989da43a9500a8",
-    "title": "A smooth approximation approach for optimization with probabilistic constraints based on sigmoid function"
-  },
-  {
-    "domain": "cs",
-    "page_count": 9,
-    "citations": 6,
-    "year": 2024,
-    "filename": "cs/cs_085.pdf",
-    "id": "001b2fac48115ddd4bbe6e1f9029e4e7021f800c",
-    "title": "Transformasi Ekonomi Digital Indonesia Dalam Mewujudkan Indonesia Emas 2045: Pemikiran Prof. Nurcholish Madjid"
-  },
-  {
-    "domain": "cs",
-    "page_count": 17,
-    "citations": 126,
-    "year": 2022,
-    "filename": "cs/cs_086.pdf",
-    "id": "00323324c7df8cc691fcfe1d3e792c97d156f324",
-    "title": "Facial Emotion Recognition Using Conventional Machine Learning and Deep Learning Methods: Current Achievements, Analysis and Remaining Challenges"
-  },
-  {
-    "domain": "cs",
-    "page_count": 13,
-    "citations": 9,
-    "year": 2022,
-    "filename": "cs/cs_087.pdf",
-    "id": "0002ae1c2f2e7499ef7306eacfc3bd2269770612",
-    "title": "Smart Shopping Cart for Visually Impaired Individuals"
-  },
-  {
-    "domain": "cs",
-    "page_count": 14,
-    "citations": 6,
-    "year": 2023,
-    "filename": "cs/cs_088.pdf",
-    "id": "00299907eda9eebdbccd486b85b6ca2289e61ef0",
-    "title": "High-dimensional Encoding in the Round-Robin Differential-Phase-Shift Protocol"
-  },
-  {
-    "domain": "cs",
-    "page_count": 23,
-    "citations": 9,
-    "year": 2022,
-    "filename": "cs/cs_089.pdf",
-    "id": "005f2b2cd12f76d02ef6dffb2134976437940b89",
-    "title": "The Derivatives of Sinkhorn-Knopp Converge"
+    "filename": "cs/cs_099.pdf",
+    "id": "006361d661355680d8670e90f60deacf60a592ec",
+    "title": "AutoPoster: A Highly Automatic and Content-aware Design System for Advertising Poster Generation"
   },
   {
     "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 17,
-    "year": 2022,
+    "page_count": 21,
+    "citations": 9,
+    "year": 2021,
     "filename": "bio_medical/bio_medical_000.pdf",
-    "id": "00565704f445f2e80ae9a57310652245da97cb6d",
-    "title": "Proteomic Analysis of Prostate Cancer FFPE Samples Reveals Markers of Disease Progression and Aggressiveness"
+    "id": "0055dcf5d6c0e80a7509495a822d9452d3e0cd65",
+    "title": "Testing and Isolation Efficacy: Insights from a Simple Epidemic Model"
   },
   {
     "domain": "bio_medical",
-    "page_count": 83,
-    "citations": 50,
+    "page_count": 19,
+    "citations": 13,
     "year": 2021,
     "filename": "bio_medical/bio_medical_001.pdf",
-    "id": "008fe7b84f171f4792b207fee9262c756bb8edd9",
-    "title": "Ganoderma (Ganodermataceae, Basidiomycota) Species from the Greater Mekong Subregion"
+    "id": "008eca5d0c5678e9978a269435f9d1c599ae46ab",
+    "title": "Influence of Environmental Factors on Occurrence of Cyanobacteria and Abundance of Saxitoxin-Producing Cyanobacteria in a Subtropical Drinking Water Reservoir in Brazil"
   },
   {
     "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 11,
-    "year": 2022,
+    "page_count": 16,
+    "citations": 46,
+    "year": 2023,
     "filename": "bio_medical/bio_medical_002.pdf",
-    "id": "0042de5b91308ff71d8aab1e04766158c121d840",
-    "title": "Viromes of Freshwater Fish with Lacustrine and Diadromous Life Histories Differ in Composition"
+    "id": "0065c28e61aa3497ff6931ff3915e024d9be4530",
+    "title": "A positive feedback circuit driven by m6A-modified circular RNA facilitates colorectal cancer liver metastasis"
   },
   {
     "domain": "bio_medical",
-    "page_count": 13,
-    "citations": 8,
+    "page_count": 17,
+    "citations": 9,
     "year": 2021,
     "filename": "bio_medical/bio_medical_003.pdf",
-    "id": "0066c739237f405d3076e23ea5ca2cd424fc3143",
-    "title": "Conspecific Presence Improves Episodic-Like Memory in Rats"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 22,
-    "year": 2024,
-    "filename": "bio_medical/bio_medical_004.pdf",
-    "id": "006710a69a194ea7fa52bcd3d32db0310ee76641",
-    "title": "Human intestinal microbiome: Role in health and disease"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 25,
-    "citations": 7,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_005.pdf",
-    "id": "001c48987bfb14c9858e7937fda072cbbd6fcc4c",
-    "title": "DHI Increases the Proliferation and Migration of Schwann Cells Through the PI3K/AKT Pathway and the Expression of CXCL12 and GDNF to Promote Facial Nerve Function Repair"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 22,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_006.pdf",
-    "id": "002e02aecc8570a6e31c0ebac0c18334b784d47c",
-    "title": "Low-abundance populations distinguish microbiome performance in plant cell wall deconstruction"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 21,
-    "citations": 40,
-    "year": 2024,
-    "filename": "bio_medical/bio_medical_007.pdf",
-    "id": "0040ba03d35d67687e10ab2a61d9e41dcb6b6d42",
-    "title": "RND Efflux Pump Induction: A Crucial Network Unveiling Adaptive Antibiotic Resistance Mechanisms of Gram-Negative Bacteria"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 11,
-    "year": 2025,
-    "filename": "bio_medical/bio_medical_008.pdf",
-    "id": "00466e50bb0d57aaf1949c4f295bd6203236a42a",
-    "title": "The Role of cortisol in the stress response"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 26,
-    "citations": 16,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_009.pdf",
-    "id": "0044ff9d2fb3c875403b441a834f97367a4fc5ea",
-    "title": "Revisiting nature: a review of iridoids as a potential antileishmanial class"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 5,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_010.pdf",
-    "id": "0080ddd18d364a0e74e61dbda00be043fa322ad6",
-    "title": "New Insights on the Genetic Basis Underlying SHILCA Syndrome: Characterization of the NMNAT1 Pathological Alterations Due to Compound Heterozygous Mutations and Identification of a Novel Alternative Isoform"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 19,
-    "citations": 40,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_011.pdf",
-    "id": "007e4c371cf19022a0f3f9462662f3ca3aeb17ce",
-    "title": "Gut dysbiosis promotes prostate cancer progression and docetaxel resistance via activating NF-\u03baB-IL6-STAT3 axis"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 19,
-    "citations": 18,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_012.pdf",
-    "id": "007190ec7649b0de38d417b7b60302f42daecadb",
-    "title": "Genome-wide association studies reveal novel QTLs, QTL-by-environment interactions and their candidate genes for tocopherol content in soybean seed"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 14,
-    "citations": 37,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_013.pdf",
-    "id": "007eaf1996337a84d18efc2dbeabd557e0ac7f74",
-    "title": "Post-Translational Modifications Drive Success and Failure of Fungal\u2013Host Interactions"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 7,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_014.pdf",
-    "id": "003a71331ee221816b2c7e22fe31ee402c6a334d",
-    "title": "Molecular Biomechanics Controls Protein Mixing and Segregation in Adherent Membranes"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 8,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_015.pdf",
-    "id": "00384c5a0c476157c02d131019a5c0c1995005fd",
-    "title": "CHD1L prevents lipopolysaccharide-induced hepatocellular carcinomar cell death by activating hnRNP A2/B1-nmMYLK axis"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 10,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_016.pdf",
-    "id": "007db885444e8ba593b5152b2e1ff4a480bcace7",
-    "title": "The analysis of the pyroptosis-related genes and hub gene TP63 ceRNA axis in osteosarcoma"
+    "id": "0065e66c1a5d96585b2d992ecc805f04592ab96f",
+    "title": "Large-Scale RT-qPCR Diagnostics for Seed Potato Certification"
   },
   {
     "domain": "bio_medical",
     "page_count": 13,
-    "citations": 35,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_017.pdf",
-    "id": "0086425302a049942965d7f6244996f9ddc598d7",
-    "title": "Role of Peroxisome Proliferator-Activated Receptors (PPARs) in Trophoblast Functions"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 6,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_018.pdf",
-    "id": "00889fa986fd0523fe733bd1abd3d254efe8e8b3",
-    "title": "Snake venom-defined fibrin architecture dictates fibroblast survival and differentiation"
+    "citations": 40,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_004.pdf",
+    "id": "000b1f6d6bf9e2c856631e7accbeeefa6896c660",
+    "title": "Fenofibrate Ameliorated Systemic and Retinal Inflammation and Modulated Gut Microbiota in High-Fat Diet-Induced Mice"
   },
   {
     "domain": "bio_medical",
     "page_count": 12,
-    "citations": 10,
-    "year": 2024,
-    "filename": "bio_medical/bio_medical_019.pdf",
-    "id": "00756e911bb0c90c508dfa6189c3b3566380d17d",
-    "title": "Exploring reciprocal causation: bidirectional mendelian randomization study of gut microbiota composition and thyroid cancer"
+    "citations": 8,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_005.pdf",
+    "id": "0006afc7e0982a0335c8723723ba92c98ca7bea5",
+    "title": "PathogenTrack and Yeskit: tools for identifying intracellular pathogens from single-cell RNA-sequencing datasets as illustrated by application to COVID-19"
   },
   {
     "domain": "bio_medical",
     "page_count": 23,
-    "citations": 16,
+    "citations": 9,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_006.pdf",
+    "id": "001c114920334109a0d3cffee8c0285a7d427720",
+    "title": "Comprehensive Analysis of Arabinogalactan Protein-Encoding Genes Reveals the Involvement of Three BrFLA Genes in Pollen Germination in Brassica rapa"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 19,
+    "citations": 24,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_007.pdf",
+    "id": "004024557e4fca6ce5ec9be6b3b5fc3467e8a817",
+    "title": "Disorders of Sex Development of Adrenal Origin"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 15,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_008.pdf",
+    "id": "0045ba2fb2f6e4204c4e121000be222c09bfdd35",
+    "title": "KLHL29-mediated DDX3X degradation promotes chemosensitivity by abrogating cell cycle checkpoint in triple-negative breast cancer"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 20,
+    "citations": 11,
     "year": 2022,
-    "filename": "bio_medical/bio_medical_020.pdf",
-    "id": "0017e099defaf7d0d808ac17ea1806fc2ae33aef",
-    "title": "Microbiota in the Natural History of Pancreatic Cancer: From Predisposition to Therapy"
+    "filename": "bio_medical/bio_medical_009.pdf",
+    "id": "0080693c1dc3ef2bb7ab7853f2d8e69a98c1c10f",
+    "title": "Genome-wide identification of the ZIP gene family in lettuce (Lactuca sativa L.) and expression analysis under different element stress"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 27,
+    "citations": 783,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_010.pdf",
+    "id": "0008c1b28b37e19de521aa6a832f4d49b71c3245",
+    "title": "Cancer Immune Evasion Through Loss of MHC Class I Antigen Presentation"
   },
   {
     "domain": "bio_medical",
     "page_count": 17,
+    "citations": 20,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_011.pdf",
+    "id": "002bbeddcf56e247abcb2467bda83fc31505d3ac",
+    "title": "Components of the Phenylpropanoid Pathway in the Implementation of the Protective Effect of Sodium Nitroprusside on Wheat under Salinity"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 13,
+    "citations": 6,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_012.pdf",
+    "id": "001cb9a21e96f3c21ebe9e4ad693ac38788597bb",
+    "title": "Accessing the energy-limited and sparsely populated deep biosphere: achievements and ongoing challenges of available technologies"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 16,
+    "citations": 10,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_013.pdf",
+    "id": "000ad67ca3c7148e02deab8f2b3649beb55cacde",
+    "title": "Extracellular thiamine concentration influences thermogenic competency of differentiating neck area-derived human adipocytes"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 11,
+    "citations": 17,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_014.pdf",
+    "id": "007daf700fad6e53e0d7d453ad24f4884424aa66",
+    "title": "Plasmids as Key Players in Acinetobacter Adaptation"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 66,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_015.pdf",
+    "id": "004003fe9184f7ed0e67c59cc912ea27e0ef1f2b",
+    "title": "Eicosanoid Signaling in Insect Immunology: New Genes and Unresolved Issues"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 17,
+    "citations": 6,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_016.pdf",
+    "id": "007dd226c60afb266b56f092e927f4ee629ad816",
+    "title": "Developmental Stages of Lotic-breeding Toad, Bufo torrenticola, with a Comparison to Lentic-breeding B. japonicus formosus (Amphibia: Anura: Bufonidae)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 7,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_017.pdf",
+    "id": "002cd6650cd8c8d60c23c15c44d020d60f5dc97c",
+    "title": "Longitudinal study on background lesions in broiler breeder flocks and their progeny, and genomic characterisation of Escherichia coli"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 9,
+    "citations": 8,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_018.pdf",
+    "id": "00614fc67b689946131b34010bfd63c436da967c",
+    "title": "Sex as a biological variable in determining the metabolic changes influencing acute ischemic stroke outcomes\u2014Where is the data: A systematic review"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 12,
+    "citations": 38,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_019.pdf",
+    "id": "003a5ea76154047e404310c9cebcf353765d37bc",
+    "title": "Multifaceted membrane interactions of human Atg3 promote LC3-phosphatidylethanolamine conjugation during autophagy"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 10,
+    "citations": 22,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_020.pdf",
+    "id": "00383036681321a9ff83d3170e9cdcadc97b4e2b",
+    "title": "Transcriptomic and proteomic analysis of Hemidactylus frenatus during initial stages of tail regeneration"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 13,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_021.pdf",
+    "id": "004d14a0a99ed65f5d45d29f178feded4862a2bf",
+    "title": "Enhancing or Inhibitory Effect of Fruit or Vegetable Bioactive Compound on Aspergillus niger and A. oryzae"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 8,
+    "citations": 25,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_022.pdf",
+    "id": "00101c3e8bccd09098231f23b34156ac5d47f665",
+    "title": "What is life?"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 11,
+    "citations": 8,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_023.pdf",
+    "id": "00881246efe587105f5240c64972b9cf4b522d15",
+    "title": "Larval and adult diet affect phenotypic plasticity in thermal tolerance of the marula fly, Ceratitis cosyra (Walker) (Diptera: Tephritidae)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 19,
+    "citations": 20,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_024.pdf",
+    "id": "0074a6e6cbb98a01294ce91529461a2f185aa83c",
+    "title": "Phosphorylation of Jhd2 by the Ras-cAMP-PKA(Tpk2) pathway regulates histone modifications and autophagy"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 17,
+    "citations": 16,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_025.pdf",
+    "id": "0017b4a4724d4a00e1fb35df734b7324383d52dc",
+    "title": "Transcriptome Analysis Reveals the Senescence Process Controlling the Flower Opening and Closure Rhythm in the Waterlilies (Nymphaea L.)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 11,
     "citations": 7,
     "year": 2023,
-    "filename": "bio_medical/bio_medical_021.pdf",
-    "id": "000edd490abb05c2ab11376db4e918a3b472fbac",
-    "title": "Phenolic-Based Discrimination between Non-Symptomatic and Symptomatic Leaves of Aesculus hippocastanum Infested by Cameraria ohridella and Erysiphe flexuosa"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 17,
-    "citations": 35,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_022.pdf",
-    "id": "00251cfce29d28abf8b67670b05af0f8d03476d4",
-    "title": "Advancing Insights into Probiotics during Vegetable Fermentation"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 29,
-    "citations": 25,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_023.pdf",
-    "id": "002a640b2eefbf66f51e8f2ba5667e70c4b296dc",
-    "title": "Climate-Resilient Microbial Biotechnology: A Perspective on Sustainable Agriculture"
+    "filename": "bio_medical/bio_medical_026.pdf",
+    "id": "000e3f59f89511a0d7211ca3d32e5266456439b4",
+    "title": "Identification, proteolytic activity quantification and biofilm-forming characterization of Gram-positive, proteolytic, psychrotrophic bacteria isolated from cold raw milk"
   },
   {
     "domain": "bio_medical",
     "page_count": 16,
     "citations": 14,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_024.pdf",
-    "id": "00007ea8662c9529040063f0221b162216112b13",
-    "title": "First tracks of newborn straight-tusked elephants (Palaeoloxodon antiquus)"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 12,
     "year": 2023,
-    "filename": "bio_medical/bio_medical_025.pdf",
-    "id": "00188e7e880ff53a7b3ba0ecb7cf1b0de08d21fe",
-    "title": "High-throughput RNA sequencing reveals differences between the transcriptomes of the five spore forms of Puccinia striiformis f. sp. tritici, the wheat stripe rust pathogen"
+    "filename": "bio_medical/bio_medical_027.pdf",
+    "id": "0029e5701c899cb5be942312e3db7e1064daeccb",
+    "title": "PGNneo: A Proteogenomics-Based Neoantigen Prediction Pipeline in Noncoding Regions"
   },
   {
     "domain": "bio_medical",
     "page_count": 23,
-    "citations": 23,
+    "citations": 25,
     "year": 2023,
-    "filename": "bio_medical/bio_medical_026.pdf",
+    "filename": "bio_medical/bio_medical_028.pdf",
     "id": "00007cd7e54de662da61b060ca7feccb88c404f4",
     "title": "Quorum Sensing as a Trigger That Improves Characteristics of Microbial Biocatalysts"
   },
   {
     "domain": "bio_medical",
-    "page_count": 19,
-    "citations": 6,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_027.pdf",
-    "id": "0008bb6bfbcd743005e32bf64e259ad2e6933333",
-    "title": "Targeting CDK5 in Astrocytes Promotes Calcium Homeostasis Under Excitotoxic Conditions"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 5,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_028.pdf",
-    "id": "0083157d320474dde1594fc49ff0a0b942ccced6",
-    "title": "Linkage analysis of rice bacterial blight resistance gene xa20 in XM6, a mutant line from IR24"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 26,
-    "citations": 112,
-    "year": 2022,
+    "page_count": 21,
+    "citations": 22,
+    "year": 2023,
     "filename": "bio_medical/bio_medical_029.pdf",
-    "id": "0065aeb74aea6d73e6b015d51842e20a53871524",
-    "title": "Plant microbiota dysbiosis and the Anna Karenina Principle."
+    "id": "00180f6f6156a86971d4f58fcebc480c4fe13322",
+    "title": "Water Needs, Water Insecurity, and Human Biology"
   },
   {
     "domain": "bio_medical",
-    "page_count": 13,
-    "citations": 24,
+    "page_count": 12,
+    "citations": 13,
     "year": 2021,
     "filename": "bio_medical/bio_medical_030.pdf",
-    "id": "0035aaa9e0e79debf2bf31d29863d5ed22e12d98",
-    "title": "Up-regulation of GINS1 highlighted a good diagnostic and prognostic potential of survival in three different subtypes of human cancer."
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 12,
-    "citations": 26,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_031.pdf",
-    "id": "005fa27d95efd3fc6188f0bc43c09816021979c4",
-    "title": "Enhanced production of iturin A by strengthening fatty acid synthesis modules in Bacillus amyloliquefaciens"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 20,
-    "citations": 74,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_032.pdf",
-    "id": "004cece570c7ef1e1fbb29852fdc264b69ccfccc",
-    "title": "Dysregulated tumor-associated macrophages in carcinogenesis, progression and targeted therapy of gynecological and breast cancers"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 25,
-    "citations": 7,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_033.pdf",
-    "id": "004727462b091fdc05ea160d678876b39ceffbfe",
-    "title": "Protein quality control of N-methyl-D-aspartate receptors"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 12,
-    "citations": 18,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_034.pdf",
-    "id": "0016425b43fc83d23ebd38772bc04326ead2dcca",
-    "title": "Antiparasitic Potential of Methanol Extract of Brown Alga Sargassum polycystum (Phaeophyceae) and Its LC-MS/MS Metabolite Profiling"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 8,
-    "citations": 7,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_035.pdf",
-    "id": "0004038d0f1877ce6769726d88b6ad2094e2358c",
-    "title": "Whole-Genome Analysis of Porcine Circovirus Type 2 in Russia"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 29,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_036.pdf",
-    "id": "0061881d4267ec1e79ec244a03ce3d9c9d741567",
-    "title": "Insights into the changes in the proteome of Alzheimer disease elucidated by a meta-analysis"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 55,
-    "year": 2024,
-    "filename": "bio_medical/bio_medical_037.pdf",
-    "id": "002acdacade1affbf356b9e723fe308c74ab16a9",
-    "title": "Tumor-derived Exosomal ENO2 Modulates Polarization of Tumor-associated Macrophages through Reprogramming Glycolysis to Promote Progression of Diffuse Large B-cell Lymphoma"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 26,
-    "citations": 53,
-    "year": 2024,
-    "filename": "bio_medical/bio_medical_038.pdf",
-    "id": "0050b15a6cb038322e75822fb82c6ce7e356d3ad",
-    "title": "Functionality of Reactive Oxygen Species (ROS) in Plants: Toxicity and Control in Poaceae Crops Exposed to Abiotic Stress"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 19,
-    "citations": 16,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_039.pdf",
-    "id": "0044bff1262846f17f58078c5564eb7aef3885f6",
-    "title": "Pathogenic Mechanism of a Highly Virulent Infectious Hematopoietic Necrosis Virus in Head Kidney of Rainbow Trout (Oncorhynchus mykiss) Analyzed by RNA-Seq Transcriptome Profiling"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 15,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_040.pdf",
-    "id": "0078647444f68653d42ee4ad0a30792989d4083b",
-    "title": "Intra- and Inter-individual Differences in the Human Intestinal Microbial Conversion of (-)-Epicatechin and Bioactivity of Its Major Colonic Metabolite 5-(3\u2032,4\u2032-Dihydroxy-Phenyl)-\u03b3-Valerolactone in Regulating Nrf2-Mediated Gene Expression"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 21,
-    "citations": 15,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_041.pdf",
-    "id": "005198de48497d260ceee38736823c7a11708110",
-    "title": "Thymus\u2009\u00d7\u2009citriodorus: an Emerging Aromatic and Medicinal Hybrid Plant with Relevant Bioactive Potential"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 6,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_042.pdf",
-    "id": "0053f9c34126e352cca625e42d7478adcbeae8ac",
-    "title": "Spatial Analysis as a Tool for Plant Population Conservation: A Case Study of Tamarix chinensis in the Yellow River Delta, China"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 13,
-    "citations": 13,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_043.pdf",
-    "id": "0011467a75469d9751eab6897a400de8bd47da95",
-    "title": "Identification of Immune-Related Risk Genes in Osteoarthritis Based on Bioinformatics Analysis and Machine Learning"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 39,
-    "citations": 10,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_044.pdf",
-    "id": "0053ecef0ce004e4a323e531a371a8ed5af946ca",
-    "title": "Regeneration in calcareous sponge relies on \u2018purse-string\u2019 mechanism and the rearrangements of actin cytoskeleton"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 14,
-    "citations": 16,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_045.pdf",
-    "id": "00083636d32fb33f816be8dd052c44c7f3c6668f",
-    "title": "KIR-HLA interactions extend human CD8+ T cell lifespan in vivo"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 15,
-    "citations": 7,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_046.pdf",
-    "id": "0031be2b73f728d61700f7b872fbdc6491709f21",
-    "title": "The Sweetpotato Voltage-Gated K+ Channel \u03b2 Subunit, KIbB1, Positively Regulates Low-K+ and High-Salinity Tolerance by Maintaining Ion Homeostasis"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 12,
-    "citations": 13,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_047.pdf",
-    "id": "006cb185892018391568a6f379866135fe323453",
-    "title": "Characterization of an intelectin-1 (Itln1) knockout mouse model"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 9,
-    "citations": 11,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_048.pdf",
-    "id": "008a988874cf9836a53ac17f7da67f9822cd1396",
-    "title": "Neural pathways in nutrient sensing and insulin signaling"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 12,
-    "citations": 25,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_049.pdf",
-    "id": "0050795c484387a7fa7ae3fbda9e421e3c3d285a",
-    "title": "Perspectives on the Genetic Associations of Ankylosing Spondylitis"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 25,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_050.pdf",
-    "id": "00824441ed19260803b58e5bb08f91e74d889cce",
-    "title": "Genetic diversity and selective sweeps in historical and modern Canadian spring wheat cultivars using the 90K SNP array"
+    "id": "008821de6f6d523f3747afcbc211db20ce1e4fae",
+    "title": "Autophagy Mediates Leptin-Induced Migration and ERK Activation in Breast Cancer Cells"
   },
   {
     "domain": "bio_medical",
     "page_count": 10,
-    "citations": 8,
-    "year": 2024,
-    "filename": "bio_medical/bio_medical_051.pdf",
-    "id": "007c79651fa514cd6297f674d9ad9b66bd0d2a2b",
-    "title": "Local postural changes elicit extensive and diverse skin stretch around joints, on the trunk and the face"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 19,
-    "citations": 38,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_052.pdf",
-    "id": "003cc50f79bf015afc10f3195c926aa54cfd0584",
-    "title": "HOX genes in stem cells: Maintaining cellular identity and regulation of differentiation"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 17,
-    "citations": 8,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_053.pdf",
-    "id": "0057c1f4424757f84f413c0fe4c891ca90d00df1",
-    "title": "Oligosaccharide Presentation Modulates the Molecular Recognition of Glycolipids by Galectins on Membrane Surfaces"
+    "citations": 5,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_031.pdf",
+    "id": "0081ee7fd3a33f7d40883485903370cd1cf2a3c2",
+    "title": "Differential Expression of CADM1 in Gastrointestinal Stromal Tumors of Different Sites and with Different Gene Abnormalities"
   },
   {
     "domain": "bio_medical",
     "page_count": 20,
-    "citations": 18,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_054.pdf",
-    "id": "000dc0ba3a15b146ed8616e95e102ee6217a9b85",
-    "title": "Metabolic Footprints of Burkholderia Sensu Lato Rhizosphere Bacteria Active against Maize Fusarium Pathogens"
+    "citations": 35,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_032.pdf",
+    "id": "00815de47725e0a7ff3b92ded2449413d6071a09",
+    "title": "The role of extracellular traps in ischemia reperfusion injury"
   },
   {
     "domain": "bio_medical",
-    "page_count": 9,
+    "page_count": 10,
+    "citations": 12,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_033.pdf",
+    "id": "0035a0d2617db49aff6df78db1ad4a744bc6aa03",
+    "title": "Mesenchymal Stem Cells: A Novel Therapeutic Approach to Enhance Protective Immunomodulation and Erythropoietic Recovery in Malaria"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 30,
+    "citations": 305,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_034.pdf",
+    "id": "0011c3f3e13a56e67f64c6af15f3bc65623c2833",
+    "title": "Medicinal Mushrooms: Bioactive Compounds, Use, and Clinical Trials"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 13,
     "citations": 5,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_055.pdf",
-    "id": "0023a48f4731fbc9795a5d3b3858e130c79b9c17",
-    "title": "Karyotype polymorphism of GC-rich constitutive heterochromatin in Capsicum L. pepper accessions"
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_035.pdf",
+    "id": "004c9d3d679aa5c3f86d1a6880759a2a0d11aefd",
+    "title": "Spatio-temporal variability in the strength, directionality, and relative importance of climate on occupancy and population densities in a philopatric mammal, the American pika (Ochotona princeps)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 19,
+    "citations": 9,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_036.pdf",
+    "id": "0074ba38c4967317e4269983729ecd9daf5815a9",
+    "title": "Ginsenoside F1-Mediated Telomere Preservation Delays Cellular Senescence"
   },
   {
     "domain": "bio_medical",
     "page_count": 17,
-    "citations": 32,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_056.pdf",
-    "id": "000c58989420667c58665e1e386355c3fef410a7",
-    "title": "Single-trial modeling separates multiple overlapping prediction errors during reward processing in human EEG"
+    "citations": 54,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_037.pdf",
+    "id": "0046bdd61556af6c1eecd6ea5942c712a1c1e4fa",
+    "title": "Single-molecule localization microscopy reveals STING clustering at the trans-Golgi network through palmitoylation-dependent accumulation of cholesterol"
   },
   {
     "domain": "bio_medical",
-    "page_count": 12,
-    "citations": 6,
+    "page_count": 16,
+    "citations": 10,
     "year": 2022,
-    "filename": "bio_medical/bio_medical_057.pdf",
-    "id": "00103e1e76747e00a9a3df3f78dd28fbb0a696b2",
-    "title": "Expression Pattern of Entire Cytochrome P450 Genes and Response of Defenses in a Metabolic-Herbicide-Resistant Biotype of Polypogon fugax"
+    "filename": "bio_medical/bio_medical_038.pdf",
+    "id": "0015eb33bc556b80151c1a9381f7f98ec32c098f",
+    "title": "Gnas Promoter Hypermethylation in the Basolateral Amygdala Regulates Reconsolidation of Morphine Reward Memory in Rats"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 21,
+    "citations": 54,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_039.pdf",
+    "id": "00850df02bfe76a25ed91b4a8f6e9fdf59ea772b",
+    "title": "The Ferroptosis Inhibitor Liproxstatin-1 Ameliorates LPS-Induced Cognitive Impairment in Mice"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 14,
+    "citations": 11,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_040.pdf",
+    "id": "0060ed67633d77b677a459133f531989c40d2eff",
+    "title": "Targeting a splicing-mediated drug resistance mechanism in prostate cancer by inhibiting transcriptional regulation by PKC\u03b21"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 10,
+    "citations": 13,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_041.pdf",
+    "id": "002abe154f31189a6fda6c5edaec44df506a1521",
+    "title": "ADRB3 induces mobilization and inhibits differentiation of both breast cancer cells and myeloid-derived suppressor cells"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 19,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_042.pdf",
+    "id": "0044582eb5ecdbd301447a7841d27a06f6f30c73",
+    "title": "Outcomes of feeding activity of the sea cucumber Holothuria tubulosa on quantity, biochemical composition, and nutritional quality of sedimentary organic matter"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 19,
+    "citations": 19,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_043.pdf",
+    "id": "0077cf16ac075420dbac4f0e6a36507c6b3ed5b9",
+    "title": "Effect of Salt Stress on the Phenolic Compounds, Antioxidant Capacity, Microbial Load, and In Vitro Bioaccessibility of Two Microalgae Species (Phaeodactylum tricornutum and Spirulina platensis)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 20,
+    "citations": 16,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_044.pdf",
+    "id": "00524e3a11c89ac98de4f1e52f54f38437c2a842",
+    "title": "Seventeen Ustilaginaceae High-Quality Genome Sequences Allow Phylogenomic Analysis and Provide Insights into Secondary Metabolite Synthesis"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 8,
+    "citations": 6,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_045.pdf",
+    "id": "0011023d3372a858bbb899058219a4c3b2793785",
+    "title": "Akkermansia beyond muciniphila - emergence of new species Akkermansia massiliensis sp. nov."
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 14,
+    "citations": 21,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_046.pdf",
+    "id": "00523984ad6eacea7866cf838603b5f2065914a9",
+    "title": "Bioactivities of Pseudocereal Fractionated Seed Proteins and Derived Peptides Relevant for Maintaining Human Well-Being"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 11,
+    "citations": 9,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_047.pdf",
+    "id": "000822548f5217bcda7148593427b1e75e5bda75",
+    "title": "The Effect of Fluctuating Incubation Temperatures on West Nile Virus Infection in Culex Mosquitoes"
   },
   {
     "domain": "bio_medical",
     "page_count": 25,
-    "citations": 41,
+    "citations": 53,
     "year": 2022,
-    "filename": "bio_medical/bio_medical_058.pdf",
-    "id": "002048cfd313a2d1bfe3506a216daad15e2d65cf",
-    "title": "Targeting microglial autophagic degradation of the NLRP3 inflammasome for identification of thonningianin A in Alzheimer\u2019s disease"
+    "filename": "bio_medical/bio_medical_048.pdf",
+    "id": "000743826389fbc3b0ae2d6f73d439afad16d12d",
+    "title": "Bacterial Signal Peptides- Navigating the Journey of Proteins"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 17,
+    "citations": 12,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_049.pdf",
+    "id": "0031931327311783693531c9cb11710a6b124bb1",
+    "title": "Competing endogenous RNA network analysis of the molecular mechanisms of ischemic stroke"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 31,
+    "citations": 8,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_050.pdf",
+    "id": "006bf11d3f05b4cccd83c238f704c2403c397045",
+    "title": "TLR2 Regulates Hair Follicle Cycle and Regeneration via BMP Signaling"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 14,
+    "citations": 17,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_051.pdf",
+    "id": "008918bbe64eb5b0ea965c004eeb3e0f701ee2f7",
+    "title": "Making Biomedical Research Software FAIR: Actionable Step-by-step Guidelines with a User-support Tool"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 9,
+    "citations": 13,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_052.pdf",
+    "id": "004fb80f99cf82f6dc1ab9351be10013f07a85a8",
+    "title": "Social immunity in the honey bee: do immune-challenged workers enter enforced or self-imposed exile?"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 11,
+    "citations": 122,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_053.pdf",
+    "id": "007b23736d08b6a7a2df300b95a7b462f4dc6688",
+    "title": "Protists as main indicators and determinants of plant performance"
   },
   {
     "domain": "bio_medical",
     "page_count": 16,
-    "citations": 39,
+    "citations": 15,
     "year": 2021,
-    "filename": "bio_medical/bio_medical_059.pdf",
-    "id": "000d3eb1ac4b3e795f6c0afcd937e4d0609385ad",
-    "title": "Identification of Silkworm Hemocyte Subsets and Analysis of Their Response to Baculovirus Infection Based on Single-Cell RNA Sequencing"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 16,
-    "citations": 14,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_060.pdf",
+    "filename": "bio_medical/bio_medical_054.pdf",
     "id": "00006e2293ff880d63d0dc1b20b1cb6e4dbcff57",
     "title": "Comprehensive Analysis of Hexokinase 2 Immune Infiltrates and m6A Related Genes in Human Esophageal Carcinoma"
   },
   {
     "domain": "bio_medical",
     "page_count": 16,
-    "citations": 9,
+    "citations": 32,
     "year": 2023,
-    "filename": "bio_medical/bio_medical_061.pdf",
-    "id": "003dc68e8e3fe0dfc26fc5e6930584cfe157a1a1",
-    "title": "The Anterior Insula and its Projection to the Prelimbic Cortex are Involved in the Regulation of 5-HT-Induced Itch"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 19,
-    "citations": 7,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_062.pdf",
-    "id": "005186ec1eb3683de9cec8fab1b3c1ac6517d98e",
-    "title": "A humanized mouse model for in vivo evaluation of invariant Natural Killer T cell responses"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 8,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_063.pdf",
-    "id": "000158e982032f5592db96728ab712c86e3fb4af",
-    "title": "Secreted glucose regulated protein78 ameliorates DSS-induced mouse colitis"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 13,
-    "citations": 5,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_064.pdf",
-    "id": "00218398040cc1ada747da1977cbf3dc29a316d7",
-    "title": "Correlated variability in primate superior colliculus depends on functional class"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 14,
-    "citations": 13,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_065.pdf",
-    "id": "006f450f68d10b6a7c3aa5963374724d3eab8e0b",
-    "title": "Effectiveness of Bacteriophages against Biofilm-Forming Shiga-Toxigenic Escherichia coli In Vitro and on Food-Contact Surfaces"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 17,
-    "citations": 6,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_066.pdf",
-    "id": "007dd226c60afb266b56f092e927f4ee629ad816",
-    "title": "Developmental Stages of Lotic-breeding Toad, Bufo torrenticola, with a Comparison to Lentic-breeding B. japonicus formosus (Amphibia: Anura: Bufonidae)"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 18,
-    "citations": 9,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_067.pdf",
-    "id": "007b585f65ed10654e2bd478fc3bc0f619d8516c",
-    "title": "LATPS, a novel prognostic signature based on tumor microenvironment of lung adenocarcinoma to better predict survival and immunotherapy response"
+    "filename": "bio_medical/bio_medical_055.pdf",
+    "id": "0057637b95e20da266e3337751e346e6c8368d7b",
+    "title": "The Role of Seaweed Polysaccharides in Gastrointestinal Health: Protective Effect against Inflammatory Bowel Disease"
   },
   {
     "domain": "bio_medical",
     "page_count": 12,
-    "citations": 8,
+    "citations": 13,
     "year": 2023,
-    "filename": "bio_medical/bio_medical_068.pdf",
-    "id": "006f48e70b2d6dff035537a3158abeb8ecf202ff",
-    "title": "lncRNA TPT1-AS1 promotes cell migration and invasion in esophageal squamous-cell carcinomas by regulating the miR-26a/HMGA1 axis"
+    "filename": "bio_medical/bio_medical_056.pdf",
+    "id": "002978e7ac96301dc609ee8c05d855fd63587d67",
+    "title": "Nanopore Translocation Reveals Electrophoretic Force on Noncanonical RNA:DNA Double Helix"
   },
   {
     "domain": "bio_medical",
-    "page_count": 32,
-    "citations": 23,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_069.pdf",
-    "id": "004263885690b4a3b93b19f42a213826b05cd924",
-    "title": "Rational Prediction of PROTAC-compatible Protein-Protein Interfaces by Molecular Docking"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 8,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_070.pdf",
-    "id": "0024fcfd37ecb2c9c2e17e0c4e493003cf55b212",
-    "title": "A Culture-Adapted Strain of Babesia bovis Has Reduced Subpopulation Complexity and Is Unable to Complete Its Natural Life Cycle in Ticks"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 22,
-    "citations": 48,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_071.pdf",
-    "id": "0003310a32016c63e413ff8b72e9461d6c6620bd",
-    "title": "Amyloid-\u03b2 specific regulatory T cells attenuate Alzheimer\u2019s disease pathobiology in APP/PS1 mice"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 8,
-    "citations": 24,
+    "page_count": 16,
+    "citations": 40,
     "year": 2021,
-    "filename": "bio_medical/bio_medical_072.pdf",
-    "id": "0020f23b9156108d5320a9f000beb222fa2f5f4c",
-    "title": "Adaptation of the Start-Growth-Time Method for High-Throughput Biofilm Quantification"
+    "filename": "bio_medical/bio_medical_057.pdf",
+    "id": "000d3eb1ac4b3e795f6c0afcd937e4d0609385ad",
+    "title": "Identification of Silkworm Hemocyte Subsets and Analysis of Their Response to Baculovirus Infection Based on Single-Cell RNA Sequencing"
   },
   {
     "domain": "bio_medical",
-    "page_count": 174,
-    "citations": 261,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_073.pdf",
-    "id": "0078919139702d8df3969aa50aaa969cb4fd5048",
-    "title": "Biomarkers of aging"
+    "page_count": 10,
+    "citations": 5,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_058.pdf",
+    "id": "00236b4788f291c818eb487caf150aedc83fc3af",
+    "title": "Long-Read Nanopore-Based Sequencing of Anelloviruses"
   },
   {
     "domain": "bio_medical",
-    "page_count": 17,
-    "citations": 11,
-    "year": 2023,
-    "filename": "bio_medical/bio_medical_074.pdf",
-    "id": "0031931327311783693531c9cb11710a6b124bb1",
-    "title": "Competing endogenous RNA network analysis of the molecular mechanisms of ischemic stroke"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 24,
-    "citations": 46,
+    "page_count": 14,
+    "citations": 8,
     "year": 2021,
-    "filename": "bio_medical/bio_medical_075.pdf",
-    "id": "005815b888766bdf790dada32d86c5dbd15a9627",
-    "title": "Evolving a generalist biosensor for bicyclic monoterpenes"
+    "filename": "bio_medical/bio_medical_059.pdf",
+    "id": "006c5a12ee172afe945965adf890ff596433d0d0",
+    "title": "De novo transcriptome characterization of Iris atropurpurea (the Royal Iris) and phylogenetic analysis of MADS-box and R2R3-MYB gene families"
   },
   {
     "domain": "bio_medical",
     "page_count": 18,
-    "citations": 7,
+    "citations": 18,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_060.pdf",
+    "id": "001017cf295efb43faeebceb2b1514e3d8559025",
+    "title": "Large-scale analysis of the ARF and Aux/IAA gene families in 406 horticultural and other plants"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 16,
+    "citations": 8,
     "year": 2022,
-    "filename": "bio_medical/bio_medical_076.pdf",
-    "id": "00744c9dab06258d322852cd0163948645ac2458",
-    "title": "Novel Insight into the Serum Sphingolipid Fingerprint Characterizing Longevity"
+    "filename": "bio_medical/bio_medical_061.pdf",
+    "id": "001fa47ee59b2daddb2773c561238316f5d219ac",
+    "title": "Fitness of the Papaya Mealybug, Paracoccus marginatus (Hemiptera: Pseudococcidae), after Transferring from Solanum tuberosum to Carica papaya, Ipomoea batatas, and Alternanthera philoxeroides"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 10,
+    "citations": 37,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_062.pdf",
+    "id": "004ede81a5ec045beca80d5ec8b556e43fd1d38a",
+    "title": "Hydrogen sulfide signaling in plant response to temperature stress"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 6,
+    "citations": 33,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_063.pdf",
+    "id": "0000536e477ce112c35121f2a66584f90ba5e871",
+    "title": "Sun protection factor, total phenol, flavonoid contents and antioxidant activity of medicinal plants from Iran"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 41,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_064.pdf",
+    "id": "003d98a04fa5a85d21a26cf80ec39c06c4a76c94",
+    "title": "The m6A reader YTHDC1 and the RNA helicase DDX5 control the production of rhabdomyosarcoma-enriched circRNAs"
   },
   {
     "domain": "bio_medical",
     "page_count": 16,
     "citations": 8,
     "year": 2024,
-    "filename": "bio_medical/bio_medical_077.pdf",
+    "filename": "bio_medical/bio_medical_065.pdf",
     "id": "000142e6143790322f27d13bd78a6d3a4d97f4e6",
     "title": "Self-assembled Lignin Nanoparticles produced from Elephant Grass Leaves enable Selective Inactivation of Gram-positive Microorganisms"
   },
   {
     "domain": "bio_medical",
-    "page_count": 25,
-    "citations": 52,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_078.pdf",
-    "id": "000743826389fbc3b0ae2d6f73d439afad16d12d",
-    "title": "Bacterial Signal Peptides- Navigating the Journey of Proteins"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 4,
-    "citations": 6,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_079.pdf",
-    "id": "003dcb4e0ee7ff5c9eda1a67c574f8f70cd1a7f4",
-    "title": "The Regulatory Mendelian Mutation score for GRCh38"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 101,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_080.pdf",
-    "id": "0038b4f00ee1d90b00b7aa05bbe32e77d7c14a2a",
-    "title": "SAAFEC-SEQ: A Sequence-Based Method for Predicting the Effect of Single Point Mutations on Protein Thermodynamic Stability"
-  },
-  {
-    "domain": "bio_medical",
     "page_count": 14,
-    "citations": 8,
+    "citations": 9,
     "year": 2022,
-    "filename": "bio_medical/bio_medical_081.pdf",
-    "id": "0019de56af34ad011cfb10232dfa0c29fb0835f2",
-    "title": "Robustness of a multivariate composite score when evaluating distress of animal models for gastrointestinal diseases"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 18,
-    "citations": 17,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_082.pdf",
-    "id": "000de36469b0e35c20a88a6d83d2c76048f05edb",
-    "title": "Mineralocorticoid receptor antagonists and glucocorticoids differentially affect skeletal muscle inflammation and pathology in muscular dystrophy"
+    "filename": "bio_medical/bio_medical_066.pdf",
+    "id": "006e27a41cbac51b9e870970fb4ab9caf58a88f5",
+    "title": "Comprehensive Transcriptome Profiling of NAFLD- and NASH-Induced Skeletal Muscle Dysfunction"
   },
   {
     "domain": "bio_medical",
     "page_count": 8,
-    "citations": 12,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_083.pdf",
-    "id": "0014c15a0e8616a178a9dc0b11f4579b3e03ca30",
-    "title": "STAS Domain Only Proteins in Bacterial Gene Regulation"
+    "citations": 15,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_067.pdf",
+    "id": "00452022ae5352a514b01a4cde3ede8a3ce89a9e",
+    "title": "SARS-CoV-2 Nucleocapsid Protein is Associated With Lower Testosterone Levels: An Experimental Study"
   },
   {
     "domain": "bio_medical",
-    "page_count": 34,
-    "citations": 28,
+    "page_count": 21,
+    "citations": 7,
     "year": 2023,
-    "filename": "bio_medical/bio_medical_084.pdf",
-    "id": "0034103ca4deb5f7d62ac96b873bbd8d4e6a6666",
-    "title": "Time-resolved single-cell and spatial gene regulatory atlas of plants under pathogen attack"
+    "filename": "bio_medical/bio_medical_068.pdf",
+    "id": "007ccaf9c8cc7c4760a4d42b39c577498a73339d",
+    "title": "How to train your myeloid cells: a way forward for helminth vaccines?"
   },
   {
     "domain": "bio_medical",
-    "page_count": 9,
-    "citations": 5,
+    "page_count": 30,
+    "citations": 20,
     "year": 2021,
-    "filename": "bio_medical/bio_medical_085.pdf",
-    "id": "008a02f3bfbce9d1f4ac5ac5068464d7123aba71",
-    "title": "Persistence of mRNA indicative of Plasmodium falciparum ring-stage parasites 42 days after artemisinin and non-artemisinin combination therapy in naturally infected Malians"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 17,
-    "citations": 17,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_086.pdf",
-    "id": "0038217aeb26519d674d99c14cec4c56758c7a64",
-    "title": "Exendin-4 Promotes Schwann Cell Survival/Migration and Myelination In Vitro"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 11,
-    "citations": 120,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_087.pdf",
-    "id": "007b23736d08b6a7a2df300b95a7b462f4dc6688",
-    "title": "Protists as main indicators and determinants of plant performance"
-  },
-  {
-    "domain": "bio_medical",
-    "page_count": 17,
-    "citations": 30,
-    "year": 2021,
-    "filename": "bio_medical/bio_medical_088.pdf",
-    "id": "0011498cdad0eaef5b35811dff2af5046296a3a2",
-    "title": "Linking remote sensing parameters to CO2 assimilation rates at a leaf scale"
+    "filename": "bio_medical/bio_medical_069.pdf",
+    "id": "007a41a4eb4a59a9b4b36841c2d6560c886676ff",
+    "title": "Protection of the C. elegans germ cell genome depends on diverse DNA repair pathways during normal proliferation"
   },
   {
     "domain": "bio_medical",
     "page_count": 15,
-    "citations": 32,
-    "year": 2022,
-    "filename": "bio_medical/bio_medical_089.pdf",
-    "id": "001c34e0701387274a7545bcdf70098fe98f5b3b",
-    "title": "Host phylogeny, habitat, and diet are main drivers of the cephalopod and mollusk gut microbiome"
-  },
-  {
-    "domain": "physics",
-    "page_count": 6,
-    "citations": 9,
-    "year": 2022,
-    "filename": "physics/physics_000.pdf",
-    "id": "00954f48a81abef3fcf8c3d03eba9cad85443ffe",
-    "title": "Is first-order relativistic hydrodynamics in a general frame stable and causal for arbitrary interactions?"
-  },
-  {
-    "domain": "physics",
-    "page_count": 27,
-    "citations": 8,
+    "citations": 30,
     "year": 2023,
-    "filename": "physics/physics_001.pdf",
-    "id": "0043d318a936d41ef99095ff652905bdb9285427",
-    "title": "libEMM: A fictious wave domain 3D CSEM modelling library bridging sequential and parallel GPU implementation"
+    "filename": "bio_medical/bio_medical_070.pdf",
+    "id": "00862f98256975864e6df5d60f913c9a323bd09a",
+    "title": "Drug cytotoxicity screening using human intestinal organoids propagated with extensive cost-reduction strategies"
   },
   {
-    "domain": "physics",
-    "page_count": 5,
+    "domain": "bio_medical",
+    "page_count": 13,
+    "citations": 7,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_071.pdf",
+    "id": "0041fe46d33331028c6e133ad220fbeb745fb872",
+    "title": "Gut Bacterial Communities Vary across Habitats and Their Diversity Increases with Increasing Glucocorticoids in Toad Tadpoles"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 37,
+    "citations": 35,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_072.pdf",
+    "id": "0024af10b16d211016313221044a0a12b808e777",
+    "title": "CD163+ M2 macrophages promote fibrosis in IgG4-related disease via TLR7/IRAK4/NF-\u03baB signaling."
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 10,
+    "citations": 11,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_073.pdf",
+    "id": "0002efd820dd8d57b4db06ac1a2104ccb9708d50",
+    "title": "Tumor morphology and location associate with immune cell composition in pleomorphic sarcoma"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 6,
+    "citations": 7,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_074.pdf",
+    "id": "0083abd8370365eb0775076f11332bc72cc6a163",
+    "title": "Lipoprotein(a) Modulates Carotid Atherosclerosis in Metabolic Syndrome"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 19,
+    "citations": 28,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_075.pdf",
+    "id": "0057c1bf8e2f22d266498506d4c1a4d25e6bc2af",
+    "title": "From the Reef to the Ocean: Revealing the Acoustic Range of the Biophony of a Coral Reef (Moorea Island, French Polynesia)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 22,
+    "citations": 16,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_076.pdf",
+    "id": "00738a665480627852911865462bc5b4d5c8c723",
+    "title": "Impact of Progerin Expression on Adipogenesis in Hutchinson\u2014Gilford Progeria Skin-Derived Precursor Cells"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 16,
+    "citations": 7,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_077.pdf",
+    "id": "003db218860191528b3b14997da1b68c6aa4f80c",
+    "title": "Initial Phylotranscriptomic Confirmation of Homoplastic Evolution of the Conspicuous Coloration and Bufoniform Morphology of Pumpkin-Toadlets in the Genus Brachycephalus"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 14,
+    "citations": 18,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_078.pdf",
+    "id": "000d5b54be07a3e56be400aa1988dd67cef18199",
+    "title": "Pollination, pollen tube growth, and fertilization independently contribute to fruit set and development in tomato"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 14,
+    "citations": 7,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_079.pdf",
+    "id": "00146775fd5ec57d2631ec37ac0f21827178982a",
+    "title": "Development of a Biosensor to Detect Venom of Malayan Krait (Bungarus candidus)"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 20,
+    "citations": 5,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_080.pdf",
+    "id": "0033dbcea7c9ebe4f2a00954bd1a84c94f6c83ea",
+    "title": "Lipid metabolism-related gene expression in the immune microenvironment predicts prognostic outcomes in renal cell carcinoma"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 23,
+    "citations": 57,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_081.pdf",
+    "id": "008847b2dff61633b7df87b000acab0df79714b1",
+    "title": "Highly divergent white-tailed deer SARS-CoV-2 with potential deer-to-human transmission"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 18,
     "citations": 15,
     "year": 2021,
-    "filename": "physics/physics_002.pdf",
-    "id": "00f2c962e42f626be9903a1915255540b63d43be",
-    "title": "10 Gb/s free space optical interconnect with broadcasting capability enabled by a silicon integrated optical phased array"
+    "filename": "bio_medical/bio_medical_082.pdf",
+    "id": "0037f32bc3d9d02e908028df7363ee151dbc3c14",
+    "title": "Molecular Profiles of Amyloid-\u03b2 Proteoforms in Typical and Rapidly Progressive Alzheimer\u2019s Disease"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 10,
+    "citations": 5,
+    "year": 2024,
+    "filename": "bio_medical/bio_medical_083.pdf",
+    "id": "007a3f96b10872d3c3469b8c20728a8ba58746bf",
+    "title": "Mechanism of sodium butyrate, a metabolite of gut microbiota, regulating cardiac fibroblast transdifferentiation via the NLRP3/Caspase-1 pyroptosis pathway"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 7,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_084.pdf",
+    "id": "001bc32c1a46bd12054bcddabd7927acd776ac06",
+    "title": "Characterization of the Evolutionary Pressure on Anisodus tanguticus Maxim. with Complete Chloroplast Genome Sequence"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 21,
+    "citations": 9,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_085.pdf",
+    "id": "00639f846b7508d3ed2a97637b249e890ec0a0f9",
+    "title": "Characterization of lipid droplet metabolism patterns identified prognosis and tumor microenvironment infiltration in gastric cancer"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 10,
+    "citations": 31,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_086.pdf",
+    "id": "008cc3210a7e0097bf147e8351867652512acad4",
+    "title": "An Updated Review of Porcine Deltacoronavirus in Terms of Prevalence, Pathogenicity, Pathogenesis and Antiviral Strategy"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 29,
+    "citations": 145,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_087.pdf",
+    "id": "0071a70fe507982201936b5310a3e879afcd7fc8",
+    "title": "Glial Cell-Mediated Neuroinflammation in Alzheimer\u2019s Disease"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 48,
+    "citations": 27,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_088.pdf",
+    "id": "00021cbe3e9019c7a21c61e3f7b17c48f5ac6c75",
+    "title": "Integrative Taxonomy and Molecular Phylogeny of the Plant-Parasitic Nematode Genus Paratylenchus (Nematoda: Paratylenchinae): Linking Species with Molecular Barcodes"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 6,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_089.pdf",
+    "id": "002de96d63a570ee17ae7ad1afee5c914df6aad7",
+    "title": "Identification of the Transcription Factor ATF3 as a Direct and Indirect Regulator of the LDLR"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 14,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_090.pdf",
+    "id": "0017256310f002c78e92ff6adf765a3d24aeb5bc",
+    "title": "Prevalence of Antibiotic Resistance Genes in the Saigon River Impacted by Anthropogenic Activities"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 20,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_091.pdf",
+    "id": "00421fc7aa992617dbfbe22d4f30fe8f7036c7ac",
+    "title": "A Novel Strategy to Study the Invasive Capability of Adherent-Invasive Escherichia coli by Using Human Primary Organoid-Derived Epithelial Monolayers"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 19,
+    "citations": 44,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_092.pdf",
+    "id": "0066562548ff96d3831e04eeda2aef7c06336ca6",
+    "title": "Thrombospondin 4/integrin \u03b12/HSF1 axis promotes proliferation and cancer stem-like traits of gallbladder cancer by enhancing reciprocal crosstalk between cancer-associated fibroblasts and tumor cells"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 21,
+    "citations": 6,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_093.pdf",
+    "id": "00326e7774422be6bdb9c94cca49a4bea88aeed0",
+    "title": "Quantitative Proteomic Study Unmasks Fibrinogen Pathway in Polycystic Liver Disease"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 18,
+    "citations": 9,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_094.pdf",
+    "id": "0049442859b0b1b81c75c9feae3852cf0c410423",
+    "title": "The COPII subunit MoSec24B is involved in development, pathogenicity and autophagy in the rice blast fungus"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 15,
+    "citations": 55,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_095.pdf",
+    "id": "008bd9905c4956b73ed83d457650b2fd9712b3c0",
+    "title": "Immunomodulatory Effects of BRAF, MEK, and CDK4/6 Inhibitors: Implications for Combining Targeted Therapy and Immune Checkpoint Blockade for the Treatment of Melanoma"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 16,
+    "citations": 6,
+    "year": 2023,
+    "filename": "bio_medical/bio_medical_096.pdf",
+    "id": "006952df61cb29cc96ff563f213fb76fa989e6fc",
+    "title": "Antiparasitic Activities of Compounds Isolated from Aspergillus fumigatus Strain Discovered in Northcentral Nigeria"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 17,
+    "citations": 9,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_097.pdf",
+    "id": "00098e836664af531c2fce8ef43861cfc3081d06",
+    "title": "Therapeutic potential of an intestinotrophic hormone, glucagon-like peptide 2, for treatment of type 2 short bowel syndrome rats with intestinal bacterial and fungal dysbiosis"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 13,
+    "citations": 29,
+    "year": 2021,
+    "filename": "bio_medical/bio_medical_098.pdf",
+    "id": "005180492ae02ae8fa610db53892f9e7c57de656",
+    "title": "Structural and Catalytic Characterization of TsBGL, a \u03b2-Glucosidase From Thermofilum sp. ex4484_79"
+  },
+  {
+    "domain": "bio_medical",
+    "page_count": 12,
+    "citations": 19,
+    "year": 2022,
+    "filename": "bio_medical/bio_medical_099.pdf",
+    "id": "003196f7b9046ccbe11edde522040ec1a1a9f776",
+    "title": "Kynurenine aminotransferase II inhibition promotes sleep and rescues impairments induced by neurodevelopmental insult"
+  },
+  {
+    "domain": "physics",
+    "page_count": 9,
+    "citations": 16,
+    "year": 2023,
+    "filename": "physics/physics_000.pdf",
+    "id": "0092fa0a4f54b690acb7dc9f617842803b5e58b5",
+    "title": "Visualizing ultrafast photothermal dynamics with decoupled optical force nanoscopy"
+  },
+  {
+    "domain": "physics",
+    "page_count": 14,
+    "citations": 5,
+    "year": 2021,
+    "filename": "physics/physics_001.pdf",
+    "id": "00421b2d30e92fc848eb03a3329fff2d76329748",
+    "title": "Optical band engineering via vertical stacking of honeycomb plasmonic lattices"
   },
   {
     "domain": "physics",
     "page_count": 14,
     "citations": 6,
     "year": 2022,
-    "filename": "physics/physics_003.pdf",
+    "filename": "physics/physics_002.pdf",
     "id": "00093d15f9b6a1381ed066ea672de9ae2edac118",
     "title": "The a3\u03a3+ state of KCs revisited: hyperfine structure analysis and potential refinement"
   },
   {
     "domain": "physics",
-    "page_count": 9,
-    "citations": 5,
-    "year": 2022,
-    "filename": "physics/physics_004.pdf",
-    "id": "00c9fd018c996e9c55b46d3484e7815ab1c75b01",
-    "title": "PINO-MBD: Physics-informed Neural Operator for Solving Coupled ODEs in Multi-body Dynamics"
-  },
-  {
-    "domain": "physics",
-    "page_count": 13,
-    "citations": 12,
-    "year": 2021,
-    "filename": "physics/physics_005.pdf",
-    "id": "00b6ec0e49ebb732334168fe25a83271705e6e7a",
-    "title": "A New Low-Energy Proton Irradiation Facility to Unveil the Mechanistic Basis of the Proton-Boron Capture Therapy Approach"
+    "page_count": 36,
+    "citations": 18,
+    "year": 2023,
+    "filename": "physics/physics_003.pdf",
+    "id": "00e294bb734a000a2b482aecbca1c43d202ffd1f",
+    "title": "Collider constraints on electroweakinos in the presence of a light gravitino"
   },
   {
     "domain": "physics",
     "page_count": 16,
     "citations": 12,
     "year": 2022,
-    "filename": "physics/physics_006.pdf",
+    "filename": "physics/physics_004.pdf",
     "id": "00b3ef117d3929ade886eeca854e531b1fecc867",
     "title": "Primary accelerometer calibration with two-axis automatic positioning stage"
   },
   {
     "domain": "physics",
-    "page_count": 25,
-    "citations": 9,
-    "year": 2023,
-    "filename": "physics/physics_007.pdf",
-    "id": "00fe5c0555a884f3290959593da695c46499ec26",
-    "title": "Adaptive oscillators support Bayesian prediction in temporal processing"
-  },
-  {
-    "domain": "physics",
-    "page_count": 10,
-    "citations": 56,
-    "year": 2023,
-    "filename": "physics/physics_008.pdf",
-    "id": "0036b47190a3e5badfe694d03c1b264822f26952",
-    "title": "Quantum interference enhances the performance of single-molecule transistors"
-  },
-  {
-    "domain": "physics",
-    "page_count": 16,
-    "citations": 7,
+    "page_count": 14,
+    "citations": 5,
     "year": 2022,
-    "filename": "physics/physics_009.pdf",
-    "id": "010979b76f4cc04a72c17cdc775bbbbc21341d12",
-    "title": "Physics and semantic informed multi-sensor calibration via optimization theory and self-supervised learning"
+    "filename": "physics/physics_005.pdf",
+    "id": "00b2e3ae7fd4ff4fba1cef1ea3757eb6bfad4fce",
+    "title": "Exploring the impact of nickel doping on the structure and low-temperature magnetic features of cobalt nano-spinel ferrite"
   },
   {
     "domain": "physics",
     "page_count": 17,
-    "citations": 11,
+    "citations": 6,
+    "year": 2021,
+    "filename": "physics/physics_006.pdf",
+    "id": "00f8cebd697ab75c503d297414b4e9d952cea1fd",
+    "title": "Nonlinear Optical Absorption in Nanoscale Films Revealed through Ultrafast Acoustics."
+  },
+  {
+    "domain": "physics",
+    "page_count": 24,
+    "citations": 13,
+    "year": 2024,
+    "filename": "physics/physics_007.pdf",
+    "id": "0104f63ee3d27df43f12397387cad4860694b73b",
+    "title": "Cosmological dynamics from covariant loop quantum gravity with scalar matter"
+  },
+  {
+    "domain": "physics",
+    "page_count": 12,
+    "citations": 35,
+    "year": 2022,
+    "filename": "physics/physics_008.pdf",
+    "id": "00ca83538389e3c947f6f529ce90484ea436e99d",
+    "title": "Imaging ferroelectric domains with a single-spin scanning quantum sensor"
+  },
+  {
+    "domain": "physics",
+    "page_count": 6,
+    "citations": 16,
+    "year": 2021,
+    "filename": "physics/physics_009.pdf",
+    "id": "0019aa3709ed0ed61bf98a548dbdd00c85bb59c3",
+    "title": "Hourglass phonons jointly protected by symmorphic and nonsymmorphic symmetries"
+  },
+  {
+    "domain": "physics",
+    "page_count": 12,
+    "citations": 13,
     "year": 2022,
     "filename": "physics/physics_010.pdf",
-    "id": "00ccc433272154cc73939cd3d822f248b815869e",
-    "title": "An Empirical Grid Model for Precipitable Water Vapor"
+    "id": "00a97280b99bbe0853526bf689d194cbc5618ce3",
+    "title": "Nd3+, Yb3+:YF3 Optical Temperature Nanosensors Operating in the Biological Windows"
+  },
+  {
+    "domain": "physics",
+    "page_count": 11,
+    "citations": 10,
+    "year": 2021,
+    "filename": "physics/physics_011.pdf",
+    "id": "00b3effb5cf671a351533f05d0e2e73f47978773",
+    "title": "Deglacial patterns of South Pacific overturning inferred from 231Pa and 230Th"
+  },
+  {
+    "domain": "physics",
+    "page_count": 28,
+    "citations": 24,
+    "year": 2022,
+    "filename": "physics/physics_012.pdf",
+    "id": "00d1e1275d29da9aa9e70152855b045707c84a96",
+    "title": "Gamma-Ray Cosmology and Tests of Fundamental Physics"
+  },
+  {
+    "domain": "physics",
+    "page_count": 10,
+    "citations": 59,
+    "year": 2022,
+    "filename": "physics/physics_013.pdf",
+    "id": "007fed70c39e93e756c140bedf09b2de292b7698",
+    "title": "Detection of long-range orbital-Hall torques"
   },
   {
     "domain": "physics",
     "page_count": 7,
-    "citations": 5,
-    "year": 2022,
-    "filename": "physics/physics_011.pdf",
-    "id": "00aad8dedd49d5bfd3d90af3ee1b65b20eb429c9",
-    "title": "Energy-Efficient Solutions in Two-user Downlink NOMA Systems Aided by Ambient Backscattering"
+    "citations": 8,
+    "year": 2024,
+    "filename": "physics/physics_014.pdf",
+    "id": "0002a21f33539ca9e708ff7ab8d9f8502b7d7cbc",
+    "title": "Procedure for imparting transverse orbital angular momentum by focusing spatiotemporally coupled ultrashort pulses"
   },
   {
     "domain": "physics",
-    "page_count": 22,
-    "citations": 21,
+    "page_count": 31,
+    "citations": 19,
     "year": 2021,
-    "filename": "physics/physics_012.pdf",
-    "id": "00b702d2e5849db8a35dfb80c15e1b351758e13f",
-    "title": "Alikhanov Legendre\u2014Galerkin Spectral Method for the Coupled Nonlinear Time-Space Fractional Ginzburg\u2013Landau Complex System"
+    "filename": "physics/physics_015.pdf",
+    "id": "000e69146fc360acffad88114f1ce545fced3a21",
+    "title": "Sensitivity kernels for static and dynamic tomography of scattering and absorbing media with elastic waves: a probabilistic approach"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 24,
+    "year": 2021,
+    "filename": "physics/physics_016.pdf",
+    "id": "005cc295cbca8131be50c6c28871efaed59779a5",
+    "title": "Parameter Identification of BLDC Motor Using Electromechanical Tests and Recursive Least-Squares Algorithm: Experimental Validation"
+  },
+  {
+    "domain": "physics",
+    "page_count": 38,
+    "citations": 28,
+    "year": 2022,
+    "filename": "physics/physics_017.pdf",
+    "id": "0049c363b6a51371e40c30526ac768dbbad60279",
+    "title": "A database of Calabi-Yau orientifolds and the size of D3-tadpoles"
+  },
+  {
+    "domain": "physics",
+    "page_count": 8,
+    "citations": 13,
+    "year": 2021,
+    "filename": "physics/physics_018.pdf",
+    "id": "0065a8a23e6535401b67050386bad211d6cacfd8",
+    "title": "Resonant leptogenesis and TM$$_1$$ mixing in minimal type-I seesaw model with S$$_4$$ symmetry"
+  },
+  {
+    "domain": "physics",
+    "page_count": 33,
+    "citations": 52,
+    "year": 2022,
+    "filename": "physics/physics_019.pdf",
+    "id": "00ad36947970b4676b297bcd387515d36a19a3fb",
+    "title": "Combining thermal resummation and gauge invariance for electroweak phase transition"
+  },
+  {
+    "domain": "physics",
+    "page_count": 27,
+    "citations": 10,
+    "year": 2022,
+    "filename": "physics/physics_020.pdf",
+    "id": "0022e354d7d6b9857d61ae50ae6a4ffbdaca1874",
+    "title": "Landscape of polymer quantum cosmology"
   },
   {
     "domain": "physics",
     "page_count": 14,
     "citations": 24,
     "year": 2021,
-    "filename": "physics/physics_013.pdf",
+    "filename": "physics/physics_021.pdf",
     "id": "00d4a9ef192a84a7efe447643d4d7a2c1b175361",
     "title": "Optical Performance Monitoring in Mode Division Multiplexed Optical Networks"
   },
   {
     "domain": "physics",
-    "page_count": 5,
-    "citations": 16,
-    "year": 2021,
-    "filename": "physics/physics_014.pdf",
-    "id": "007589c235713f6e30ea229e25584cec749b8edb",
-    "title": "The radio emission from active galactic nuclei"
-  },
-  {
-    "domain": "physics",
-    "page_count": 7,
-    "citations": 8,
-    "year": 2024,
-    "filename": "physics/physics_015.pdf",
-    "id": "0002a21f33539ca9e708ff7ab8d9f8502b7d7cbc",
-    "title": "Procedure for imparting transverse orbital angular momentum by focusing spatiotemporally coupled ultrashort pulses"
-  },
-  {
-    "domain": "physics",
-    "page_count": 10,
-    "citations": 13,
-    "year": 2023,
-    "filename": "physics/physics_016.pdf",
-    "id": "000eb9100d4f108070c04e199469c75bf6246a1e",
-    "title": "Wireless magneto-ionics: voltage control of magnetism by bipolar electrochemistry"
-  },
-  {
-    "domain": "physics",
-    "page_count": 6,
-    "citations": 18,
+    "page_count": 11,
+    "citations": 12,
     "year": 2022,
-    "filename": "physics/physics_017.pdf",
-    "id": "0037c02a41a90ba5bce15008f02cb81518ec03f0",
-    "title": "Pattern-Division Multiplexing for Continuous-Aperture MIMO"
-  },
-  {
-    "domain": "physics",
-    "page_count": 26,
-    "citations": 19,
-    "year": 2023,
-    "filename": "physics/physics_018.pdf",
-    "id": "005d98847ae95949cf93542f45422f8330a8db69",
-    "title": "Signatures of Electric Field and Layer Separation Effects on the Spin-Valley Physics of MoSe2/WSe2 Heterobilayers: From Energy Bands to Dipolar Excitons"
-  },
-  {
-    "domain": "physics",
-    "page_count": 14,
-    "citations": 9,
-    "year": 2021,
-    "filename": "physics/physics_019.pdf",
-    "id": "010b67330288aaa0dc15a12dc3f486b2552d1afc",
-    "title": "Asymmetric Metal-Dielectric Metacylinders and Their Potential Applications From Engineering Scattering Patterns to Spatial Optical Signal Processing"
-  },
-  {
-    "domain": "physics",
-    "page_count": 34,
-    "citations": 8,
-    "year": 2022,
-    "filename": "physics/physics_020.pdf",
-    "id": "000bb9e3046daa4be762cf4b965f6ca904af5372",
-    "title": "Haagerup\u2019s phase transition at polydisc\nslicing"
-  },
-  {
-    "domain": "physics",
-    "page_count": 10,
-    "citations": 5,
-    "year": 2021,
-    "filename": "physics/physics_021.pdf",
-    "id": "00675f52aaba574dcad2d3993b46bfdb67390e4b",
-    "title": "Performance Enhancement of Flexible Polymer Triboelectric Generator through Polarization of the Embedded Ferroelectric Polymer Layer"
-  },
-  {
-    "domain": "physics",
-    "page_count": 20,
-    "citations": 5,
-    "year": 2024,
     "filename": "physics/physics_022.pdf",
-    "id": "00af8ac83d2bca22c904d7e7bbb9e3318e154e23",
-    "title": "Control of Nozzle Flow Using Rectangular Ribs at Sonic and Supersonic Mach Numbers"
+    "id": "0014ff240e02ff6879fb07b1dc1c2528285e4273",
+    "title": "Tianwen-1 Mars entry vehicle trajectory and atmosphere reconstruction preliminary analysis"
   },
   {
     "domain": "physics",
     "page_count": 27,
-    "citations": 33,
+    "citations": 8,
     "year": 2021,
     "filename": "physics/physics_023.pdf",
-    "id": "0023472c00b8de1cdf7d38b4d98dfdc00b687eb3",
-    "title": "Markov chain Monte Carlo analyses of the flux ratios of B, Be and Li with the DRAGON2 code"
+    "id": "00d8ef82948656d210b883db95fcdc8859383f19",
+    "title": "CTF and FLOCAL Thermal Hydraulics Validations and Verifications within a Multiscale and Multiphysics Software Development"
   },
   {
     "domain": "physics",
-    "page_count": 26,
-    "citations": 7,
-    "year": 2022,
-    "filename": "physics/physics_024.pdf",
-    "id": "00d756427f24c5a02008baaa6c277e3b73cf2c9a",
-    "title": "Modelling of Backscattering off Filaments Using the Code IPF-FD3D for the Interpretation of Doppler Backscattering Data"
-  },
-  {
-    "domain": "physics",
-    "page_count": 10,
-    "citations": 5,
-    "year": 2021,
-    "filename": "physics/physics_025.pdf",
-    "id": "001531b0ec20d54f1922d1ac5e934cc452ed2b6d",
-    "title": "Layer-by-Layer Growth of Graphene Sheets over Selected Areas for Semiconductor Device Applications"
-  },
-  {
-    "domain": "physics",
-    "page_count": 20,
-    "citations": 6,
-    "year": 2021,
-    "filename": "physics/physics_026.pdf",
-    "id": "00c0cfbb1fe2dcf5e760ef984dd81c1ed9728ad1",
-    "title": "On the Validity of the Null Current Assumption for Modeling Sorptive Reactive Transport and Electro-Diffusion in Porous Media"
-  },
-  {
-    "domain": "physics",
-    "page_count": 11,
+    "page_count": 8,
     "citations": 12,
+    "year": 2021,
+    "filename": "physics/physics_024.pdf",
+    "id": "00f1e529b67a2bc24f82e83fa5d7d29a58573797",
+    "title": "Splay states and two-cluster states in ensembles of excitable units"
+  },
+  {
+    "domain": "physics",
+    "page_count": 14,
+    "citations": 27,
+    "year": 2022,
+    "filename": "physics/physics_025.pdf",
+    "id": "00d2c0e1c77ba42f59f4886286abfa6a06a5c47e",
+    "title": "Dual-Band Three-Way Doherty Power Amplifier Employing Dual-Mode Gate Bias and Load Compensation Network"
+  },
+  {
+    "domain": "physics",
+    "page_count": 19,
+    "citations": 7,
+    "year": 2024,
+    "filename": "physics/physics_026.pdf",
+    "id": "00be1d781bef45482de3b3295a6fde03434a56f3",
+    "title": "An Enhanced Gravity Model for Determining Crucial Nodes in Social Networks Based on Degree K-Shell Eigenvector Index"
+  },
+  {
+    "domain": "physics",
+    "page_count": 15,
+    "citations": 11,
     "year": 2022,
     "filename": "physics/physics_027.pdf",
-    "id": "003f897cbb62f204fd6b853c561b645330e65cec",
-    "title": "Upper Limit on the Diffuse Radio Background from GZK Photon Observation"
+    "id": "0031082a95e0f8e0e8c071e210ddcb4c0a1e457d",
+    "title": "Analyzing Transverse Momentum Spectra by a New Method in High-Energy Collisions"
   },
   {
     "domain": "physics",
-    "page_count": 16,
-    "citations": 15,
-    "year": 2022,
+    "page_count": 21,
+    "citations": 48,
+    "year": 2023,
     "filename": "physics/physics_028.pdf",
-    "id": "00313b7be7f81bb5205ac04fc0b9be193dfc275d",
-    "title": "Statistical Simulation of the Switching Mechanism in ZnO-Based RRAM Devices"
-  },
-  {
-    "domain": "physics",
-    "page_count": 17,
-    "citations": 13,
-    "year": 2021,
-    "filename": "physics/physics_029.pdf",
-    "id": "006a65c8d4dc6558fa1f9a860d08a54cc567e10a",
-    "title": "DIRC-like time-of-flight detector for the experiment at the Super Tau-Charm Facility"
-  },
-  {
-    "domain": "physics",
-    "page_count": 24,
-    "citations": 7,
-    "year": 2022,
-    "filename": "physics/physics_030.pdf",
-    "id": "00d6d8f3acbbebb069d02ced6ab4ddb091eb9388",
-    "title": "Gaussian process hydrodynamics"
+    "id": "00b3c04763698dd86e8468e1443e55ee29f2a29b",
+    "title": "Optical Methods of Methane Detection"
   },
   {
     "domain": "physics",
     "page_count": 16,
-    "citations": 23,
-    "year": 2021,
+    "citations": 6,
+    "year": 2023,
+    "filename": "physics/physics_029.pdf",
+    "id": "00872e761ff91066074d288c96e4aeca83dcc646",
+    "title": "On the Size of Superconducting Islands on the Density-Wave Background in Organic Metals"
+  },
+  {
+    "domain": "physics",
+    "page_count": 18,
+    "citations": 5,
+    "year": 2024,
+    "filename": "physics/physics_030.pdf",
+    "id": "0040348b89cd24e66f5bb98d59e74a9cfbf421e6",
+    "title": "Many-body quantum dynamics of spin-orbit coupled Andreev states in a Zeeman field"
+  },
+  {
+    "domain": "physics",
+    "page_count": 13,
+    "citations": 27,
+    "year": 2023,
     "filename": "physics/physics_031.pdf",
+    "id": "0060c95616519f997d175f0ebcd7066b4939ace5",
+    "title": "Asymmetric tetramer metasurface sensor governed by quasi-bound states in the continuum"
+  },
+  {
+    "domain": "physics",
+    "page_count": 9,
+    "citations": 5,
+    "year": 2024,
+    "filename": "physics/physics_032.pdf",
+    "id": "000d83c2fc8816c2608f16501c142ab162e85a4a",
+    "title": "Inter-Satellite Link Prediction with Supervised Learning Based on Kepler and SGP4 Orbits"
+  },
+  {
+    "domain": "physics",
+    "page_count": 14,
+    "citations": 10,
+    "year": 2023,
+    "filename": "physics/physics_033.pdf",
+    "id": "00d4402c93b63e02db7484af75e8a770b499de14",
+    "title": "Green's function integral method for pressure reconstruction from measured pressure gradient and the interpretation of omnidirectional integration"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 24,
+    "year": 2021,
+    "filename": "physics/physics_034.pdf",
     "id": "00075f761a0d2bd5ea4d3108b6714615963c4f1e",
     "title": "Adhesive Wear Regimes on Rough Surfaces and Interaction of Micro-contacts"
   },
   {
     "domain": "physics",
-    "page_count": 15,
-    "citations": 15,
-    "year": 2022,
-    "filename": "physics/physics_032.pdf",
-    "id": "009b4a1519517b47f2e41c3e06086ffb6d4ff2b8",
-    "title": "Numerical Investigation of Darcy\u2013Forchheimer Hybrid Nanofluid Flow with Energy Transfer over a Spinning Fluctuating Disk under the Influence of Chemical Reaction and Heat Source"
-  },
-  {
-    "domain": "physics",
-    "page_count": 14,
-    "citations": 8,
-    "year": 2024,
-    "filename": "physics/physics_033.pdf",
-    "id": "00478ac9f247d9df04c0f57548d6f4c08a232d89",
-    "title": "Movable surface acoustic wave tweezers: a versatile toolbox for micromanipulation"
+    "page_count": 17,
+    "citations": 12,
+    "year": 2023,
+    "filename": "physics/physics_035.pdf",
+    "id": "0015fd538641197ff126e47d99685575a28ba9e8",
+    "title": "Self-isolated MIMO antenna using mixed coupling by close coupling technique"
   },
   {
     "domain": "physics",
     "page_count": 5,
-    "citations": 10,
-    "year": 2022,
-    "filename": "physics/physics_034.pdf",
-    "id": "0032fb658ecaa1ed66b9f82d91fb5798622ac168",
-    "title": "Two dimensional LiMgAs: A topological quantum catalyst for hydrogen evolution reaction"
-  },
-  {
-    "domain": "physics",
-    "page_count": 13,
-    "citations": 118,
-    "year": 2021,
-    "filename": "physics/physics_035.pdf",
-    "id": "00e995295666a50db67f87c4f4f83741d28a39bd",
-    "title": "Rydberg Atom Electric Field Sensors for Communications and Sensing"
-  },
-  {
-    "domain": "physics",
-    "page_count": 22,
-    "citations": 6,
-    "year": 2022,
-    "filename": "physics/physics_036.pdf",
-    "id": "00c87bee84b534487ed2fd7a0b9a2cf185eaf002",
-    "title": "Deep Neural Networks as the Semi-classical Limit of Topological Quantum Neural Networks: The problem of generalisation"
-  },
-  {
-    "domain": "physics",
-    "page_count": 8,
-    "citations": 25,
-    "year": 2022,
-    "filename": "physics/physics_037.pdf",
-    "id": "00597f1a3a15739105e302079045d0f7715ca100",
-    "title": "A Universal PINNs Method for Solving Partial Differential Equations with a Point Source"
-  },
-  {
-    "domain": "physics",
-    "page_count": 88,
-    "citations": 11,
-    "year": 2022,
-    "filename": "physics/physics_038.pdf",
-    "id": "006ca23a94a97851410793be4f6f135d1d82b523",
-    "title": "The mathematical structure of U-spin amplitude sum rules"
-  },
-  {
-    "domain": "physics",
-    "page_count": 15,
-    "citations": 19,
-    "year": 2023,
-    "filename": "physics/physics_039.pdf",
-    "id": "007fee6ee38c214880d931e10a17cf6a78bd007a",
-    "title": "The Nonlinear Eigenvalue Problem of Electromagnetic Wave Propagation in a Dielectric Layer Covered with Graphene"
-  },
-  {
-    "domain": "physics",
-    "page_count": 10,
-    "citations": 66,
-    "year": 2021,
-    "filename": "physics/physics_040.pdf",
-    "id": "002d0be07ae821d36bb3115ea41c6dfd308770ea",
-    "title": "High thermoelectric performance enabled by convergence of nested conduction bands in Pb7Bi4Se13 with low thermal conductivity"
-  },
-  {
-    "domain": "physics",
-    "page_count": 9,
-    "citations": 12,
-    "year": 2021,
-    "filename": "physics/physics_041.pdf",
-    "id": "00d0cf95980886a445ed1e271c1f28ffc1ba32ff",
-    "title": "Dynamical decoupling methods in nanoscale NMR"
-  },
-  {
-    "domain": "physics",
-    "page_count": 29,
-    "citations": 11,
-    "year": 2023,
-    "filename": "physics/physics_042.pdf",
-    "id": "00d36ed8d4691ebff5a5003c3db2152dc1e49ec7",
-    "title": "Tension-compression asymmetry of metastable austenitic stainless steel studied by in-situ high-energy X-ray diffraction"
-  },
-  {
-    "domain": "physics",
-    "page_count": 8,
-    "citations": 39,
-    "year": 2021,
-    "filename": "physics/physics_043.pdf",
-    "id": "01025a4d5dff4e713df266145d73f728f7bf7969",
-    "title": "Stability and molecular pathways to the formation of spin defects in silicon carbide"
-  },
-  {
-    "domain": "physics",
-    "page_count": 13,
-    "citations": 10,
-    "year": 2022,
-    "filename": "physics/physics_044.pdf",
-    "id": "00cc5ebd4a7057b00d11c34986ddc889d37baf7d",
-    "title": "Ti3C2Tx MXene Quantum Dots with Surface-Terminated Groups (-F, -OH, =O, -Cl) for Ultrafast Photonics"
-  },
-  {
-    "domain": "physics",
-    "page_count": 27,
-    "citations": 10,
-    "year": 2021,
-    "filename": "physics/physics_045.pdf",
-    "id": "0084fe882e6c0efdba39306ced1f834a757db70a",
-    "title": "Estimating fundamental parameters of nearby M dwarfs from SPIRou spectra"
-  },
-  {
-    "domain": "physics",
-    "page_count": 10,
-    "citations": 27,
-    "year": 2022,
-    "filename": "physics/physics_046.pdf",
-    "id": "004f5c9c83b37d867163efb1244f2a42bbd02fca",
-    "title": "Shaping the quantum vacuum with anisotropic temporal boundaries"
-  },
-  {
-    "domain": "physics",
-    "page_count": 12,
-    "citations": 22,
-    "year": 2024,
-    "filename": "physics/physics_048.pdf",
-    "id": "004cf2bf300c11772bac940b5e19b74ceda6adc8",
-    "title": "Inner-extremal regular black holes from pure gravity"
-  },
-  {
-    "domain": "physics",
-    "page_count": 4,
     "citations": 9,
+    "year": 2024,
+    "filename": "physics/physics_036.pdf",
+    "id": "00452b05a4d5d3569e5939508dc90caff56337e1",
+    "title": "Highly stable power control for chip-based continuous-variable quantum key distribution system."
+  },
+  {
+    "domain": "physics",
+    "page_count": 24,
+    "citations": 11,
+    "year": 2021,
+    "filename": "physics/physics_037.pdf",
+    "id": "0032a1469d86931de2206a7f06f8f81eaabf2eec",
+    "title": "Effect of the hydrogenation solvent in the PHIP-SAH hyperpolarization of [1- 13 C]pyruvate"
+  },
+  {
+    "domain": "physics",
+    "page_count": 21,
+    "citations": 22,
     "year": 2023,
-    "filename": "physics/physics_049.pdf",
-    "id": "0098d38e5a741a6f31f97980bcc125c7e40baea2",
-    "title": "The Milky Way shines in high-energy neutrinos"
+    "filename": "physics/physics_038.pdf",
+    "id": "00c509f23ef87082092da65aad061105018b7536",
+    "title": "Percolation on Fractal Networks: A Survey"
   },
   {
     "domain": "physics",
     "page_count": 28,
-    "citations": 6,
-    "year": 2023,
-    "filename": "physics/physics_050.pdf",
-    "id": "006ad7576a3ec95dd2b1fbc294d58d7415f4abe2",
-    "title": "Surface tension and wetting at free surfaces in smoothed particle hydrodynamics"
+    "citations": 38,
+    "year": 2021,
+    "filename": "physics/physics_039.pdf",
+    "id": "00577b605f43b28904527b87f03cf3ac5e5ed754",
+    "title": "Magnetogenetics: remote activation of cellular functions triggered by magnetic switches"
   },
   {
     "domain": "physics",
-    "page_count": 22,
+    "page_count": 3,
     "citations": 8,
-    "year": 2022,
-    "filename": "physics/physics_051.pdf",
-    "id": "006c6cc646915d37e6a3ee2d258cf04606323b8e",
-    "title": "Two Classes of Gamma-ray Bursts Distinguished within the First Second of Their Prompt Emission"
+    "year": 2021,
+    "filename": "physics/physics_040.pdf",
+    "id": "006a4d3a680f805eb3faee5392b78493b82fa490",
+    "title": "Experimental Study of Deep Neural Network Equalizers Performance in Optical Links"
   },
   {
     "domain": "physics",
-    "page_count": 7,
-    "citations": 11,
+    "page_count": 59,
+    "citations": 45,
     "year": 2022,
-    "filename": "physics/physics_052.pdf",
-    "id": "00664341fa16b353fb3820f428459bf6cd58f3bf",
-    "title": "Investigations on beam quality improvement of an NCPM-KTA-based high energy optical parametric oscillator using an unstable resonator with a Gaussian reflectivity mirror [Invited]"
+    "filename": "physics/physics_041.pdf",
+    "id": "007e5be5cab0a38a2da5cfffef2d90d1fd5f156b",
+    "title": "Magnetorotational supernovae: A nucleosynthetic analysis of sophisticated 3D models"
+  },
+  {
+    "domain": "physics",
+    "page_count": 68,
+    "citations": 13,
+    "year": 2023,
+    "filename": "physics/physics_042.pdf",
+    "id": "00974b09163dd6a5db1eac0a96d19f098c4b1ce0",
+    "title": "Two-dimensional metal halide perovskites and their heterostructures: from synthesis to applications"
+  },
+  {
+    "domain": "physics",
+    "page_count": 18,
+    "citations": 7,
+    "year": 2024,
+    "filename": "physics/physics_043.pdf",
+    "id": "002c4c0232b43f42f276b6af387751fc3d930012",
+    "title": "Comparative life cycle assessment of different fabrication processes for perovskite solar mini-modules"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 20,
+    "year": 2021,
+    "filename": "physics/physics_044.pdf",
+    "id": "00d14d7215e1ff0f703521aae8c8608609046b33",
+    "title": "Deep learning of topological phase transitions from entanglement aspects: An unsupervised way"
   },
   {
     "domain": "physics",
     "page_count": 13,
-    "citations": 7,
-    "year": 2022,
-    "filename": "physics/physics_053.pdf",
-    "id": "00bb25e2ed9d8ca7f28502ff527abf6a90e7d87a",
-    "title": "Asymptotic Dynamics of Open Quantum Systems and Modular Theory"
+    "citations": 46,
+    "year": 2024,
+    "filename": "physics/physics_045.pdf",
+    "id": "00fd3603f8a60bc594f791dd44e92a161eb119ff",
+    "title": "Enhancing crystal integrity and structural rigidity of CsPbBr3 nanoplatelets to achieve a narrow color-saturated blue emission"
   },
   {
     "domain": "physics",
-    "page_count": 4,
-    "citations": 11,
+    "page_count": 27,
+    "citations": 8,
+    "year": 2021,
+    "filename": "physics/physics_046.pdf",
+    "id": "00c9f478c3c5f56b8e587edd114c7f81208705d7",
+    "title": "(Super)Schwarzian mechanics"
+  },
+  {
+    "domain": "physics",
+    "page_count": 19,
+    "citations": 8,
+    "year": 2024,
+    "filename": "physics/physics_047.pdf",
+    "id": "00a48a9c454c5e6efaf673654167e8d35b76e382",
+    "title": "Complete mathematical theory of the jamming transition: A perspective"
+  },
+  {
+    "domain": "physics",
+    "page_count": 7,
+    "citations": 7,
     "year": 2022,
+    "filename": "physics/physics_048.pdf",
+    "id": "00921c554299f722ad37bdd246b4f95625ee275d",
+    "title": "Robust neural network-enhanced estimation of local primordial non-Gaussianity"
+  },
+  {
+    "domain": "physics",
+    "page_count": 12,
+    "citations": 6,
+    "year": 2023,
+    "filename": "physics/physics_049.pdf",
+    "id": "004b4f2e29e7703d49a79129fada406c3409b548",
+    "title": "Study on the Single Sheet Measurement Method for AC Magnetic Measurement on Grain-Oriented Electrical Steel"
+  },
+  {
+    "domain": "physics",
+    "page_count": 18,
+    "citations": 21,
+    "year": 2021,
+    "filename": "physics/physics_050.pdf",
+    "id": "0095e7492aaf0060aa38eaf311a9904a689075de",
+    "title": "Neutron Radiobiology and Dosimetry"
+  },
+  {
+    "domain": "physics",
+    "page_count": 15,
+    "citations": 27,
+    "year": 2023,
+    "filename": "physics/physics_051.pdf",
+    "id": "0069b1254ebb3f1edbbfb9609c1121310d054083",
+    "title": "Probing the early Universe cosmology with NANOGrav: Possibilities and limitations"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 9,
+    "year": 2021,
+    "filename": "physics/physics_052.pdf",
+    "id": "0058913680c5c238448f847c49b6d0fba632c07a",
+    "title": "The Hull-Strominger system and the Anomaly flow on a class of solvmanifolds"
+  },
+  {
+    "domain": "physics",
+    "page_count": 18,
+    "citations": 12,
+    "year": 2022,
+    "filename": "physics/physics_053.pdf",
+    "id": "00b874f71d63353d1162381fd0f3758faca2276b",
+    "title": "Energy Transfer through a Magnetized Williamson Hybrid Nanofluid Flowing around a Spherical Surface: Numerical Simulation"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 20,
+    "year": 2021,
     "filename": "physics/physics_054.pdf",
-    "id": "00c8e4f75a56ff18508779f587326dc087e0fa1b",
-    "title": "Neutron Lifetime Anomaly and Big Bang Nucleosynthesis"
+    "id": "00c58266063f1b295a20b7879bde4542fc7de2bc",
+    "title": "First constraints on the AGN X-ray luminosity function at z ~ 6 from an eROSITA-detected quasar"
+  },
+  {
+    "domain": "physics",
+    "page_count": 6,
+    "citations": 48,
+    "year": 2021,
+    "filename": "physics/physics_055.pdf",
+    "id": "00de3b1aa0f710251d603051ddb263df8344ae4a",
+    "title": "Light helicity detector based on 2D magnetic semiconductor CrI3"
+  },
+  {
+    "domain": "physics",
+    "page_count": 15,
+    "citations": 12,
+    "year": 2021,
+    "filename": "physics/physics_056.pdf",
+    "id": "006a2c4eb7774b2f59f535febcfacf79a54c2d84",
+    "title": "Anisotropic Angstrom-Wide Conductive Channels in Black Phosphorus by Top-down Cu Intercalation."
+  },
+  {
+    "domain": "physics",
+    "page_count": 9,
+    "citations": 5,
+    "year": 2021,
+    "filename": "physics/physics_057.pdf",
+    "id": "00e3e8154601368eaa4ed13374d4d457bacd794f",
+    "title": "Chaotic theory incorporated with PSO algorithm for solving optimal reactive power dispatch problem of power system"
+  },
+  {
+    "domain": "physics",
+    "page_count": 20,
+    "citations": 14,
+    "year": 2021,
+    "filename": "physics/physics_058.pdf",
+    "id": "00f7125103834c4b1ec27533d41355f89dba6652",
+    "title": "Double mode model of size-dependent chaotic vibrations of nanoplates based on the nonlocal elasticity theory"
+  },
+  {
+    "domain": "physics",
+    "page_count": 15,
+    "citations": 17,
+    "year": 2022,
+    "filename": "physics/physics_059.pdf",
+    "id": "0018cc7f9215a7a1b9bd5d38e1cbb5b69ce48001",
+    "title": "Investigation of turbulent superstructures in Rayleigh\u2013B\u00e9nard convection by Lagrangian particle tracking of fluorescent microspheres"
+  },
+  {
+    "domain": "physics",
+    "page_count": 9,
+    "citations": 7,
+    "year": 2021,
+    "filename": "physics/physics_060.pdf",
+    "id": "00170331f9272e133aef9ecf04d9906be8d9908b",
+    "title": "Particle sizing for flowing colloidal suspensions using flow-differential dynamic microscopy."
+  },
+  {
+    "domain": "physics",
+    "page_count": 5,
+    "citations": 5,
+    "year": 2022,
+    "filename": "physics/physics_061.pdf",
+    "id": "00866b53b0bb8c0d928b50fe6137a9ff23be3de3",
+    "title": "Radionuclides in Diagnostics and Therapy of Malignant Tumors: New Development"
+  },
+  {
+    "domain": "physics",
+    "page_count": 14,
+    "citations": 7,
+    "year": 2022,
+    "filename": "physics/physics_062.pdf",
+    "id": "0002416574cc991186e4310b6d4ff63d8aa3797f",
+    "title": "Bottom-Gated ZnO TFT Pressure Sensor with 1D Nanorods"
+  },
+  {
+    "domain": "physics",
+    "page_count": 14,
+    "citations": 6,
+    "year": 2023,
+    "filename": "physics/physics_063.pdf",
+    "id": "00299907eda9eebdbccd486b85b6ca2289e61ef0",
+    "title": "High-dimensional Encoding in the Round-Robin Differential-Phase-Shift Protocol"
+  },
+  {
+    "domain": "physics",
+    "page_count": 20,
+    "citations": 16,
+    "year": 2023,
+    "filename": "physics/physics_064.pdf",
+    "id": "00713e6c75dde91212831121e613ea39bc5ba022",
+    "title": "Measurement of Microscopic Thermal Diffusivity Distribution for Ryugu Sample by Infrared Lock-in Periodic Heating Method"
+  },
+  {
+    "domain": "physics",
+    "page_count": 37,
+    "citations": 11,
+    "year": 2024,
+    "filename": "physics/physics_065.pdf",
+    "id": "00c2249e0f0272088c0feb31d1e43696c64a245e",
+    "title": "Turbulence anisotropy effects on corner-flow separation: physics and turbulence modelling"
+  },
+  {
+    "domain": "physics",
+    "page_count": 33,
+    "citations": 11,
+    "year": 2021,
+    "filename": "physics/physics_066.pdf",
+    "id": "009584d51d38f10c562b2f56f0aa4a7e45002f22",
+    "title": "Thermodynamic structure of a generic null surface and the zeroth law in scalar-tensor theory"
+  },
+  {
+    "domain": "physics",
+    "page_count": 20,
+    "citations": 15,
+    "year": 2021,
+    "filename": "physics/physics_067.pdf",
+    "id": "0097792a35a19f29310b3f258152d0115d15bbbc",
+    "title": "Was physics ever deterministic? The historical basis of determinism and the image of classical physics"
+  },
+  {
+    "domain": "physics",
+    "page_count": 12,
+    "citations": 18,
+    "year": 2023,
+    "filename": "physics/physics_068.pdf",
+    "id": "00cec28fe6c433b8e3edc57a177969993fd7ab57",
+    "title": "THE MODIFIED OHM\u2019S LAW AND ITS IMPLICATIONS FOR ELECTRICAL CIRCUIT ANALYSIS"
+  },
+  {
+    "domain": "physics",
+    "page_count": 11,
+    "citations": 5,
+    "year": 2021,
+    "filename": "physics/physics_069.pdf",
+    "id": "00bbae1785ec4bececde12f7fa43e7d454f8d68a",
+    "title": "Singlet fission dynamics modulated by molecular configuration in covalently linked pyrene dimers, Anti- and Syn-1,2-di(pyrenyl)benzene"
+  },
+  {
+    "domain": "physics",
+    "page_count": 13,
+    "citations": 70,
+    "year": 2021,
+    "filename": "physics/physics_070.pdf",
+    "id": "0039cffae1c29b1e9ce79f9a8f1e7de47506c290",
+    "title": "Satellite All-sky Infrared Radiance Assimilation: Recent Progress and Future Perspectives"
   },
   {
     "domain": "physics",
     "page_count": 14,
     "citations": 5,
     "year": 2022,
-    "filename": "physics/physics_055.pdf",
+    "filename": "physics/physics_071.pdf",
     "id": "00e1aa14fe5487a70632119466f08b3bbdc8df88",
     "title": "Multi-Parameter Characteristics of Electric Arc Furnace Melting"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 20,
+    "year": 2021,
+    "filename": "physics/physics_072.pdf",
+    "id": "00418d82fbae1bd5df58e6c41ec0a14b3368c057",
+    "title": "Relative distribution of dark matter, gas, and stars around cosmic filaments in the IllustrisTNG simulation"
+  },
+  {
+    "domain": "physics",
+    "page_count": 10,
+    "citations": 162,
+    "year": 2021,
+    "filename": "physics/physics_073.pdf",
+    "id": "008f41ec16208ddc2e8f1a249d36163ae6568268",
+    "title": "Polymerized small molecular acceptor based all-polymer solar cells with an efficiency of 16.16% via tuning polymer blend morphology by molecular design"
+  },
+  {
+    "domain": "physics",
+    "page_count": 22,
+    "citations": 5,
+    "year": 2023,
+    "filename": "physics/physics_074.pdf",
+    "id": "00667acc8b7fbc807655961ba7bdc656ba4a45b8",
+    "title": "A conservative fourth-order real space method for the (2+1)D Dirac equation"
+  },
+  {
+    "domain": "physics",
+    "page_count": 11,
+    "citations": 15,
+    "year": 2022,
+    "filename": "physics/physics_075.pdf",
+    "id": "0018f70c832836cf961ec7d1764deff5bb0e4cde",
+    "title": "Viscous cosmology in f(T) gravity"
+  },
+  {
+    "domain": "physics",
+    "page_count": 23,
+    "citations": 31,
+    "year": 2023,
+    "filename": "physics/physics_076.pdf",
+    "id": "006a538aeeb0af4d097ba224dfc39f831efd2664",
+    "title": "Quantum Metrology in the Noisy Intermediate\u2010Scale Quantum Era"
+  },
+  {
+    "domain": "physics",
+    "page_count": 13,
+    "citations": 42,
+    "year": 2023,
+    "filename": "physics/physics_077.pdf",
+    "id": "009ddc364e706d196ca10a8a8d80d887253de700",
+    "title": "Cutting multi-control quantum gates with ZX calculus"
+  },
+  {
+    "domain": "physics",
+    "page_count": 49,
+    "citations": 21,
+    "year": 2021,
+    "filename": "physics/physics_078.pdf",
+    "id": "003d5771f719c262900930fa52bb451ca2326c60",
+    "title": "tRecX - An environment for solving time-dependent Schr\u00f6dinger-like problems"
+  },
+  {
+    "domain": "physics",
+    "page_count": 38,
+    "citations": 12,
+    "year": 2022,
+    "filename": "physics/physics_079.pdf",
+    "id": "003daecf7a4fcf79be4913b12752f9e17d6d296c",
+    "title": "(Slow-)twisting inflationary attractors"
+  },
+  {
+    "domain": "physics",
+    "page_count": 8,
+    "citations": 47,
+    "year": 2021,
+    "filename": "physics/physics_080.pdf",
+    "id": "00e887f2c28d09317da0901d702c8cf740a56080",
+    "title": "Engineering of atomic-scale flexoelectricity at grain boundaries"
+  },
+  {
+    "domain": "physics",
+    "page_count": 14,
+    "citations": 35,
+    "year": 2023,
+    "filename": "physics/physics_081.pdf",
+    "id": "00351d8d20de5255f612867b71a15d7966fe4bc5",
+    "title": "Lead-free, formamidinium germanium-antimony halide (FA4GeSbCl12) double perovskite solar cells: the effects of band offsets"
+  },
+  {
+    "domain": "physics",
+    "page_count": 7,
+    "citations": 7,
+    "year": 2022,
+    "filename": "physics/physics_082.pdf",
+    "id": "0011515706b726ad41301af0a85aee7e7424c6b1",
+    "title": "Physics-Conditioned Generative Adversarial Networks for State Estimation in Active Power Distribution Systems with Low Observability"
+  },
+  {
+    "domain": "physics",
+    "page_count": 40,
+    "citations": 16,
+    "year": 2021,
+    "filename": "physics/physics_083.pdf",
+    "id": "00030ea72e8e65ac7be8ad083aaa0c7ee26f3275",
+    "title": "M5-branes probing flux backgrounds"
+  },
+  {
+    "domain": "physics",
+    "page_count": 15,
+    "citations": 8,
+    "year": 2022,
+    "filename": "physics/physics_084.pdf",
+    "id": "00f8f59eb17fcde610920c9cebb36029bb6a44f2",
+    "title": "Spatial sputtering of fused silica after a laser-induced exploding caused by a 355 nm nd: YAG laser"
+  },
+  {
+    "domain": "physics",
+    "page_count": 25,
+    "citations": 7,
+    "year": 2023,
+    "filename": "physics/physics_085.pdf",
+    "id": "00333a8c6ff0bf8593902d3c0352a5760cee0b21",
+    "title": "Flat-band ferromagnetism in the SU(N) Hubbard and Kondo lattice models"
+  },
+  {
+    "domain": "physics",
+    "page_count": 15,
+    "citations": 9,
+    "year": 2023,
+    "filename": "physics/physics_086.pdf",
+    "id": "0046008a3ece0d4ce3e978188ff9f155f6179e5d",
+    "title": "Ultra-Fast All-Optical Plasmonic Dual-Band Nonlinear Off\u2013On and Two-Port Switches"
+  },
+  {
+    "domain": "physics",
+    "page_count": 12,
+    "citations": 13,
+    "year": 2023,
+    "filename": "physics/physics_087.pdf",
+    "id": "00a87c04528d0b364c099473869de276a0e223ff",
+    "title": "Assessing the Stability of P+ and N+ Polysilicon Passivating Contacts with Various Capping Layers on P-Type Wafers"
+  },
+  {
+    "domain": "physics",
+    "page_count": 28,
+    "citations": 39,
+    "year": 2021,
+    "filename": "physics/physics_088.pdf",
+    "id": "00d790af465a90f1ad8cb110fbd772d571ec3424",
+    "title": "Forward-modelling the luminosity, distance, and size distributions of the milky way satellites"
+  },
+  {
+    "domain": "physics",
+    "page_count": 8,
+    "citations": 8,
+    "year": 2021,
+    "filename": "physics/physics_089.pdf",
+    "id": "00ee63f51c831d77a0db87aa3e9a80223b86066a",
+    "title": "Characterization of superconducting NbTiN films using a dispersive Fourier transform spectrometer"
+  },
+  {
+    "domain": "physics",
+    "page_count": 8,
+    "citations": 10,
+    "year": 2021,
+    "filename": "physics/physics_090.pdf",
+    "id": "00c36b1c4730e83fc5607c74468889d8daa1f24f",
+    "title": "Nonclassical Nucleation\u2014Role of Metastable Intermediate Phase in Crystal Nucleation: An Editorial Prefix"
+  },
+  {
+    "domain": "physics",
+    "page_count": 13,
+    "citations": 54,
+    "year": 2022,
+    "filename": "physics/physics_091.pdf",
+    "id": "005162c3640476dc1bdbbafab7549ab6fa637706",
+    "title": "Seismic multi-hazard and impact estimation via causal inference from satellite imagery"
+  },
+  {
+    "domain": "physics",
+    "page_count": 62,
+    "citations": 5,
+    "year": 2021,
+    "filename": "physics/physics_092.pdf",
+    "id": "0080238ce01eb2b12db211b18962804a14258c09",
+    "title": "The Lyman Alpha Reference Sample XII. Morphology of extended Lyman alpha emission in star-forming galaxies"
+  },
+  {
+    "domain": "physics",
+    "page_count": 57,
+    "citations": 7,
+    "year": 2021,
+    "filename": "physics/physics_093.pdf",
+    "id": "00783c7b59c07eb90d6ccaeb0952bc7265cdbc8a",
+    "title": "Aperiodic crystals in biology"
+  },
+  {
+    "domain": "physics",
+    "page_count": 16,
+    "citations": 87,
+    "year": 2021,
+    "filename": "physics/physics_094.pdf",
+    "id": "00128e32879f38b8f85e9e2ff93307c2c3938fb1",
+    "title": "Phase transitions in a non-Hermitian Aubry-Andr\u00e9-Harper model"
+  },
+  {
+    "domain": "physics",
+    "page_count": 28,
+    "citations": 17,
+    "year": 2021,
+    "filename": "physics/physics_095.pdf",
+    "id": "00d1fb4c75c5c008d7c65d375f7cf613dd4f6aee",
+    "title": "Nishimori meets Bethe: a spectral method for node classification in sparse weighted graphs"
   },
   {
     "domain": "physics",
     "page_count": 20,
     "citations": 9,
     "year": 2023,
-    "filename": "physics/physics_056.pdf",
+    "filename": "physics/physics_096.pdf",
     "id": "006c7c03504e6fb1b20b3bb147b1c43451257a11",
     "title": "A Review of the Dynamics Progress of Bubble Collapse within Droplet and Droplet Splash"
   },
   {
     "domain": "physics",
-    "page_count": 8,
-    "citations": 10,
-    "year": 2022,
-    "filename": "physics/physics_057.pdf",
-    "id": "009aa90da218173c5dbd699a4a421e4ced245d71",
-    "title": "Site-controlled interlayer coupling in WSe2/2D perovskite heterostructure"
-  },
-  {
-    "domain": "physics",
-    "page_count": 13,
-    "citations": 23,
+    "page_count": 9,
+    "citations": 8,
     "year": 2021,
-    "filename": "physics/physics_058.pdf",
-    "id": "00e76c73348ec2d6346fa22bc5d9057a499bccab",
-    "title": "Improvement of Recursive DFT for APF With Higher Switching Frequency to Suppress Wideband Harmonics"
+    "filename": "physics/physics_097.pdf",
+    "id": "004e49fa72d149e4811c2b99391b9700a5c9de8c",
+    "title": "Identification of three cataclysmic variables detected by the ART-XC and eROSITA telescopes on board the SRG during the all-sky X-ray survey"
   },
   {
     "domain": "physics",
-    "page_count": 28,
+    "page_count": 7,
+    "citations": 10,
+    "year": 2021,
+    "filename": "physics/physics_098.pdf",
+    "id": "005ba8268b85f3652a46af5914f8c4044d789eea",
+    "title": "Pure quantum extension of the semiclassical Boltzmann-Uehling-Uhlenbeck equation"
+  },
+  {
+    "domain": "physics",
+    "page_count": 10,
+    "citations": 5,
+    "year": 2022,
+    "filename": "physics/physics_099.pdf",
+    "id": "0056abaf323ec8feaf11fb567602418c678023dc",
+    "title": "Permittivity and Loss Characterization of Polymer Films for Terahertz Applications"
+  },
+  {
+    "domain": "math",
+    "page_count": 21,
     "citations": 7,
     "year": 2023,
-    "filename": "physics/physics_059.pdf",
-    "id": "000f5c829ea95eb9f947a43170f0cdce0c12c072",
-    "title": "Lyman continuum leaker candidates among highly ionised, low-redshift dwarf galaxies selected from HeII"
-  },
-  {
-    "domain": "math",
-    "page_count": 18,
-    "citations": 9,
-    "year": 2021,
     "filename": "math/math_000.pdf",
-    "id": "02693a95549ff59f48ef592b1043ad18f77b2ad0",
-    "title": "Stand Stability of Pure and Mixed-Eucalyptus Forests of Different Tree Species in a Typhoon-Prone Area"
+    "id": "0265d82fcbd6d95ac6b1a640d5b2d982e072d74e",
+    "title": "Supersolutions to nonautonomous Choquard equations in general domains"
   },
   {
     "domain": "math",
-    "page_count": 17,
-    "citations": 23,
+    "page_count": 27,
+    "citations": 6,
     "year": 2021,
     "filename": "math/math_001.pdf",
-    "id": "01b5e3cfb209d509b4041f30778dab3052721609",
-    "title": "Topdressing Nitrogen Demand Prediction in Rice Crop Using Machine Learning Systems"
+    "id": "01b2f40c35598dde9ef5c47bf9ca1af56966c709",
+    "title": "Anamorphosis: Between Perspective and Catoptrics"
+  },
+  {
+    "domain": "math",
+    "page_count": 22,
+    "citations": 48,
+    "year": 2023,
+    "filename": "math/math_002.pdf",
+    "id": "008018cef25a863a751b7e88de6ee4e634825562",
+    "title": "Graph Neural Networks with Learnable and Optimal Polynomial Bases"
+  },
+  {
+    "domain": "math",
+    "page_count": 13,
+    "citations": 67,
+    "year": 2022,
+    "filename": "math/math_003.pdf",
+    "id": "005b16e1c8e30c08254bda86cc9c1fa851c42885",
+    "title": "Topological approach to generate new rough set models"
+  },
+  {
+    "domain": "math",
+    "page_count": 6,
+    "citations": 7,
+    "year": 2021,
+    "filename": "math/math_004.pdf",
+    "id": "0096d45fafc656e421ce1dd95f025139e83957e7",
+    "title": "ANALISIS PENGARUH SERVICE QUALITY DAN WORD OF MOUTH (WOM) TERHADAP MINAT BELI KONSUMEN (Studi Kasus UKM Bakpia Boomber Mas Raga Gunung Kidul)"
+  },
+  {
+    "domain": "math",
+    "page_count": 15,
+    "citations": 10,
+    "year": 2022,
+    "filename": "math/math_005.pdf",
+    "id": "0267222c7d341d740db2b7d212ebccc972ed3983",
+    "title": "A novel study for hybrid pair of multivalued dominated mappings in b-multiplicative metric space with applications"
+  },
+  {
+    "domain": "math",
+    "page_count": 20,
+    "citations": 13,
+    "year": 2023,
+    "filename": "math/math_006.pdf",
+    "id": "0273699a71c90e1d6f6d8dba8aad38c3d5490687",
+    "title": "Is it only about technology? The interplay between educational technology for mathematics homework, teaching practice, and students\u2019 activities"
+  },
+  {
+    "domain": "math",
+    "page_count": 14,
+    "citations": 11,
+    "year": 2021,
+    "filename": "math/math_007.pdf",
+    "id": "0164d108d7a31b576ec1bbf14b781f2ac320c1d8",
+    "title": "Estimates for Green's Functions of Elliptic Equations in Non-Divergence Form with Continuous Coefficients"
+  },
+  {
+    "domain": "math",
+    "page_count": 41,
+    "citations": 25,
+    "year": 2023,
+    "filename": "math/math_008.pdf",
+    "id": "018a1db1ced37c332d58ba785d9debc1cc80d141",
+    "title": "Learning in POMDPs is Sample-Efficient with Hindsight Observability"
+  },
+  {
+    "domain": "math",
+    "page_count": 28,
+    "citations": 9,
+    "year": 2023,
+    "filename": "math/math_009.pdf",
+    "id": "0274c51a5e9b543f3f6a9f703c573eafd0361702",
+    "title": "Strictly subgaussian probability distributions"
   },
   {
     "domain": "math",
     "page_count": 11,
-    "citations": 5,
+    "citations": 9,
+    "year": 2021,
+    "filename": "math/math_010.pdf",
+    "id": "000def981f2402170ad9989f7a6874fd4249d20f",
+    "title": "Performance of Low Synchronization Orthogonalization Methods in Anderson Accelerated Fixed Point Solvers"
+  },
+  {
+    "domain": "math",
+    "page_count": 24,
+    "citations": 11,
+    "year": 2021,
+    "filename": "math/math_011.pdf",
+    "id": "01eda276ea117906fc5ebda14509d7a666434109",
+    "title": "Introducing Statistical Inference: Design of a Theoretically and Empirically Based Learning Trajectory"
+  },
+  {
+    "domain": "math",
+    "page_count": 11,
+    "citations": 21,
     "year": 2022,
-    "filename": "math/math_002.pdf",
-    "id": "0081fb6dbb0e421cadec02a2ca76877e9d6362c2",
-    "title": "The Information Velocity of Packet-Erasure Links"
+    "filename": "math/math_012.pdf",
+    "id": "012efa197c549b0b4728f7705c74adcba95f2936",
+    "title": "Connected Cruise and Traffic Control for Pairs of Connected Automated Vehicles"
+  },
+  {
+    "domain": "math",
+    "page_count": 10,
+    "citations": 6,
+    "year": 2022,
+    "filename": "math/math_013.pdf",
+    "id": "0244debd527b65ea710cefc41f4c027d439414c2",
+    "title": "Fractional series operators on discrete Hardy spaces"
+  },
+  {
+    "domain": "math",
+    "page_count": 13,
+    "citations": 7,
+    "year": 2024,
+    "filename": "math/math_014.pdf",
+    "id": "01d46b65319cceccb51b6cbe947eca2472e258e9",
+    "title": "Strictly Wider Class of Soft Sets via Supra Soft \u03b4-Closure Operator"
+  },
+  {
+    "domain": "math",
+    "page_count": 26,
+    "citations": 9,
+    "year": 2023,
+    "filename": "math/math_015.pdf",
+    "id": "00d7db63129f6a2ae4b9471823c2e90b6d66880e",
+    "title": "Fair Max\u2013Min Diversity Maximization in Streaming and Sliding-Window Models"
   },
   {
     "domain": "math",
     "page_count": 46,
     "citations": 5,
     "year": 2022,
-    "filename": "math/math_003.pdf",
+    "filename": "math/math_016.pdf",
     "id": "005bba518831c4cfb1e20e35b44136258efa4c12",
     "title": "Improvement of a Conserved Current Density Versus Adding a Total Derivative to a Lagrangian Density"
   },
   {
     "domain": "math",
-    "page_count": 8,
-    "citations": 5,
-    "year": 2021,
-    "filename": "math/math_004.pdf",
-    "id": "0240ebb83245e98d0af83cebb1d12f62be88b4ca",
-    "title": "What Factors Determine the Production of Independent Smallholder Oil Palm?"
-  },
-  {
-    "domain": "math",
-    "page_count": 20,
-    "citations": 8,
-    "year": 2023,
-    "filename": "math/math_005.pdf",
-    "id": "027804512b7b80a728f035b0e041142335a08b3b",
-    "title": "Computational Triangulation in Mathematics Teacher Education"
-  },
-  {
-    "domain": "math",
-    "page_count": 26,
-    "citations": 17,
+    "page_count": 15,
+    "citations": 14,
     "year": 2022,
-    "filename": "math/math_006.pdf",
-    "id": "0164fa2969d515cb6f78471b3eaf095ce680f016",
-    "title": "Chemical diffusion master equation: Formulations of reaction\u2013diffusion processes on the molecular level"
-  },
-  {
-    "domain": "math",
-    "page_count": 32,
-    "citations": 7,
-    "year": 2023,
-    "filename": "math/math_007.pdf",
-    "id": "027996dd2cd94d0aef54aa4c10b0c4036fedf218",
-    "title": "Fast Robust Location and Scatter Estimation: A Depth-based Method"
-  },
-  {
-    "domain": "math",
-    "page_count": 11,
-    "citations": 9,
-    "year": 2021,
-    "filename": "math/math_008.pdf",
-    "id": "000def981f2402170ad9989f7a6874fd4249d20f",
-    "title": "Performance of Low Synchronization Orthogonalization Methods in Anderson Accelerated Fixed Point Solvers"
-  },
-  {
-    "domain": "math",
-    "page_count": 26,
-    "citations": 12,
-    "year": 2022,
-    "filename": "math/math_009.pdf",
-    "id": "01ef92c4f00fbf8419e5dc593831ebc4d2eb5dc8",
-    "title": "The interplay of math anxiety and math competence for later performance"
-  },
-  {
-    "domain": "math",
-    "page_count": 38,
-    "citations": 20,
-    "year": 2022,
-    "filename": "math/math_010.pdf",
-    "id": "012f763fb795e90168b8e150612197166cea689f",
-    "title": "Generalized Lotka-Volterra model with hierarchical interactions."
-  },
-  {
-    "domain": "math",
-    "page_count": 21,
-    "citations": 11,
-    "year": 2021,
-    "filename": "math/math_011.pdf",
-    "id": "02489883085c4cdd9e405a8be28396e678af40cc",
-    "title": "Rough q-Rung Orthopair Fuzzy Sets and Their Applications in Decision-Making"
-  },
-  {
-    "domain": "math",
-    "page_count": 10,
-    "citations": 5,
-    "year": 2021,
-    "filename": "math/math_012.pdf",
-    "id": "01d6d24bedc97469f8a50096ef746f3045822411",
-    "title": "Computing Complexity-aware Plans Using Kolmogorov Complexity"
-  },
-  {
-    "domain": "math",
-    "page_count": 49,
-    "citations": 33,
-    "year": 2022,
-    "filename": "math/math_013.pdf",
-    "id": "02aeafea0587218c6c2e9428381a9dbe75141903",
-    "title": "Large Hybrid Time-Varying Parameter VARs"
-  },
-  {
-    "domain": "math",
-    "page_count": 19,
-    "citations": 54,
-    "year": 2021,
-    "filename": "math/math_014.pdf",
-    "id": "00d828af1015906846450047af87cd65d01fddc8",
-    "title": "SAT-Based Rigorous Explanations for Decision Lists"
-  },
-  {
-    "domain": "math",
-    "page_count": 42,
-    "citations": 26,
-    "year": 2023,
-    "filename": "math/math_015.pdf",
-    "id": "01121c1a37da0b062b41f39d8d07623570e7dd0b",
-    "title": "Discrete Approximations of Gaussian Smoothing and Gaussian Derivatives"
-  },
-  {
-    "domain": "math",
-    "page_count": 19,
-    "citations": 10,
-    "year": 2023,
-    "filename": "math/math_016.pdf",
-    "id": "005ce2a1c64a21f2b47633b4d00f0bbf739a8fd9",
-    "title": "A block Toeplitz preconditioner for all-at-once systems from linear wave equations"
-  },
-  {
-    "domain": "math",
-    "page_count": 27,
-    "citations": 8,
-    "year": 2021,
     "filename": "math/math_017.pdf",
-    "id": "00c9f478c3c5f56b8e587edd114c7f81208705d7",
-    "title": "(Super)Schwarzian mechanics"
+    "id": "01402158bf7ef2b6ce631a0d82d6cbf05cda66f2",
+    "title": "An Exhaustive Variable Selection Study for Linear Models of Soundscape Emotions: Rankings and Gibbs Analysis"
   },
   {
     "domain": "math",
-    "page_count": 26,
-    "citations": 10,
-    "year": 2024,
+    "page_count": 15,
+    "citations": 13,
+    "year": 2021,
     "filename": "math/math_018.pdf",
-    "id": "01407d1e84f0d8dcefb898ef62ae2b98817ba6fa",
-    "title": "A Simple and Efficient Convex Optimization Based Bound-Preserving High Order Accurate Limiter for Cahn-Hilliard-Navier-Stokes System"
+    "id": "01b38dbf32484aac4d5c0386f1e5f6d19c821055",
+    "title": "Experimental Comparison of Preferential vs. Common Delta Connections for the Star-Delta Starting of Induction Motors"
+  },
+  {
+    "domain": "math",
+    "page_count": 25,
+    "citations": 10,
+    "year": 2021,
+    "filename": "math/math_019.pdf",
+    "id": "01a43dd5d642770b999e566c855ed81da45dfd1b",
+    "title": "Optimal lower bounds for first eigenvalues of Riemann surfaces for large genus"
   },
   {
     "domain": "math",
     "page_count": 19,
     "citations": 5,
-    "year": 2023,
-    "filename": "math/math_019.pdf",
-    "id": "01b74c45d0a579250bde673144773821edf20288",
-    "title": "Population dynamics with protection and harvesting of a species"
-  },
-  {
-    "domain": "math",
-    "page_count": 23,
-    "citations": 59,
     "year": 2022,
     "filename": "math/math_020.pdf",
-    "id": "01a607fc1799bf270e71dff2bd74c6a7049fec34",
-    "title": "Optimal error estimates of a Crank-Nicolson finite element projection method for magnetohydrodynamic equations"
+    "id": "015ae31413a8d6297655cd17702daac96426d60c",
+    "title": "Storage and retrieval of von Neumann measurements"
   },
   {
     "domain": "math",
-    "page_count": 18,
-    "citations": 6,
+    "page_count": 35,
+    "citations": 20,
     "year": 2023,
     "filename": "math/math_021.pdf",
-    "id": "015ae3b35ef2390fa9606bfb298c2a0e45ddfe7b",
-    "title": "Local Convergence Analysis of a One Parameter Family of Simultaneous Methods with Applications to Real-World Problems"
+    "id": "00961f46dbc0adc92fec7f157c944af1fe4f52f5",
+    "title": "Nonparametric regression using over-parameterized shallow ReLU neural networks"
   },
   {
     "domain": "math",
-    "page_count": 9,
-    "citations": 23,
-    "year": 2023,
+    "page_count": 113,
+    "citations": 8,
+    "year": 2024,
     "filename": "math/math_022.pdf",
-    "id": "02657f902758c3b85146629fe4faa3feab0ea34f",
-    "title": "Learning Decomposed Spatial Relations for Multi-Variate Time-Series Modeling"
+    "id": "00f998d4a3afe0d0f7c96513a3ced43fb25462a8",
+    "title": "Sum-of-Squares Lower Bounds for Non-Gaussian Component Analysis"
   },
   {
     "domain": "math",
-    "page_count": 21,
-    "citations": 30,
-    "year": 2021,
-    "filename": "math/math_023.pdf",
-    "id": "00965d73d4b2277eaf37f8c1ca462a1fdbf5ed52",
-    "title": "A Problem with parameter for the integro-differential equations"
-  },
-  {
-    "domain": "math",
-    "page_count": 17,
-    "citations": 50,
+    "page_count": 52,
+    "citations": 82,
     "year": 2023,
-    "filename": "math/math_024.pdf",
-    "id": "00fa84ae6e881a0090c7c1a9241e06d4bbead3fe",
-    "title": "Statistical Foundations of Prior-Data Fitted Networks"
+    "filename": "math/math_023.pdf",
+    "id": "01a98937cfd7744353a215048dfdbc0959b0ff2f",
+    "title": "ChatGPT for Programming Numerical Methods"
   },
   {
     "domain": "math",
-    "page_count": 7,
-    "citations": 5,
+    "page_count": 22,
+    "citations": 11,
     "year": 2021,
-    "filename": "math/math_025.pdf",
-    "id": "00c772db5d2cf58d0c357937b76f14d7a0a7561c",
-    "title": "Gaussian Mixture Estimation from Weighted Samples"
+    "filename": "math/math_024.pdf",
+    "id": "00c7529294ceb21a001bbcc3897154d8bdcaa8ca",
+    "title": "On the Moore-Gibson-Thompson equation with memory with nonconvex kernels"
   },
   {
     "domain": "math",
     "page_count": 15,
     "citations": 6,
     "year": 2021,
-    "filename": "math/math_026.pdf",
+    "filename": "math/math_025.pdf",
     "id": "004812b659001c11adc3ad1ceea0180fbf65964d",
     "title": "Weighted norm inequalities for the maximal functions associated to a critical radius function on variable Lebesgue spaces"
   },
@@ -2398,296 +2938,665 @@
     "page_count": 15,
     "citations": 17,
     "year": 2021,
-    "filename": "math/math_027.pdf",
+    "filename": "math/math_026.pdf",
     "id": "0045619ce1c85977fbde6dcde94ee36730060258",
     "title": "The Development of an Evaluation Model to Assess the Effect of Online English Teaching Based on Fuzzy Mathematics"
   },
   {
     "domain": "math",
-    "page_count": 20,
-    "citations": 5,
-    "year": 2023,
-    "filename": "math/math_028.pdf",
-    "id": "00d44d72c445617c1c2fff1d1461262198cc85f4",
-    "title": "Estimating Territory Risk Relativity Using Generalized Linear Mixed Models and Fuzzy C-Means Clustering"
-  },
-  {
-    "domain": "math",
-    "page_count": 26,
-    "citations": 16,
+    "page_count": 28,
+    "citations": 17,
     "year": 2021,
-    "filename": "math/math_029.pdf",
-    "id": "009002760a8ad17b2b12b0671c7e5c3e1d1df3da",
-    "title": "Bivariate Chebyshev polynomials of the fifth kind for variable-order time-fractional partial integro-differential equations with weakly singular kernel"
+    "filename": "math/math_027.pdf",
+    "id": "00d1fb4c75c5c008d7c65d375f7cf613dd4f6aee",
+    "title": "Nishimori meets Bethe: a spectral method for node classification in sparse weighted graphs"
   },
   {
     "domain": "math",
-    "page_count": 45,
-    "citations": 8,
-    "year": 2022,
-    "filename": "math/math_030.pdf",
-    "id": "021c0e2fbadf736f352313b6ff9327e9bf7b6002",
-    "title": "Diffusive Limit of Random Walks on Tessellations via Generalized Gradient Flows"
-  },
-  {
-    "domain": "math",
-    "page_count": 12,
-    "citations": 27,
-    "year": 2022,
-    "filename": "math/math_031.pdf",
-    "id": "0107700c3fb87fdf0b07ad790cff3c56ecef6311",
-    "title": "Usage of Compartmental Models in Predicting COVID-19 Outbreaks"
-  },
-  {
-    "domain": "math",
-    "page_count": 26,
-    "citations": 7,
-    "year": 2022,
-    "filename": "math/math_032.pdf",
-    "id": "014221b806e0f4c101b2329f7d17415ccf3019d1",
-    "title": "Scalable and Demography-Agnostic Confinement Strategies for COVID-19 Pandemic with Game Theory and Graph Algorithms"
-  },
-  {
-    "domain": "math",
-    "page_count": 13,
-    "citations": 12,
-    "year": 2023,
-    "filename": "math/math_033.pdf",
-    "id": "02a3c42db6f4704430f9d9e3deebece1ba3dcdc3",
-    "title": "Solving Fr\u00e9chet Distance Problems by Algebraic Geometric Methods"
-  },
-  {
-    "domain": "math",
-    "page_count": 176,
+    "page_count": 37,
     "citations": 10,
     "year": 2023,
-    "filename": "math/math_034.pdf",
-    "id": "01c73835328037dee3079e2d1535a5a8b1cbbf1a",
-    "title": "Gauge origami and quiver W-algebras"
+    "filename": "math/math_028.pdf",
+    "id": "008e5bef30246024a3eb0ba3ed9f27d64747873e",
+    "title": "Outlier Robust Adversarial Training"
   },
   {
     "domain": "math",
-    "page_count": 30,
-    "citations": 11,
+    "page_count": 37,
+    "citations": 5,
     "year": 2023,
-    "filename": "math/math_035.pdf",
-    "id": "00fe59edf62f5c762254a1fc99fd8704174c5ff3",
-    "title": "A registration method for reduced basis problems using linear optimal transport"
-  },
-  {
-    "domain": "math",
-    "page_count": 14,
-    "citations": 21,
-    "year": 2022,
-    "filename": "math/math_036.pdf",
-    "id": "01c27abcb2525bb6ca1912c2bc0cab13cc5771d4",
-    "title": "Learning the Solution Operator of Boundary Value Problems using Graph Neural Networks"
-  },
-  {
-    "domain": "math",
-    "page_count": 71,
-    "citations": 18,
-    "year": 2021,
-    "filename": "math/math_037.pdf",
-    "id": "02701513134771f67124734dec550859c28996fb",
-    "title": "Large deviations of Kac\u2019s conservative particle system and energy nonconserving solutions to the Boltzmann equation: A counterexample to the predicted rate function"
-  },
-  {
-    "domain": "math",
-    "page_count": 22,
-    "citations": 43,
-    "year": 2022,
-    "filename": "math/math_038.pdf",
-    "id": "00729c2bb96059dd41de41e8c7e452fa24f69a45",
-    "title": "Isometric 3D Adversarial Examples in the Physical World"
-  },
-  {
-    "domain": "math",
-    "page_count": 28,
-    "citations": 9,
-    "year": 2023,
-    "filename": "math/math_039.pdf",
-    "id": "0274c51a5e9b543f3f6a9f703c573eafd0361702",
-    "title": "Strictly subgaussian probability distributions"
+    "filename": "math/math_029.pdf",
+    "id": "0217024237779d22a7392c1db90fbb8b145f4a9e",
+    "title": "On Exact Sampling in the Two-Variable Fragment of First-Order Logic"
   },
   {
     "domain": "math",
     "page_count": 27,
-    "citations": 18,
-    "year": 2021,
-    "filename": "math/math_040.pdf",
-    "id": "01c86b633f946dae53cd115826707ebc3cd44add",
-    "title": "Approach to Multi-Attribute Decision-Making Methods for Performance Evaluation Process Using Interval-Valued T-Spherical Fuzzy Hamacher Aggregation Information"
+    "citations": 6,
+    "year": 2022,
+    "filename": "math/math_030.pdf",
+    "id": "01be19fd07a8c3747850eda4ed24d2c4ff95dbd2",
+    "title": "Sharp large deviations and concentration inequalities for the number of descents in a random permutation"
+  },
+  {
+    "domain": "math",
+    "page_count": 8,
+    "citations": 8,
+    "year": 2022,
+    "filename": "math/math_031.pdf",
+    "id": "0105bc0c1b67f3b5be6a8a6912a65f809c107005",
+    "title": "Predicting the spread of COVID-19 with a machine learning technique and multiplicative calculus"
+  },
+  {
+    "domain": "math",
+    "page_count": 8,
+    "citations": 6,
+    "year": 2022,
+    "filename": "math/math_032.pdf",
+    "id": "014165fc50b4bffdbbdc0a37c26625cb0e57101f",
+    "title": "Q-learning with online random forests"
+  },
+  {
+    "domain": "math",
+    "page_count": 9,
+    "citations": 5,
+    "year": 2022,
+    "filename": "math/math_033.pdf",
+    "id": "01c27e295956a30f7208c2e32e73a2cc1a27caee",
+    "title": "Fast Offline Policy Optimization for Large Scale Recommendation"
+  },
+  {
+    "domain": "math",
+    "page_count": 28,
+    "citations": 8,
+    "year": 2023,
+    "filename": "math/math_034.pdf",
+    "id": "00727564d4ad20dada98c7f1051fe0cea0f5c90c",
+    "title": "RecordTest: An R Package to Analyze Non-Stationarity in the Extremes Based on Record-Breaking Events"
+  },
+  {
+    "domain": "math",
+    "page_count": 18,
+    "citations": 8,
+    "year": 2022,
+    "filename": "math/math_035.pdf",
+    "id": "01c30b9608cbc0a066f8d253dbb5b8f8a367d052",
+    "title": "Mobile Sensor Path Planning for Kalman Filter Spatiotemporal Estimation"
   },
   {
     "domain": "math",
     "page_count": 25,
     "citations": 7,
     "year": 2023,
-    "filename": "math/math_041.pdf",
+    "filename": "math/math_036.pdf",
     "id": "00333a8c6ff0bf8593902d3c0352a5760cee0b21",
     "title": "Flat-band ferromagnetism in the SU(N) Hubbard and Kondo lattice models"
   },
   {
     "domain": "math",
-    "page_count": 16,
-    "citations": 16,
-    "year": 2021,
-    "filename": "math/math_042.pdf",
-    "id": "0209ceeb6de0723f3cdfb2b75f7ba8293272f782",
-    "title": "Geometrothermodynamics of van der Waals systems"
-  },
-  {
-    "domain": "math",
-    "page_count": 43,
-    "citations": 6,
-    "year": 2021,
-    "filename": "math/math_043.pdf",
-    "id": "029178eda46f7b1c0bbf84a461f440d62e7213c5",
-    "title": "A unified construction of all-speed HLL-type schemes for hypersonic heating computations"
+    "page_count": 32,
+    "citations": 5,
+    "year": 2022,
+    "filename": "math/math_037.pdf",
+    "id": "0207452c1d640ad7d1853a9a93f98682e7df736e",
+    "title": "Practical considerations for sandwich variance estimation in two-stage regression settings."
   },
   {
     "domain": "math",
     "page_count": 17,
-    "citations": 5,
+    "citations": 9,
+    "year": 2023,
+    "filename": "math/math_038.pdf",
+    "id": "0266e2823b2b13fd91d55d19404b02807173b381",
+    "title": "Five Generalized Rough Approximation Spaces Produced by Maximal Rough Neighborhoods"
+  },
+  {
+    "domain": "math",
+    "page_count": 33,
+    "citations": 10,
+    "year": 2024,
+    "filename": "math/math_039.pdf",
+    "id": "006ea96ab71a4b8f15385bea89d2af16bc56648f",
+    "title": "Hyers\u2013Ulam Stability of 2D-Convex Mappings and Some Related New Hermite\u2013Hadamard, Pachpatte, and Fej\u00e9r Type Integral Inequalities Using Novel Fractional Integral Operators Via Totally Interval-Order Relations with Open Problem"
+  },
+  {
+    "domain": "math",
+    "page_count": 40,
+    "citations": 68,
+    "year": 2023,
+    "filename": "math/math_040.pdf",
+    "id": "028a25798231fca91771312ebc0fd5d938ab8840",
+    "title": "C3: High-Performance and Low-Complexity Neural Compression from a Single Image or Video"
+  },
+  {
+    "domain": "math",
+    "page_count": 16,
+    "citations": 19,
+    "year": 2021,
+    "filename": "math/math_041.pdf",
+    "id": "00889b7d01ff6ae903a1aa0efd0a0e81db93333b",
+    "title": "Testing Grease Consistency"
+  },
+  {
+    "domain": "math",
+    "page_count": 2,
+    "citations": 7,
+    "year": 2022,
+    "filename": "math/math_042.pdf",
+    "id": "0059aef858bf677ab6c627589f54c15744dd0bae",
+    "title": "q-Hermite-Hadamard inequalities for functions with convex or h-convex q-derivative"
+  },
+  {
+    "domain": "math",
+    "page_count": 26,
+    "citations": 17,
+    "year": 2022,
+    "filename": "math/math_043.pdf",
+    "id": "0164fa2969d515cb6f78471b3eaf095ce680f016",
+    "title": "Chemical diffusion master equation: Formulations of reaction\u2013diffusion processes on the molecular level"
+  },
+  {
+    "domain": "math",
+    "page_count": 18,
+    "citations": 22,
     "year": 2021,
     "filename": "math/math_044.pdf",
-    "id": "0269d7ceddee0758eb0c7b6c4d638157708c5df0",
-    "title": "A parsimonious model of blood glucose homeostasis"
-  },
-  {
-    "domain": "math",
-    "page_count": 25,
-    "citations": 11,
-    "year": 2023,
-    "filename": "math/math_045.pdf",
-    "id": "006fddcc0ea5696c0ec4cd733e54324ee7023b73",
-    "title": "Dichotomies for Maximum Matching Cut: H-Freeness, Bounded Diameter, Bounded Radius"
-  },
-  {
-    "domain": "math",
-    "page_count": 56,
-    "citations": 9,
-    "year": 2022,
-    "filename": "math/math_046.pdf",
-    "id": "0290a858b1b114975bdcda6bc2b8e83c5de724a3",
-    "title": "An Invitation to Higher Arity Science"
-  },
-  {
-    "domain": "math",
-    "page_count": 13,
-    "citations": 67,
-    "year": 2022,
-    "filename": "math/math_047.pdf",
-    "id": "005b16e1c8e30c08254bda86cc9c1fa851c42885",
-    "title": "Topological approach to generate new rough set models"
-  },
-  {
-    "domain": "math",
-    "page_count": 20,
-    "citations": 11,
-    "year": 2023,
-    "filename": "math/math_048.pdf",
-    "id": "02cbe794da8f1b2c436d29551e320c32a5a8a643",
-    "title": "James-Stein type estimators in beta regression model\u200e: simulation and application\u200e"
-  },
-  {
-    "domain": "math",
-    "page_count": 52,
-    "citations": 17,
-    "year": 2024,
-    "filename": "math/math_049.pdf",
-    "id": "0124dc1539a36f5639fe7d4ec53e106d3b30558b",
-    "title": "Rotation invariance and equivariance in 3D deep learning: a survey"
-  },
-  {
-    "domain": "math",
-    "page_count": 9,
-    "citations": 12,
-    "year": 2024,
-    "filename": "math/math_050.pdf",
-    "id": "0165047ea3e35376f0436d813f6b2d3eb2995ded",
-    "title": "Synchronization in Networks of Nonlinear Systems: Contraction Analysis via Riemannian Metrics and Deep-Learning for Feedback Estimation"
-  },
-  {
-    "domain": "math",
-    "page_count": 21,
-    "citations": 13,
-    "year": 2021,
-    "filename": "math/math_051.pdf",
-    "id": "00bde879e152946a5cb7ace37bded07c5f458b37",
-    "title": "Identification, visualization, statistical analysis and mathematical modeling of high-feedback loops in gene regulatory networks"
-  },
-  {
-    "domain": "math",
-    "page_count": 17,
-    "citations": 5,
-    "year": 2022,
-    "filename": "math/math_052.pdf",
-    "id": "007ec453c3a293e87d597ac241fe451a8047bdba",
-    "title": "Weak compactness and representation in variable exponent Lebesgue spaces on infinite measure spaces"
-  },
-  {
-    "domain": "math",
-    "page_count": 29,
-    "citations": 12,
-    "year": 2021,
-    "filename": "math/math_053.pdf",
-    "id": "015e0facbc98c19e6ed76094005152310268adf6",
-    "title": "Anomalous symmetries of classifiable C*-algebras"
+    "id": "015cb173fc52c018c035290440dadca3da9554a6",
+    "title": "Surface model of the human red blood cell simulating changes in membrane curvature under strain"
   },
   {
     "domain": "math",
     "page_count": 12,
     "citations": 5,
     "year": 2022,
-    "filename": "math/math_054.pdf",
+    "filename": "math/math_045.pdf",
     "id": "0032a2a0d362cab0f878e621ad3d1936831006eb",
     "title": "Hypergraph LSS-ideals and coordinate sections of symmetric tensors"
   },
   {
     "domain": "math",
-    "page_count": 30,
-    "citations": 11,
-    "year": 2022,
-    "filename": "math/math_055.pdf",
-    "id": "01aaf22f7b1932de3ab0e73a9c41a787462a1185",
-    "title": "Neural Score Matching for High-Dimensional Causal Inference"
+    "page_count": 18,
+    "citations": 7,
+    "year": 2021,
+    "filename": "math/math_046.pdf",
+    "id": "01a973833d8c3b4c7fe3e9069aaa0f6b79ebc24f",
+    "title": "An improvement of convergence rate in the local limit theorem for integral-valued random variables"
   },
   {
     "domain": "math",
     "page_count": 24,
     "citations": 14,
     "year": 2021,
-    "filename": "math/math_056.pdf",
+    "filename": "math/math_047.pdf",
     "id": "002e35e3096b5d8dea0808d56e179370b36ae2a1",
     "title": "Classification of 7-dimensional solvable Lie algebras having 5-dimensional nilradicals"
   },
   {
     "domain": "math",
-    "page_count": 24,
+    "page_count": 16,
+    "citations": 12,
+    "year": 2022,
+    "filename": "math/math_048.pdf",
+    "id": "010183576b7fd4120ee606627b906eaacb91c0fb",
+    "title": "Finite-Time Synchronization Analysis for BAM Neural Networks with Time-Varying Delays by Applying the Maximum-Value Approach with New Inequalities"
+  },
+  {
+    "domain": "math",
+    "page_count": 20,
+    "citations": 23,
+    "year": 2022,
+    "filename": "math/math_049.pdf",
+    "id": "012c678f2ef1b6771969457db58b99b553192834",
+    "title": "Augmented Reality Learning in Mathematics Education: A Systematic Literature Review"
+  },
+  {
+    "domain": "math",
+    "page_count": 121,
+    "citations": 7,
+    "year": 2021,
+    "filename": "math/math_050.pdf",
+    "id": "0207919a8113a6f14d06d6582f780b08e691ecd6",
+    "title": "A non-structural fuzzy decision method developed for organic Rankine cycles used in liquid-dominated geothermal fields of medium/high temperature"
+  },
+  {
+    "domain": "math",
+    "page_count": 12,
+    "citations": 22,
+    "year": 2021,
+    "filename": "math/math_051.pdf",
+    "id": "009fff1386d7c8f529d8ad41c8ed8407bd65c8b8",
+    "title": "Novel Intuitionistic-Based Interval Type-2 Fuzzy Similarity Measures With Application to Clustering"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 12,
+    "year": 2023,
+    "filename": "math/math_052.pdf",
+    "id": "017114e97324d73a727af8c7c923953be8f6daca",
+    "title": "Algorithmically Effective Differentially Private Synthetic Data"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 6,
+    "year": 2023,
+    "filename": "math/math_053.pdf",
+    "id": "007d239b1c0466b2a7e014059126d58bbf873180",
+    "title": "Explainability of Probabilistic Bisimilarity Distances for Labelled Markov Chains"
+  },
+  {
+    "domain": "math",
+    "page_count": 10,
+    "citations": 6,
+    "year": 2022,
+    "filename": "math/math_054.pdf",
+    "id": "02948f8adce5677fe4c46fbe51d2368107f3842a",
+    "title": "Infinite Turing Bifurcations in Chains of Van der Pol Systems"
+  },
+  {
+    "domain": "math",
+    "page_count": 16,
+    "citations": 31,
+    "year": 2022,
+    "filename": "math/math_055.pdf",
+    "id": "005463dd34b6075ae446cd812b5efc04175fc592",
+    "title": "Matrix Completion via Non-Convex Relaxation and Adaptive Correlation Learning"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 6,
+    "year": 2021,
+    "filename": "math/math_056.pdf",
+    "id": "0085dca4271366a9f928367eaf8af0d0d0c20168",
+    "title": "Biochemical and phylogenetic networks-I: hypertrees and corona products"
+  },
+  {
+    "domain": "math",
+    "page_count": 34,
+    "citations": 15,
+    "year": 2021,
+    "filename": "math/math_057.pdf",
+    "id": "024d2fd43047aaaa8eb7ec6b3097c238e444d50b",
+    "title": "Parameterized Complexity of Elimination Distance to First-Order Logic Properties"
+  },
+  {
+    "domain": "math",
+    "page_count": 12,
+    "citations": 56,
+    "year": 2022,
+    "filename": "math/math_058.pdf",
+    "id": "007257c7a8caf7260f756324ba37e47f363ca3c0",
+    "title": "One-Shot Adaptation of GAN in Just One CLIP"
+  },
+  {
+    "domain": "math",
+    "page_count": 16,
     "citations": 5,
     "year": 2023,
-    "filename": "math/math_057.pdf",
-    "id": "01037cd9463e6003fd46ccf3209fcd3cc4cc1fdc",
-    "title": "An efficient solver for ASP(Q)"
-  },
-  {
-    "domain": "math",
-    "page_count": 45,
-    "citations": 20,
-    "year": 2021,
-    "filename": "math/math_058.pdf",
-    "id": "012c837047873bc41a85213fb2a58e10781e7a77",
-    "title": "The isoperimetric problem on Riemannian manifolds via Gromov-Hausdorff asymptotic analysis"
-  },
-  {
-    "domain": "math",
-    "page_count": 36,
-    "citations": 16,
-    "year": 2021,
     "filename": "math/math_059.pdf",
-    "id": "020a5a4b0f593d4b283c545ec78c6b3ae7aca6ff",
-    "title": "Graph-Based Equilibrium Metrics for Dynamic Supply\u2013Demand Systems With Applications to Ride-sourcing Platforms"
+    "id": "0092b76176dbd19527f595c2cf1cea8e1126be9c",
+    "title": "Neural Networks at a Fraction with Pruned Quaternions"
+  },
+  {
+    "domain": "math",
+    "page_count": 12,
+    "citations": 5,
+    "year": 2022,
+    "filename": "math/math_060.pdf",
+    "id": "002f4b51b9883390d798a53e9d91fdcfc35cf443",
+    "title": "The complex-type Padovan-p sequences"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 6,
+    "year": 2023,
+    "filename": "math/math_061.pdf",
+    "id": "00a9c29de9acb96e6a21efebff90590db3a7157b",
+    "title": "Addressing Mathematics Anxiety: A Case Study in a High School in Brazil"
+  },
+  {
+    "domain": "math",
+    "page_count": 15,
+    "citations": 5,
+    "year": 2023,
+    "filename": "math/math_062.pdf",
+    "id": "01bd4bb682d478e123fd857ae13e9f98e6bfec8b",
+    "title": "A note on the convergence of deterministic gradient sampling in nonsmooth optimization"
+  },
+  {
+    "domain": "math",
+    "page_count": 11,
+    "citations": 18,
+    "year": 2021,
+    "filename": "math/math_063.pdf",
+    "id": "0013a0f730b2a81abd6d694cd95be93d322e1df3",
+    "title": "Assessing the Performance of Deep Learning Algorithms for Short-Term Surface Water Quality Prediction"
+  },
+  {
+    "domain": "math",
+    "page_count": 9,
+    "citations": 45,
+    "year": 2022,
+    "filename": "math/math_064.pdf",
+    "id": "02a4e863d7b45f304671ab846c84a5330048d32c",
+    "title": "Modeling how antibody responses may determine the efficacy of COVID-19 vaccines"
+  },
+  {
+    "domain": "math",
+    "page_count": 17,
+    "citations": 5,
+    "year": 2022,
+    "filename": "math/math_065.pdf",
+    "id": "00ad91a9a8844ab73eb7ab4e0c099116d8f8e399",
+    "title": "The Nature of Prospective Mathematics Teachers\u2019 Designed Manipulatives and their Potential as Anchors for Conceptual and Pedagogical Knowledge"
+  },
+  {
+    "domain": "math",
+    "page_count": 10,
+    "citations": 33,
+    "year": 2022,
+    "filename": "math/math_066.pdf",
+    "id": "01013f563006c88d91b833335c64691162c13c6d",
+    "title": "Tighter Expected Generalization Error Bounds via Convexity of Information Measures"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 5,
+    "year": 2023,
+    "filename": "math/math_067.pdf",
+    "id": "0133a5758393f9287d7614b80a65b29258e44448",
+    "title": "Three-Way Fuzzy Sets and Their Applications (III)"
+  },
+  {
+    "domain": "math",
+    "page_count": 56,
+    "citations": 9,
+    "year": 2021,
+    "filename": "math/math_068.pdf",
+    "id": "01fd245937d4b4b05d31176b6ef8e679b648065b",
+    "title": "Dynamical (In)Stability of Ricci-flat ALE metrics along the Ricci flow"
+  },
+  {
+    "domain": "math",
+    "page_count": 12,
+    "citations": 22,
+    "year": 2021,
+    "filename": "math/math_069.pdf",
+    "id": "0052d6933edc12b1443acf3aefa4fbeb3d299667",
+    "title": "Redesigning Mathematical Curriculum for Blended Learning"
+  },
+  {
+    "domain": "math",
+    "page_count": 18,
+    "citations": 12,
+    "year": 2021,
+    "filename": "math/math_070.pdf",
+    "id": "006c2b3e78707e52f87f9ec9ef30b7f74c48c3ef",
+    "title": "Agency\u2013structure dynamics in an indigenous mathematics education community in times of an existential crisis in education"
+  },
+  {
+    "domain": "math",
+    "page_count": 14,
+    "citations": 5,
+    "year": 2021,
+    "filename": "math/math_071.pdf",
+    "id": "01396db487bbfaa9cba5e8e4a7d678c687f14826",
+    "title": "On two problems concerning Eberlein compacta"
+  },
+  {
+    "domain": "math",
+    "page_count": 22,
+    "citations": 5,
+    "year": 2024,
+    "filename": "math/math_072.pdf",
+    "id": "0118775af1f7f7b931f50720c823fa2e36a239bb",
+    "title": "Convergence of Decentralized Actor-Critic Algorithm in General\u2013Sum Markov Games"
+  },
+  {
+    "domain": "math",
+    "page_count": 19,
+    "citations": 11,
+    "year": 2023,
+    "filename": "math/math_073.pdf",
+    "id": "005ce2a1c64a21f2b47633b4d00f0bbf739a8fd9",
+    "title": "A block Toeplitz preconditioner for all-at-once systems from linear wave equations"
+  },
+  {
+    "domain": "math",
+    "page_count": 17,
+    "citations": 18,
+    "year": 2021,
+    "filename": "math/math_074.pdf",
+    "id": "0095afb2356bb3adce6046fb92b0ba19288f076d",
+    "title": "Multiterm boundary value problem of Caputo fractional differential equations of variable order"
+  },
+  {
+    "domain": "math",
+    "page_count": 9,
+    "citations": 5,
+    "year": 2021,
+    "filename": "math/math_075.pdf",
+    "id": "0152539b1a07f499b580197504a1cff0ec4f56ca",
+    "title": "Applications of the Sub Equation Method for the High Dimensional Nonlinear Evolution Equation"
+  },
+  {
+    "domain": "math",
+    "page_count": 61,
+    "citations": 10,
+    "year": 2022,
+    "filename": "math/math_076.pdf",
+    "id": "007402ee28e86c2c00e2492d88cd85f0d9b9e8a4",
+    "title": "Simulation of Heat Conduction in Complex Domains of Multi-material Composites using a Meshless Method"
+  },
+  {
+    "domain": "math",
+    "page_count": 21,
+    "citations": 7,
+    "year": 2021,
+    "filename": "math/math_077.pdf",
+    "id": "01f33b44e67ae3b11da1d81a7dbd065ea4634546",
+    "title": "A simple consistent Bayes factor for testing the Kendall rank correlation coefficient"
+  },
+  {
+    "domain": "math",
+    "page_count": 21,
+    "citations": 6,
+    "year": 2023,
+    "filename": "math/math_078.pdf",
+    "id": "0104949e68695546c6987dc4e457e5108eda0712",
+    "title": "Sample-Efficient Learning of POMDPs with Multiple Observations In Hindsight"
+  },
+  {
+    "domain": "math",
+    "page_count": 17,
+    "citations": 51,
+    "year": 2023,
+    "filename": "math/math_079.pdf",
+    "id": "00fa84ae6e881a0090c7c1a9241e06d4bbead3fe",
+    "title": "Statistical Foundations of Prior-Data Fitted Networks"
+  },
+  {
+    "domain": "math",
+    "page_count": 19,
+    "citations": 7,
+    "year": 2023,
+    "filename": "math/math_080.pdf",
+    "id": "000be9ea853cd8ffe799a0a745888979605a0e85",
+    "title": "Fractional order mathematical modeling of lumpy skin disease"
+  },
+  {
+    "domain": "math",
+    "page_count": 28,
+    "citations": 11,
+    "year": 2021,
+    "filename": "math/math_081.pdf",
+    "id": "01e207d4937fc5431adbc79aa2cade0352ceba39",
+    "title": "Invariant submanifolds of conformal symplectic dynamics"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 23,
+    "year": 2021,
+    "filename": "math/math_082.pdf",
+    "id": "003969c004b22b55a042bdb23334a2b5a155807a",
+    "title": "Sobolev norms explosion for the cubic NLS on irrational tori"
+  },
+  {
+    "domain": "math",
+    "page_count": 6,
+    "citations": 13,
+    "year": 2022,
+    "filename": "math/math_083.pdf",
+    "id": "01f75d42c6c5f4ed55890a7cc45cf8a6b7cd0195",
+    "title": "Unsupervised Detection of ASH Dieback Disease (Hymenoscyphus Fraxineus) Using Diffusion-Based Hyperspectral Image Clustering"
+  },
+  {
+    "domain": "math",
+    "page_count": 14,
+    "citations": 19,
+    "year": 2023,
+    "filename": "math/math_084.pdf",
+    "id": "026cb4e534f50b6f202066da172fcca7807c00ef",
+    "title": "Selected technical issues of deep neural networks for image classification purposes"
+  },
+  {
+    "domain": "math",
+    "page_count": 12,
+    "citations": 7,
+    "year": 2023,
+    "filename": "math/math_085.pdf",
+    "id": "01312285dd7b00e63a5b6ad3b15566737eeea2e1",
+    "title": "On LQ optimization problem subject to fractional order irregular singular systems"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 9,
+    "year": 2021,
+    "filename": "math/math_086.pdf",
+    "id": "007c077af85719f16cf40c3f21c366a29a240026",
+    "title": "Sturm attractors for fully nonlinear parabolic equations"
+  },
+  {
+    "domain": "math",
+    "page_count": 56,
+    "citations": 9,
+    "year": 2022,
+    "filename": "math/math_087.pdf",
+    "id": "0290a858b1b114975bdcda6bc2b8e83c5de724a3",
+    "title": "An Invitation to Higher Arity Science"
+  },
+  {
+    "domain": "math",
+    "page_count": 18,
+    "citations": 15,
+    "year": 2021,
+    "filename": "math/math_088.pdf",
+    "id": "008e010b7bbc12e0d5ef58844540ea4ab4397472",
+    "title": "The critical two-point function for long-range percolation on the hierarchical lattice"
+  },
+  {
+    "domain": "math",
+    "page_count": 10,
+    "citations": 21,
+    "year": 2021,
+    "filename": "math/math_089.pdf",
+    "id": "00f0ec58d0261b2109abe900d3f70ee1a8b0a1f0",
+    "title": "Identify Influential Spreaders in Asymmetrically Interacting Multiplex Networks"
+  },
+  {
+    "domain": "math",
+    "page_count": 16,
+    "citations": 110,
+    "year": 2021,
+    "filename": "math/math_090.pdf",
+    "id": "02a7bb84d95510dd1e249f83adde358b22920353",
+    "title": "The future of mathematics education since COVID-19: humans-with-media or humans-with-non-living-things"
+  },
+  {
+    "domain": "math",
+    "page_count": 21,
+    "citations": 11,
+    "year": 2021,
+    "filename": "math/math_091.pdf",
+    "id": "02489883085c4cdd9e405a8be28396e678af40cc",
+    "title": "Rough q-Rung Orthopair Fuzzy Sets and Their Applications in Decision-Making"
+  },
+  {
+    "domain": "math",
+    "page_count": 23,
+    "citations": 9,
+    "year": 2022,
+    "filename": "math/math_092.pdf",
+    "id": "005f2b2cd12f76d02ef6dffb2134976437940b89",
+    "title": "The Derivatives of Sinkhorn-Knopp Converge"
+  },
+  {
+    "domain": "math",
+    "page_count": 15,
+    "citations": 12,
+    "year": 2022,
+    "filename": "math/math_093.pdf",
+    "id": "019cb4bb689c23254ba9149e03ad8c89c8957b91",
+    "title": "Intelligent Trajectory Design for RIS-NOMA Aided Multi-Robot Communications"
+  },
+  {
+    "domain": "math",
+    "page_count": 33,
+    "citations": 20,
+    "year": 2022,
+    "filename": "math/math_094.pdf",
+    "id": "00cbba5067c7160f0a92103df7071f0afd2ef07a",
+    "title": "Generalized Ricci Solitons of Three-Dimensional Lorentzian Lie Groups Associated Canonical Connections and Kobayashi-Nomizu Connections"
+  },
+  {
+    "domain": "math",
+    "page_count": 26,
+    "citations": 15,
+    "year": 2021,
+    "filename": "math/math_095.pdf",
+    "id": "009332e5ed0660fc28a947441e90341b3994ac39",
+    "title": "Deterministic Identification Over Poisson Channels"
+  },
+  {
+    "domain": "math",
+    "page_count": 49,
+    "citations": 14,
+    "year": 2021,
+    "filename": "math/math_096.pdf",
+    "id": "029fa816762c5934ac1109a0c63bd7a655737f17",
+    "title": "Prandtl\u2013Batchelor Flows on a Disk"
+  },
+  {
+    "domain": "math",
+    "page_count": 35,
+    "citations": 19,
+    "year": 2022,
+    "filename": "math/math_097.pdf",
+    "id": "02c43af04431f438eabc2fad3b8b02e146c34456",
+    "title": "Assumption-Lean Cox Regression"
+  },
+  {
+    "domain": "math",
+    "page_count": 6,
+    "citations": 15,
+    "year": 2022,
+    "filename": "math/math_098.pdf",
+    "id": "01e53f0b6789f77fca4c0cd831201465314ed240",
+    "title": "Classification of Hyperspectral Images Using SVM with Shape-Adaptive Reconstruction and Smoothed Total Variation"
+  },
+  {
+    "domain": "math",
+    "page_count": 29,
+    "citations": 12,
+    "year": 2021,
+    "filename": "math/math_099.pdf",
+    "id": "015e0facbc98c19e6ed76094005152310268adf6",
+    "title": "Anomalous symmetries of classifiable C*-algebras"
   }
 ]
