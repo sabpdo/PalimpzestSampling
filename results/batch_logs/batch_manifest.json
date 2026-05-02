@@ -1235,5 +1235,74 @@
     "status_file": "results/batch_logs/queue_1777552504999_seed42_cartesian_prefix_natural.status",
     "started_at_epoch_s": 1777552505.004705,
     "return_code": 0
+  },
+  {
+    "job_id": "1777577138718",
+    "command": "/Users/sabrinado/PalimpzestSampling/.venv/bin/python3.12 scripts/run_sentinel_sampling_ab.py --papers papers --features-csv papers/paper_features.csv --train-n 4 --budgets 2 4 --seed 42 --strata 4 --k 2 --j 1 --strata-composition cartesian --stratify-features word_count section_count avg_sentence_length figure_count table_count complexity_score domain --train-selection prefix --train-selection-strata 8 --train-selection-features word_count section_count avg_sentence_length figure_count table_count complexity_score domain --train-skew natural --eval-n 6 --max-workers 2 --output-csv papers/ab_results_smoke_seed42_cartesian_prefix_natural.csv --fields-json '[\n  {\n    \"name\": \"primary_contribution\",\n    \"type\": \"str\",\n    \"desc\": \"Main contribution in one sentence.\"\n  }\n]'",
+    "output_csv": "papers/ab_results_smoke_seed42_cartesian_prefix_natural.csv",
+    "budgets": [
+      2,
+      4
+    ],
+    "train_n": 4,
+    "eval_n": 6,
+    "strata": 4,
+    "k": 2,
+    "j": 1,
+    "seed": 42,
+    "strata_composition": "cartesian",
+    "stratify_features": [
+      "word_count",
+      "section_count",
+      "avg_sentence_length",
+      "figure_count",
+      "table_count",
+      "complexity_score",
+      "domain"
+    ],
+    "train_selection": "prefix",
+    "train_skew": "natural",
+    "history_imported": true,
+    "state": "imported",
+    "pid": 32569,
+    "log_file": "results/batch_logs/queue_1777577138718_seed42_cartesian_prefix_natural.log",
+    "status_file": "results/batch_logs/queue_1777577138718_seed42_cartesian_prefix_natural.status",
+    "started_at_epoch_s": 1777577138.7342222,
+    "return_code": 0
+  },
+  {
+    "job_id": "1777577145806",
+    "command": "/Users/sabrinado/PalimpzestSampling/.venv/bin/python3.12 scripts/run_sentinel_sampling_ab.py --papers papers --features-csv papers/paper_features.csv --train-n 20 --budgets 3 5 7 10 --seed 42 --strata 8 --k 6 --j 4 --strata-composition cartesian --stratify-features word_count section_count avg_sentence_length figure_count table_count complexity_score domain --train-selection prefix --train-selection-strata 8 --train-selection-features word_count section_count avg_sentence_length figure_count table_count complexity_score domain --train-skew natural --eval-n 80 --max-workers 8 --output-csv papers/ab_results_worst_case_seed42_cartesian_prefix_natural.csv --fields-json '[\n  {\n    \"name\": \"primary_contribution\",\n    \"type\": \"str\",\n    \"desc\": \"The single most important technical contribution of the paper in one sentence.\"\n  },\n  {\n    \"name\": \"methodology\",\n    \"type\": \"str\",\n    \"desc\": \"The core method or approach used (e.g. algorithm name, experimental design, proof technique).\"\n  },\n  {\n    \"name\": \"domain\",\n    \"type\": \"str\",\n    \"desc\": \"The research domain: one of '\"'\"'cs'\"'\"', '\"'\"'biomedical'\"'\"', '\"'\"'math'\"'\"', or '\"'\"'physics'\"'\"'.\"\n  },\n  {\n    \"name\": \"uses_experiments\",\n    \"type\": \"bool\",\n    \"desc\": \"True if the paper includes empirical experiments or evaluations, False if purely theoretical.\"\n  }\n]'",
+    "output_csv": "papers/ab_results_worst_case_seed42_cartesian_prefix_natural.csv",
+    "budgets": [
+      3,
+      5,
+      7,
+      10
+    ],
+    "train_n": 20,
+    "eval_n": 80,
+    "strata": 8,
+    "k": 6,
+    "j": 4,
+    "seed": 42,
+    "strata_composition": "cartesian",
+    "stratify_features": [
+      "word_count",
+      "section_count",
+      "avg_sentence_length",
+      "figure_count",
+      "table_count",
+      "complexity_score",
+      "domain"
+    ],
+    "train_selection": "prefix",
+    "train_skew": "natural",
+    "history_imported": false,
+    "state": "running",
+    "pid": 41116,
+    "log_file": "results/batch_logs/queue_1777577145806_seed42_cartesian_prefix_natural.log",
+    "status_file": "results/batch_logs/queue_1777577145806_seed42_cartesian_prefix_natural.status",
+    "started_at_epoch_s": 1777612923.498975
   }
 ]

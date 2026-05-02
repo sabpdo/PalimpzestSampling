@@ -1,0 +1,26 @@
+{
+  "generated_at_utc": "2026-05-01T07:53:22.132136+00:00",
+  "repo_root": "/Users/sabrinado/PalimpzestSampling",
+  "cases_requested": 4,
+  "cases_manifested": 4,
+  "ab_runs_completed": 8,
+  "failures": [],
+  "ab_settings": {
+    "train_n": 6,
+    "eval_n": 16,
+    "budgets": [
+      2,
+      4,
+      8
+    ],
+    "exp_seeds": [
+      42,
+      43
+    ],
+    "strata": 8,
+    "k": 4,
+    "j": 2,
+    "max_workers": 2,
+    "fields_json": "[{\"name\": \"primary_contribution\", \"type\": \"str\", \"desc\": \"Main contribution in one concise sentence.\"}, {\"name\": \"methodology\", \"type\": \"str\", \"desc\": \"Core method or approach used in the paper.\"}, {\"name\": \"domain\", \"type\": \"str\", \"desc\": \"One of cs, biomedical, math, physics.\"}, {\"name\": \"uses_experiments\", \"type\": \"bool\", \"desc\": \"True if empirical experiments are reported.\"}]"
+  }
+}
