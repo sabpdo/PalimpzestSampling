@@ -178,7 +178,7 @@ rm -f results/batch_logs/queue_*.status
 
 ---
 
-## 8) Notes for graders/reviewers
+## 8) Notes for reviewers
 
 - All experiments are paired random-vs-stratified under matched settings.
 - P-values are two-sided sign tests over paired deltas (see appendix p-value method note).
