@@ -2,7 +2,14 @@
 
 ## Prerequisite: `.env` for runs/history
 
-Before launching the UI, create a `.env` file in the repo root with the API keys/env vars used by your model providers and experiment logging setup.
+Before launching the UI, create a `.env` file in the repo root with provider API keys and history/logging env vars.
+
+At minimum for run history persistence, include:
+```bash
+export PALIMPZEST_HISTORY_DB_URL="sqlite:///papers/experiment_history.sqlite3"
+```
+
+You should also include your model provider keys (for example `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY`) in the same `.env`.
 
 Why this matters:
 - the UI can load prior run history/state from experiment outputs,
