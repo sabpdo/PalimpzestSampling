@@ -1,6 +1,0 @@
-Feature axis,Mean Δ optimization_cost,Mean Δ total_cost,Mean Δ quality_error
-avg_sentence_length,-0.0904,+0.4466,-0.0067
-complexity_score,-0.0334,-0.5723,-0.0112
-figure_count,-0.3767,-1.1302,-0.0112
-section_count,-0.1169,-0.1714,-0.0022
-table_count,+2.7486,+3.1450,+0.0045

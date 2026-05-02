@@ -1,0 +1,3 @@
+run,quality_metric,mean_quality_delta,mean_runtime_delta_s,mean_runtime_speedup_pct,mean_cost_delta,quality_win_rate,runtime_win_rate,cost_win_rate
+run1_baseline,mean_sentinel_quality,0.0,0.3939526081085205,-1.4193265202444294,0.0,0.0,0.3333333333333333,0.0
+run2_stronger_strat,mean_sentinel_quality,0.0,1.0972626209259058,-3.7612749143237796,0.0,0.0,0.0,0.0

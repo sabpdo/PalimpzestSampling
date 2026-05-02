@@ -1,5 +1,0 @@
-metric,direction_better_for_stratified,n_pairs,stratified_wins,random_wins,ties,win_rate_excluding_ties,mean_delta,median_delta,std_delta,sign_test_p_value_two_sided,is_significant_p_lt_0_05
-mean_sentinel_quality,higher,24,2,0,22,1.0,0.02236111111111111,0.0,0.08747935114074887,0.5,False
-mean_plan_quality,higher,24,2,2,20,0.5,0.000558035714285717,0.0,0.14560922888550853,1.0,False
-total_time_s,lower,24,15,9,0,0.625,-133.55141165852547,-0.7541201114654541,724.7022542131323,0.30745625495910645,False
-total_cost,lower,24,4,0,20,1.0,-0.16648935624999997,0.0,0.5050393987099341,0.125,False
