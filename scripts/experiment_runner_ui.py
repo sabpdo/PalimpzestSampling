@@ -58,6 +58,24 @@ def parse_text_list(raw: str) -> list[str]:
     return [v.strip() for v in raw.replace(",", " ").split() if v.strip()]
 
 
+def _pid_is_alive(pid_val: object) -> bool:
+    try:
+        pid = int(pid_val)
+        if pid <= 0:
+            return False
+    except (TypeError, ValueError):
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except Exception:
+        return False
+
+
 DEFAULT_FIELDS_JSON = json.dumps(
     [
         {
@@ -102,6 +120,33 @@ QUICK_GRAPH_FIELDS_JSON = json.dumps(
     ],
     indent=2,
 )
+
+MEDIUM_FIELDS_JSON = json.dumps(
+    [
+        {
+            "name": "primary_contribution",
+            "type": "str",
+            "desc": "Main contribution in one concise sentence.",
+        },
+        {
+            "name": "methodology",
+            "type": "str",
+            "desc": "Core method or approach used in the paper.",
+        },
+        {
+            "name": "uses_experiments",
+            "type": "bool",
+            "desc": "True if empirical experiments are reported.",
+        },
+    ],
+    indent=2,
+)
+
+FIELD_PRESETS: dict[str, str] = {
+    "Easy (1 field, fast smoke test)": QUICK_GRAPH_FIELDS_JSON,
+    "Medium (3 fields, balanced)": MEDIUM_FIELDS_JSON,
+    "Hard (3 strict fields, report-grade)": DEFAULT_FIELDS_JSON,
+}
 
 FIGSIZE_LINE = (4.8, 2.8)
 FIGSIZE_BAR = (4.8, 2.8)
@@ -234,7 +279,7 @@ def _apply_quick_graph_test_defaults() -> None:
     st.session_state["train_skew"] = "natural"
     st.session_state["papers"] = "papers"
     st.session_state["features_csv"] = "papers/paper_features.csv"
-    st.session_state["output_csv"] = "papers/ab_results_smoke.csv"
+    st.session_state["output_csv"] = "sampling-project/results/sampling-results/runs/ab_results_smoke.csv"
     st.session_state["train_n"] = 4
     st.session_state["eval_n_raw"] = "6"
     st.session_state["budgets_raw"] = "2 4"
@@ -245,38 +290,10 @@ def _apply_quick_graph_test_defaults() -> None:
     st.session_state["j"] = 1
     st.session_state["strata_composition"] = "cartesian"
     st.session_state["stratify_features"] = STRAT_FEATURE_COLUMNS.copy()
-    st.session_state["models_raw"] = ""
     st.session_state["random_only"] = False
     st.session_state["stratified_only"] = False
     st.session_state["no_progress"] = False
     st.session_state["fields_json_raw"] = QUICK_GRAPH_FIELDS_JSON
-
-
-def _apply_worst_case_stress_defaults() -> None:
-    """
-    Configure a low-budget, higher-heterogeneity stress setup where random
-    sampling is more likely to be unstable than stratified sampling.
-    """
-    st.session_state["train_selection"] = "prefix"
-    st.session_state["train_skew"] = "natural"
-    st.session_state["papers"] = "papers"
-    st.session_state["features_csv"] = "papers/paper_features.csv"
-    st.session_state["output_csv"] = "papers/ab_results_worst_case.csv"
-    st.session_state["train_n"] = 20
-    st.session_state["eval_n_raw"] = "80"
-    st.session_state["budgets_raw"] = "3 5 7 10"
-    st.session_state["seed"] = 42
-    st.session_state["strata"] = 8
-    st.session_state["max_workers_raw"] = "8"
-    st.session_state["k"] = 6
-    st.session_state["j"] = 4
-    st.session_state["strata_composition"] = "cartesian"
-    st.session_state["stratify_features"] = STRAT_FEATURE_COLUMNS.copy()
-    st.session_state["models_raw"] = ""
-    st.session_state["random_only"] = False
-    st.session_state["stratified_only"] = False
-    st.session_state["no_progress"] = False
-    st.session_state["fields_json_raw"] = DEFAULT_FIELDS_JSON
 
 
 def _init_session_defaults() -> None:
@@ -289,23 +306,26 @@ def _init_session_defaults() -> None:
         "train_skew_domain_ratios": "",
         "papers": "papers",
         "features_csv": "papers/paper_features.csv",
-        "output_csv": "papers/ab_results.csv",
+        "output_csv": "sampling-project/results/sampling-results/runs/ab_results.csv",
         "train_n": 20,
         "eval_n_raw": "20",
         "budgets_raw": "5 10 15 20",
         "seed": 42,
         "strata": 8,
-        "max_workers_raw": "64",
+        "max_workers_raw": "2",
+        "models_raw": "",
         "k": 6,
         "j": 4,
-        "models_raw": "",
         "strata_composition": "cartesian",
         "stratify_features": STRAT_FEATURE_COLUMNS.copy(),
         "random_only": False,
         "stratified_only": False,
         "no_progress": False,
         "fields_json_raw": DEFAULT_FIELDS_JSON,
-        "queue_max_parallel": 1,
+        "queue_max_parallel": 2,
+        "fields_preset_name": "Hard (3 strict fields, report-grade)",
+        "fields_preset_last_applied": "Hard (3 strict fields, report-grade)",
+        "output_append_timestamp": True,
     }
     for k, v in defaults.items():
         st.session_state.setdefault(k, v)
@@ -1285,6 +1305,11 @@ def _job_state(repo_root: Path, row: dict) -> str:
             status_file = str(row.get("status_file", "") or "").strip()
             if status_file and (repo_root / status_file).is_file():
                 return "finished"
+            # If the child shell process died before writing status_file,
+            # still treat it as finished so it can be imported as a failed run.
+            pid = row.get("pid")
+            if pid is not None and not _pid_is_alive(pid):
+                return "finished"
         if state == "finished" and row.get("history_imported"):
             return "imported"
         return state
@@ -1559,29 +1584,40 @@ def _maybe_start_queued_jobs(repo_root: Path, max_parallel: int = 1) -> tuple[in
     return started, messages
 
 
+def _purge_queue_artifacts(repo_root: Path, row: dict) -> None:
+    for key in ("log_file", "status_file"):
+        rel = str(row.get(key, "") or "").strip()
+        if not rel:
+            continue
+        p = repo_root / rel
+        if p.is_file():
+            p.unlink(missing_ok=True)
+
+
 def _sync_completed_batch_runs(repo_root: Path) -> tuple[int, int]:
     rows = _load_batch_manifest(repo_root)
     if not rows:
         return 0, 0
     imported = 0
     pending = 0
+    kept_rows: list[dict] = []
     for row in rows:
         state = _job_state(repo_root, row)
         row["state"] = state
-        if state == "imported":
-            continue
-        if state == "queued":
+        if state in {"queued", "running"}:
+            kept_rows.append(row)
             pending += 1
             continue
         status_path = repo_root / str(row.get("status_file", ""))
-        if not status_path.is_file():
-            pending += 1
-            continue
-        try:
-            return_code = int(status_path.read_text(encoding="utf-8").strip())
-        except Exception:
-            pending += 1
-            continue
+        if status_path.is_file():
+            try:
+                return_code = int(status_path.read_text(encoding="utf-8").strip())
+            except Exception:
+                return_code = 1
+        else:
+            # No status file means the background wrapper likely died early.
+            # Record as failed so it is visible in History and leaves the queue.
+            return_code = 1
         _save_run_history(
             repo_root,
             command=str(row.get("command", "")),
@@ -1604,8 +1640,9 @@ def _sync_completed_batch_runs(repo_root: Path) -> tuple[int, int]:
         row["history_imported"] = True
         row["return_code"] = return_code
         row["state"] = "imported"
+        _purge_queue_artifacts(repo_root, row)
         imported += 1
-    _save_batch_manifest(repo_root, rows)
+    _save_batch_manifest(repo_root, kept_rows)
     return imported, pending
 
 
@@ -1805,7 +1842,7 @@ def _render_history_tab(repo_root: Path) -> None:
     selected_run_from_table: int | None = None
     table_event = st.dataframe(
         runs_df,
-        width="stretch",
+        width="content",
         hide_index=True,
         on_select="rerun",
         selection_mode="single-row",
@@ -1833,7 +1870,7 @@ def _render_history_tab(repo_root: Path) -> None:
         )
         return
     st.markdown("**Selected run rows**")
-    st.dataframe(rows_df, width="stretch", hide_index=True)
+    st.dataframe(rows_df, width="content", hide_index=True)
     if {"sample_budget", "mode", "total_time_s", "run_id"}.issubset(rows_df.columns):
         fig, ax = plt.subplots(figsize=(6.2, 3.4))
         for (run_id, mode), grp in rows_df.dropna(subset=["total_time_s"]).groupby(["run_id", "mode"], dropna=False):
@@ -1872,7 +1909,7 @@ def _render_history_tab(repo_root: Path) -> None:
                 if run_match.empty:
                     st.warning("Run metadata not found.")
                 else:
-                    st.dataframe(run_match, width="stretch", hide_index=True)
+                    st.dataframe(run_match, width="content", hide_index=True)
                     _render_results_analysis(repo_root, output_csv or None)
                 if st.button("Close popup"):
                     st.session_state["history_modal_run_id"] = None
@@ -1885,7 +1922,7 @@ def _render_history_tab(repo_root: Path) -> None:
             if run_match.empty:
                 st.warning("Run metadata not found.")
             else:
-                st.dataframe(run_match, width="stretch", hide_index=True)
+                st.dataframe(run_match, width="content", hide_index=True)
                 _render_results_analysis(repo_root, output_csv or None)
             if st.button("Close run report"):
                 st.session_state["history_modal_run_id"] = None
@@ -2815,7 +2852,7 @@ def _render_stress_dataset_builder(repo_root: Path, *, widget_key_prefix: str) -
                 st.session_state["stress_eval_last_summary"] = summary
                 st.session_state["papers"] = summary["papers_dir_rel"]
                 st.session_state["features_csv"] = summary["features_csv_rel"]
-                st.session_state["output_csv"] = "papers/ab_results_strat_bench.csv"
+                st.session_state["output_csv"] = "sampling-project/results/sampling-results/runs/ab_results_strat_bench.csv"
                 if sync_eval_n:
                     st.session_state["eval_n_raw"] = str(int(n_docs))
                 st.success(
@@ -2861,7 +2898,7 @@ def _render_stratifier_bench_tab(repo_root: Path) -> None:
         except Exception as exc:
             st.warning(str(exc))
     st.code(
-        "python scripts/generate_stratifier_stress_dataset.py --output-dir papers/stratifier_stress_s42 "
+        "python scripts/generate_stratifier_stress_dataset.py --output-dir sampling-project/results/sampling-results/pools/stratifier_stress_s42 "
         "--seed 42 --n-docs 60 --preset rare_numeric_tail --stress-params-json params.json",
         language="bash",
     )
@@ -2980,9 +3017,6 @@ def main() -> None:
     if st.button("Use quick graph-test settings"):
         _apply_quick_graph_test_defaults()
         st.success("Applied quick graph-test settings (for plot testing only).")
-    if st.button("Use worst-case baseline stress settings"):
-        _apply_worst_case_stress_defaults()
-        st.success("Applied worst-case baseline stress settings (targeting low-budget heterogeneity).")
     st.caption("Quick graph-test settings are for smoke-testing plot generation only, not final experiments.")
     view = st.segmented_control(
         "View",
@@ -3077,6 +3111,17 @@ def main() -> None:
     if open_builder:
         _stress_eval_dialog(repo_root)
 
+    st.markdown("**Extraction fields** — define what to extract from each PDF. Each entry needs `name`, `type` (`str`, `bool`, `int`, `float`), and `desc`.")
+    selected_fields_preset = st.selectbox(
+        "Fields preset",
+        options=list(FIELD_PRESETS.keys()),
+        key="fields_preset_name",
+        help="Switching preset auto-populates Fields JSON below.",
+    )
+    if st.session_state.get("fields_preset_last_applied") != selected_fields_preset:
+        st.session_state["fields_json_raw"] = FIELD_PRESETS[selected_fields_preset]
+        st.session_state["fields_preset_last_applied"] = selected_fields_preset
+
     with st.form("runner"):
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -3151,9 +3196,9 @@ def main() -> None:
                 help="Minimum samples per operator before MAB pruning.",
             )
             models_raw = st.text_input(
-                "Available models (space/comma separated, optional)",
+                "Available models override (optional)",
                 key="models_raw",
-                help="Optional model allow-list; leave blank to use default auto-detected set.",
+                help="Space/comma list. If set, passes --available-models exactly as provided.",
             )
         with c5:
             strata_composition = st.selectbox(
@@ -3187,8 +3232,11 @@ def main() -> None:
                 key="no_progress",
                 help="Disable progress bars in script output.",
             )
-        st.markdown("---")
-        st.markdown("**Extraction fields** — define what to extract from each PDF. Each entry needs `name`, `type` (`str`, `bool`, `int`, `float`), and `desc`.")
+            output_append_timestamp = st.checkbox(
+                "Append timestamp to output filename",
+                key="output_append_timestamp",
+                help="Recommended: avoids overwriting previous runs with the same seed/config.",
+            )
         fields_json_raw = st.text_area(
             "Fields JSON",
             height=220,
@@ -3209,14 +3257,10 @@ def main() -> None:
     )
     if jobs:
         queued_n, running_n, _ = _queue_state_counts(repo_root, jobs)
-        imported_n = sum(1 for j in jobs if _job_state(repo_root, j) == "imported")
-        finished_n = sum(1 for j in jobs if _job_state(repo_root, j) == "finished")
-        total_n = len(jobs)
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Total queued ever", str(total_n))
-        c2.metric("Completed/imported", str(imported_n))
-        c3.metric("Finished (pending import)", str(finished_n))
-        c4.metric("Active", str(queued_n + running_n))
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Queued", str(queued_n))
+        c2.metric("Running", str(running_n))
+        c3.metric("Active queue jobs", str(queued_n + running_n))
         if running_n > 0:
             st.markdown("**Queue worker:** ⏳ running")
         elif queued_n > 0:
@@ -3225,11 +3269,11 @@ def main() -> None:
             st.markdown("**Queue worker:** idle")
         st.caption(f"Queue summary: {queued_n} queued, {running_n} running (max parallel={int(st.session_state.get('queue_max_parallel', 1))})")
         active_rows = []
-        recent_rows = []
         for job in jobs[-80:]:
             status = _job_state(repo_root, job)
             rec = {
                 "status": status,
+                "return_code": job.get("return_code"),
                 "job_id": job.get("job_id"),
                 "pid": job.get("pid"),
                 "started_at": _job_started_at_text(job),
@@ -3248,8 +3292,6 @@ def main() -> None:
             }
             if status in {"queued", "running"}:
                 active_rows.append(rec)
-            else:
-                recent_rows.append(rec)
         st.markdown("**Queued / Running**")
         if active_rows:
             active_df = pd.DataFrame(active_rows)
@@ -3271,7 +3313,7 @@ def main() -> None:
                         "output_csv",
                     ]
                 ],
-                width="stretch",
+                width="content",
                 hide_index=True,
             )
             running_for_progress = [j for j in jobs if _job_state(repo_root, j) == "running"]
@@ -3304,11 +3346,12 @@ def main() -> None:
                     st.json(sel[0], expanded=False)
         else:
             st.caption("No queued or running jobs right now.")
-        with st.expander("Show recent completed jobs", expanded=True):
-            if recent_rows:
-                st.dataframe(pd.DataFrame(recent_rows[-20:]), width="stretch", hide_index=True)
+        runs_df_preview = _load_history_runs(repo_root)
+        with st.expander("Show recent completed runs (history DB)", expanded=True):
+            if runs_df_preview.empty:
+                st.caption("No imported history rows yet.")
             else:
-                st.caption("No completed jobs yet.")
+                st.dataframe(runs_df_preview.head(20), width="content", hide_index=True)
     else:
         st.caption("No jobs yet.")
 
@@ -3395,9 +3438,11 @@ def main() -> None:
     st.code(" ".join(shlex.quote(part) for part in cmd), language="bash")
 
     manifest_rows = _load_batch_manifest(repo_root)
-    base_output = (output_csv.strip() or "results/manual_compare/queued_run.csv")
+    base_output = (output_csv.strip() or "sampling-project/results/sampling-results/manual_compare/queued_run.csv")
     out_path = Path(base_output)
     suffix = f"_seed{int(seed)}_{strata_composition}_{train_selection}_{train_skew}"
+    if output_append_timestamp:
+        suffix += "_" + time.strftime("%Y%m%d_%H%M%S")
     if out_path.suffix.lower() == ".csv":
         out_csv = str(out_path.with_name(f"{out_path.stem}{suffix}.csv"))
     else:

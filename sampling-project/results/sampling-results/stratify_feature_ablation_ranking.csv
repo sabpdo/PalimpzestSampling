@@ -1,0 +1,2 @@
+feature,file,mean_mean_sentinel_quality_delta,sum_abs_mean_sentinel_quality_delta,mean_total_cost_delta,sum_abs_total_cost_delta,mean_total_time_s_delta,sum_abs_total_time_s_delta,mean_optimization_cost_delta,sum_abs_optimization_cost_delta,mean_plan_execution_cost_delta,sum_abs_plan_execution_cost_delta
+"word_count,section_count,avg_sentence_length,figure_count,table_count,complexity_score,domain",/Users/sabrinado/PalimpzestSampling/papers/ab_results.csv,0.0,0.0,0.0,0.0,11.207038402557366,449.5852665901184,0.0,0.0,0.0,0.0

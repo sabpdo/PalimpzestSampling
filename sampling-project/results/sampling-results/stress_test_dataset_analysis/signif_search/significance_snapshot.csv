@@ -1,0 +1,5 @@
+metric,direction_better_for_stratified,n_pairs,wins,losses,ties,mean_delta,median_delta,p_value_sign_test_two_sided,significant_p_lt_0_05
+dq,higher,20,8,9,3,-0.0046875,0.0,1.0,False
+dplanq,higher,20,5,8,7,-0.010416666666666661,0.0,0.5810546875,False
+dtime,lower,20,14,6,0,-78.7379081249237,-61.75314152240753,0.11531829833984375,False
+dcost,lower,20,19,1,0,-1.4630496350000002,-1.6609288000000002,4.00543212890625e-05,True
