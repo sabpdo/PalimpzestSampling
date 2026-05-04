@@ -1,2 +1,9 @@
-# Core package install from this repo.
+# Editable Palimpzest install + core deps (see pyproject.toml).
 -e .
+
+# Experiment runner UI: scripts/experiment_runner_ui.py
+# Also satisfies Streamlit Community Cloud (repo-root requirements.txt).
+streamlit>=1.38.0
+matplotlib>=3.8.0
+sqlalchemy>=2.0.0
+psycopg[binary]>=3.2.0

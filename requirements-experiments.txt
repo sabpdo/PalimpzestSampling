@@ -1,7 +1,2 @@
-# Experiment/UI tools on top of the core package.
+# Local / CI experiments: same stack as the Streamlit UI + core package.
 -r requirements.txt
-streamlit>=1.38.0
-matplotlib>=3.8.0
-pandas>=2.1.1
-sqlalchemy>=2.0.0
-psycopg[binary]>=3.2.0

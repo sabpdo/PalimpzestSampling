@@ -2987,11 +2987,42 @@ def build_command(
     return cmd
 
 
+def _apply_streamlit_secrets_to_environ() -> None:
+    """Streamlit Community Cloud: copy dashboard Secrets into os.environ for os.getenv/subprocesses.
+
+    In the Cloud UI, paste TOML with the same names as your .env keys (flat string entries only).
+    Example::
+
+        OPENAI_API_KEY = "sk-..."
+        PALIMPZEST_HISTORY_DB_URL = "postgresql://..."
+        PALIMPZEST_RUN_BY = "streamlit-cloud"
+    """
+    try:
+        sec = st.secrets
+    except Exception:
+        return
+    try:
+        items = sec.items()
+    except Exception:
+        return
+    for key, val in items:
+        if not isinstance(key, str):
+            continue
+        if isinstance(val, str) and val.strip():
+            os.environ[key] = val.strip()
+        elif isinstance(val, dict):
+            for sk, sv in val.items():
+                if isinstance(sk, str) and isinstance(sv, str) and sv.strip():
+                    os.environ[sk] = sv.strip()
+
+
 def main() -> None:
     st.set_page_config(page_title="Palimpzest Experiment Runner", layout="wide")
     repo_root = Path(__file__).resolve().parents[1]
     # Ensure .env variables (including PALIMPZEST_HISTORY_DB_URL) are loaded for UI sessions.
     load_dotenv(repo_root / ".env", override=False)
+    # Cloud: no .env file; Streamlit dashboard Secrets → os.environ (overrides for keys present).
+    _apply_streamlit_secrets_to_environ()
     _init_session_defaults()
     migrated_runs = 0
     migrated_rows = 0
