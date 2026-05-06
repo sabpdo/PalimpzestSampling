@@ -1,0 +1,17 @@
+config,metric,n_pairs,wins,losses,ties,mean_delta,p_two_sided_sign
+promising3,dcost,10,4,6,0,0.05770749999999999,0.75390625
+promising3,dtime,10,4,6,0,-213.7232114315033,0.75390625
+promising3,dq,10,4,4,2,0.025,1.0
+promising3,dplanq,10,2,4,4,-0.016666666666666653,0.6875
+domain_word,dcost,10,5,5,0,-0.03699996500000001,1.0
+domain_word,dtime,10,5,5,0,-29.73847141265869,1.0
+domain_word,dq,10,2,4,4,-0.2,0.6875
+domain_word,dplanq,10,4,4,2,0.0,1.0
+struct_mix,dcost,10,5,5,0,-0.018050184999999986,1.0
+struct_mix,dtime,10,6,4,0,-24.679794812202452,0.75390625
+struct_mix,dq,10,3,2,5,0.125,1.0
+struct_mix,dplanq,10,1,3,6,-0.04999999999999999,0.625
+all7,dcost,10,6,4,0,-0.006620119999999974,0.75390625
+all7,dtime,10,3,7,0,83.92070212364196,0.34375
+all7,dq,10,3,4,3,-0.1,1.0
+all7,dplanq,10,3,3,4,0.0,1.0

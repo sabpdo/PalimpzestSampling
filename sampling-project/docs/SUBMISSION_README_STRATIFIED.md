@@ -9,19 +9,20 @@ Sabrina Do, Katherine Li, Jenny Yu
 
 ## 1) Current project organization
 
-### Core Palimpzest + experiment entrypoints (kept in-place)
+### Core Palimpzest + experiment entrypoints
 - `scripts/run_sentinel_sampling_ab.py` (main paired A/B runner)
 - `scripts/run_stress_test_sweep.py` (automated stress sweep runner)
 - `scripts/generate_stratifier_stress_dataset.py` (stress pool generator)
 - `scripts/experiment_runner_ui.py` (Streamlit UI)
 - `src/palimpzest/query/execution/feature_stratified_sampling.py` (sampling implementation)
 
-### Added analysis utilities (moved)
+### Analysis utilities
 - `scripts/sampling-analysis/analyze_evidence_stage_results.py`
 - `scripts/sampling-analysis/merge_stress_sweep_shards.py`
 - `scripts/sampling-analysis/compare_stratify_feature_runs.py`
+- `sampling-project/code/sampling-analysis/plot_presentation_summary_figures.py` 
 
-### Added results/artifacts root (moved)
+### Results/artifacts root
 - `results/sampling-results/stress_test_dataset_analysis/`
 
 This reorganization keeps core Palimpzest functionality untouched while grouping project-specific analysis code and outputs.

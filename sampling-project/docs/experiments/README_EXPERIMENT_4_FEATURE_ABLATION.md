@@ -28,6 +28,20 @@ python scripts/sampling-analysis/compare_stratify_feature_runs.py \
 - `results/sampling-results/stress_test_dataset_analysis/feature_ablation/feature_ablation_4_28_table.csv`
 - `results/sampling-results/stress_test_dataset_analysis/feature_ablation/feature_ablation_4_28_table.png`
 
+## Presentation figures (recommended)
+Use the combined summary plotting script to generate slide-ready visuals from the
+feature-ablation and stress-significance summary CSVs:
+
+```bash
+python sampling-project/code/sampling-analysis/plot_presentation_summary_figures.py
+```
+
+This writes:
+- `results/sampling-results/stress_test_dataset_analysis/figures/feature_ablation_summary_bars.png`
+- `results/sampling-results/stress_test_dataset_analysis/figures/feature_ablation_summary_bars.pdf`
+- `results/sampling-results/stress_test_dataset_analysis/figures/stress_significance_stacked_wlt.png`
+- `results/sampling-results/stress_test_dataset_analysis/figures/stress_significance_stacked_wlt.pdf`
+
 ## Metric note
 If explicit `quality_error` is missing in CSVs, use:
 - `quality_error := 1 - mean_sentinel_quality`
