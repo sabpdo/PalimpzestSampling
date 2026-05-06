@@ -12,7 +12,7 @@ The pilot uses:
 - small train/eval settings
 - paired deltas summarized with a two-sided sign test
 
-## Recompute significance (audit trail)
+## Recompute significance
 Use this script to recompute the pilot significance outputs directly from paired deltas:
 
 - Script: `sampling-project/code/sampling-analysis/summarize_harder_pilot_significance.py`

@@ -1,7 +1,7 @@
 # Experiment 1: Budget-Resolved Paired Run
 
 ## Purpose
-Produce the headline budget-indexed comparison (Table 1 / Figure 1) for random vs stratified.
+Produce the headline budget-indexed comparison for random vs stratified.
 
 ## Script
 - `scripts/run_sentinel_sampling_ab.py`

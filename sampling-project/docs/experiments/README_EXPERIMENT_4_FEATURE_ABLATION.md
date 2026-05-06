@@ -28,7 +28,7 @@ python scripts/sampling-analysis/compare_stratify_feature_runs.py \
 - `results/sampling-results/stress_test_dataset_analysis/feature_ablation/feature_ablation_4_28_table.csv`
 - `results/sampling-results/stress_test_dataset_analysis/feature_ablation/feature_ablation_4_28_table.png`
 
-## Presentation figures (recommended)
+## Presentation figures
 Use the combined summary plotting script to generate slide-ready visuals from the
 feature-ablation and stress-significance summary CSVs:
 
